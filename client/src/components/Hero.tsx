@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import heroImage from "@assets/generated_images/ready_for_better_future_hero.png";
-import logoImage from "@assets/generated_images/tn_credit_solutions_professional_logo.png";
 import { CheckCircle2 } from "lucide-react";
 
 export default function Hero() {
@@ -23,12 +22,6 @@ export default function Hero() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/60" />
       
       <div className="relative z-10 max-w-4xl mx-auto px-4 text-center text-white">
-        <img 
-          src={logoImage} 
-          alt="TN Credit Solutions Logo" 
-          className="h-20 w-20 mx-auto mb-6 md:mb-8"
-          data-testid="img-logo"
-        />
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6">
           Rebuild Your Credit, Maximize Your Returns
         </h1>
