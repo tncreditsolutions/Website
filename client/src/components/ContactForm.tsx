@@ -96,7 +96,7 @@ export default function ContactForm() {
                       <SelectValue placeholder="Select a service" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="credit">Credit Repair</SelectItem>
+                      <SelectItem value="credit">Credit Services</SelectItem>
                       <SelectItem value="tax">Tax Services</SelectItem>
                       <SelectItem value="both">Both Services</SelectItem>
                     </SelectContent>
