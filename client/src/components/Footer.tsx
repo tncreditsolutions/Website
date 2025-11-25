@@ -79,7 +79,7 @@ export default function Footer() {
             <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
               <Link href="/privacy" className="hover:text-foreground transition-colors" data-testid="link-privacy">Privacy Policy</Link>
               <Link href="/terms" className="hover:text-foreground transition-colors" data-testid="link-terms">Terms of Service</Link>
-              <a href="#" className="hover:text-foreground transition-colors">Disclaimer</a>
+              <Link href="/disclaimer" className="hover:text-foreground transition-colors" data-testid="link-disclaimer">Disclaimer</Link>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Shield className="w-4 h-4" />
