@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import heroImage from "@assets/generated_images/hero_consultation_scene.png";
+import heroImage from "@assets/generated_images/modern_young_professionals_hero.png";
 import { CheckCircle2 } from "lucide-react";
 
 export default function Hero() {
