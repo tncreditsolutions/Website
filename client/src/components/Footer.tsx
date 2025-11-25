@@ -78,7 +78,7 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
               <Link href="/privacy" className="hover:text-foreground transition-colors" data-testid="link-privacy">Privacy Policy</Link>
-              <a href="#" className="hover:text-foreground transition-colors">Terms of Service</a>
+              <Link href="/terms" className="hover:text-foreground transition-colors" data-testid="link-terms">Terms of Service</Link>
               <a href="#" className="hover:text-foreground transition-colors">Disclaimer</a>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
