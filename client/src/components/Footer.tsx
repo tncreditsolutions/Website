@@ -96,7 +96,7 @@ export default function Footer() {
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Shield className="w-4 h-4" />
-              <span>BBB Accredited Business</span>
+              <span>Licensed & Certified Professionals</span>
             </div>
           </div>
           <div className="text-center mt-4 text-sm text-muted-foreground">

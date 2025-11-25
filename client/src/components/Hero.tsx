@@ -60,7 +60,7 @@ export default function Hero() {
           </div>
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-5 h-5 text-primary" />
-            <span>BBB Accredited</span>
+            <span>Licensed & Certified</span>
           </div>
         </div>
       </div>
