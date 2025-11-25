@@ -1,13 +1,27 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { insertContactSubmissionSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // put application routes here
-  // prefix all routes with /api
+  app.post("/api/contact", async (req, res) => {
+    try {
+      const validatedData = insertContactSubmissionSchema.parse(req.body);
+      const submission = await storage.createContactSubmission(validatedData);
+      res.json(submission);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
 
-  // use storage to perform CRUD operations on the storage interface
-  // e.g. storage.insertUser(user) or storage.getUserByUsername(username)
+  app.get("/api/contact", async (req, res) => {
+    try {
+      const submissions = await storage.getAllContactSubmissions();
+      res.json(submissions);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
 
   const httpServer = createServer(app);
 

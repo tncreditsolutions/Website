@@ -7,6 +7,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Phone, Mail, MapPin, Clock, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import type { InsertContactSubmission } from "@shared/schema";
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({
@@ -19,21 +22,44 @@ export default function ContactForm() {
   });
   const { toast } = useToast();
 
+  const submitMutation = useMutation({
+    mutationFn: async (data: InsertContactSubmission) => {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) throw new Error("Failed to submit");
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Thank you for contacting us!",
+        description: "We'll reach out to you within 24 hours to schedule your free consultation.",
+      });
+      setFormData({
+        name: "",
+        phone: "",
+        email: "",
+        service: "",
+        referral: "",
+        message: ""
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Something went wrong",
+        description: "Please try again or call us directly.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    toast({
-      title: "Thank you for contacting us!",
-      description: "We'll reach out to you within 24 hours to schedule your free consultation.",
-    });
-    setFormData({
-      name: "",
-      phone: "",
-      email: "",
-      service: "",
-      referral: "",
-      message: ""
-    });
+    submitMutation.mutate(formData);
   };
 
   return (
@@ -131,8 +157,14 @@ export default function ContactForm() {
                   <span>We respect your privacy and never share your information</span>
                 </div>
 
-                <Button type="submit" className="w-full" size="lg" data-testid="button-submit-form">
-                  Request Free Consultation
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  size="lg" 
+                  disabled={submitMutation.isPending}
+                  data-testid="button-submit-form"
+                >
+                  {submitMutation.isPending ? "Submitting..." : "Request Free Consultation"}
                 </Button>
               </form>
             </CardContent>
