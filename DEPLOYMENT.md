@@ -115,13 +115,49 @@ heroku config:set NODE_ENV=production
 git push heroku main
 ```
 
+### Netlify
+
+Netlify is a static hosting platform. For a full-stack Node.js app like this, you have two options:
+
+#### Option 1: Frontend on Netlify + Backend Elsewhere (Recommended)
+
+**Frontend Deployment:**
+1. Go to [netlify.com](https://netlify.com)
+2. Click "Add new site" → "Import an existing project"
+3. Connect your GitHub repository
+4. Set build command: `npm run build`
+5. Set publish directory: `dist`
+6. Deploy
+
+**Backend Deployment:**
+Since Netlify doesn't support long-running Node.js servers, deploy your backend separately to:
+- Railway (recommended, easiest)
+- Heroku
+- AWS Lambda with RDS
+- Any other Node.js hosting
+
+Then update your frontend API calls to point to your backend URL.
+
+#### Option 2: Use Netlify Functions (Advanced)
+
+This requires restructuring your Express API routes into Netlify Functions, which is complex. Not recommended for this project.
+
+**Recommendation:** Use Railway (see below) for your full-stack app. It's simpler and designed for Node.js applications.
+
 ### Railway
 
-1. Connect your GitHub repository
-2. Create a new project
-3. Add PostgreSQL plugin
-4. Set environment variables in the Railway dashboard
-5. Deploy automatically on push
+1. Go to [railway.app](https://railway.app)
+2. Click "New Project" → "Deploy from GitHub repo"
+3. Connect your GitHub repository
+4. Railway auto-detects it's a Node.js app
+5. Add PostgreSQL from the "Add Service" menu
+6. Set environment variables:
+   - `NODE_ENV=production`
+   - `SESSION_SECRET=<your-random-secret>`
+   - Database URL is auto-configured
+7. Deploy - Railway automatically builds and runs your app
+
+This is the **easiest option** for your full-stack app.
 
 ### DigitalOcean App Platform
 
