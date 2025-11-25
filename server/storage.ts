@@ -19,6 +19,7 @@ export class MemStorage implements IStorage {
   constructor() {
     this.users = new Map();
     this.contactSubmissions = new Map();
+    this.chatMessages = new Map();
   }
 
   async getUser(id: string): Promise<User | undefined> {
@@ -53,6 +54,23 @@ export class MemStorage implements IStorage {
 
   async getAllContactSubmissions(): Promise<ContactSubmission[]> {
     return Array.from(this.contactSubmissions.values()).sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+    );
+  }
+
+  async createChatMessage(message: InsertChatMessage): Promise<ChatMessage> {
+    const id = randomUUID();
+    const chatMessage: ChatMessage = {
+      ...message,
+      id,
+      createdAt: new Date(),
+    };
+    this.chatMessages.set(id, chatMessage);
+    return chatMessage;
+  }
+
+  async getAllChatMessages(): Promise<ChatMessage[]> {
+    return Array.from(this.chatMessages.values()).sort(
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     );
   }
