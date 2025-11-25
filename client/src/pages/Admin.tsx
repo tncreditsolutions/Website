@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,11 +11,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Mail, Phone, Calendar, User, MessageSquare } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ArrowLeft, Mail, Phone, Calendar, User, MessageSquare, X } from "lucide-react";
 import { Link } from "wouter";
 import type { ContactSubmission } from "@shared/schema";
 
 export default function Admin() {
+  const [selectedSubmission, setSelectedSubmission] = useState<ContactSubmission | null>(null);
   const { data: submissions, isLoading } = useQuery<ContactSubmission[]>({
     queryKey: ["/api/contact"],
   });
@@ -131,12 +140,16 @@ export default function Admin() {
                           </TableCell>
                           <TableCell className="max-w-xs">
                             {submission.message ? (
-                              <div className="flex items-start gap-2">
+                              <button
+                                onClick={() => setSelectedSubmission(submission)}
+                                className="flex items-start gap-2 hover-elevate p-2 rounded-md text-left w-full"
+                                data-testid={`button-view-message-${submission.id}`}
+                              >
                                 <MessageSquare className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                                 <p className="text-sm text-muted-foreground line-clamp-2">
                                   {submission.message}
                                 </p>
-                              </div>
+                              </button>
                             ) : (
                               <span className="text-sm text-muted-foreground">No message</span>
                             )}
@@ -202,6 +215,63 @@ export default function Admin() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Full Message Dialog */}
+      <Dialog open={!!selectedSubmission} onOpenChange={() => setSelectedSubmission(null)}>
+        <DialogContent className="max-w-2xl max-h-96 overflow-y-auto" data-testid="dialog-full-message">
+          <DialogHeader>
+            <DialogTitle>Complete Submission Details</DialogTitle>
+            <DialogDescription>View the full message and contact information</DialogDescription>
+          </DialogHeader>
+          {selectedSubmission && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase">Name</p>
+                  <p className="text-sm font-medium">{selectedSubmission.name}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase">Service</p>
+                  <Badge variant={getServiceBadgeVariant(selectedSubmission.service)} className="w-fit">
+                    {getServiceLabel(selectedSubmission.service)}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase">Email</p>
+                  <a href={`mailto:${selectedSubmission.email}`} className="text-sm text-primary hover:underline">
+                    {selectedSubmission.email}
+                  </a>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase">Phone</p>
+                  <a href={`tel:${selectedSubmission.phone}`} className="text-sm text-primary hover:underline">
+                    {selectedSubmission.phone}
+                  </a>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase">Submitted</p>
+                  <p className="text-sm">{formatDate(selectedSubmission.createdAt)}</p>
+                </div>
+                {selectedSubmission.referral && (
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase">Referred By</p>
+                    <p className="text-sm">{selectedSubmission.referral}</p>
+                  </div>
+                )}
+              </div>
+
+              {selectedSubmission.message && (
+                <div className="border-t pt-4">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Message</p>
+                  <div className="bg-muted p-3 rounded-md">
+                    <p className="text-sm whitespace-pre-wrap break-words">{selectedSubmission.message}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
