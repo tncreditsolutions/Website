@@ -213,18 +213,6 @@ export default function ContactForm() {
                 </div>
               </CardContent>
             </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center mb-4">
-                  <h3 className="text-lg font-semibold mb-2">Prefer to Talk?</h3>
-                  <p className="text-muted-foreground mb-4">Schedule a call at your convenience</p>
-                  <Button variant="outline" className="w-full" data-testid="button-schedule-call">
-                    Schedule a Call
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>
