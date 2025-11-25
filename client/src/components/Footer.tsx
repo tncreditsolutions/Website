@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Shield, Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
+import { Shield } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -27,20 +27,6 @@ export default function Footer() {
             <p className="text-muted-foreground text-sm mb-4">
               Professional credit restoration and tax optimization services to secure your financial future.
             </p>
-            <div className="flex gap-3">
-              <Button size="icon" variant="outline" data-testid="link-facebook">
-                <Facebook className="w-4 h-4" />
-              </Button>
-              <Button size="icon" variant="outline" data-testid="link-twitter">
-                <Twitter className="w-4 h-4" />
-              </Button>
-              <Button size="icon" variant="outline" data-testid="link-linkedin">
-                <Linkedin className="w-4 h-4" />
-              </Button>
-              <Button size="icon" variant="outline" data-testid="link-instagram">
-                <Instagram className="w-4 h-4" />
-              </Button>
-            </div>
           </div>
 
           <div>
