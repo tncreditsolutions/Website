@@ -489,7 +489,7 @@ export default function Admin() {
               {/* Full conversation thread */}
               <div className="space-y-3 max-h-96 overflow-y-auto border rounded-md p-4 bg-muted/30">
                 {chatMessages
-                  ?.filter(msg => msg.email === selectedChatMessage.email)
+                  ?.filter(msg => msg.email === selectedChatMessage.email || msg.sender === "admin")
                   .map((msg) => {
                     const isAdmin = msg.sender === "admin" || msg.email === "support@tncreditsolutions.com";
                     return (
