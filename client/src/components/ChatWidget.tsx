@@ -79,8 +79,14 @@ export default function ChatWidget() {
     const aiMessages = allMessages.filter(msg => msg.sender === "ai");
     if (aiMessages.length === 0) return;
     
-    // Check if any AI message is marked as escalated (urgent situation from Riley)
-    const escalatedMessage = aiMessages.find(msg => msg.isEscalated === "true");
+    // Find the LAST/NEWEST escalated message (not the first)
+    let escalatedMessage = null;
+    for (let i = aiMessages.length - 1; i >= 0; i--) {
+      if (aiMessages[i].isEscalated === "true") {
+        escalatedMessage = aiMessages[i];
+        break;
+      }
+    }
     
     if (escalatedMessage) {
       // Show with 5 second delay for urgent situations to let visitor read the message
