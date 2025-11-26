@@ -30,7 +30,6 @@ export default function Admin() {
   const [selectedSubmission, setSelectedSubmission] = useState<ContactSubmission | null>(null);
   const [selectedChatMessage, setSelectedChatMessage] = useState<ChatMessage | null>(null);
   const [adminReplyMessage, setAdminReplyMessage] = useState("");
-  const [adminReplyEmail, setAdminReplyEmail] = useState("");
   const { toast } = useToast();
   
   const { data: submissions, isLoading: submissionsLoading } = useQuery<ContactSubmission[]>({
@@ -53,7 +52,6 @@ export default function Admin() {
     },
     onSuccess: () => {
       setAdminReplyMessage("");
-      setAdminReplyEmail("");
       setSelectedChatMessage(null);
       toast({
         title: "Reply sent!",
@@ -82,7 +80,7 @@ export default function Admin() {
     }
     sendAdminReplyMutation.mutate({
       name: "TN Credit Solutions",
-      email: adminReplyEmail || "support@tncreditsolutions.com",
+      email: "support@tncreditsolutions.com",
       message: adminReplyMessage.trim(),
       sender: "admin",
     });
@@ -351,16 +349,7 @@ export default function Admin() {
 
               <form onSubmit={handleSendAdminReply} className="space-y-3">
                 <div>
-                  <label className="text-xs font-semibold text-muted-foreground uppercase mb-1 block">Your Email</label>
-                  <Input
-                    placeholder="support@tncreditsolutions.com"
-                    value={adminReplyEmail}
-                    onChange={(e) => setAdminReplyEmail(e.target.value)}
-                    data-testid="input-admin-reply-email"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-muted-foreground uppercase mb-1 block">Reply Message</label>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase mb-1 block">Your Reply</label>
                   <Textarea
                     placeholder="Type your reply..."
                     value={adminReplyMessage}
