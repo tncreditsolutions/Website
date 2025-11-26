@@ -65,7 +65,7 @@ export default function ServicesOverview() {
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                 <FileText className="w-6 h-6 text-primary" />
               </div>
-              <CardTitle className="text-2xl md:text-3xl">Tax Maximization</CardTitle>
+              <CardTitle className="text-2xl md:text-3xl">Tax Optimization</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-start gap-2">
