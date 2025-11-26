@@ -490,6 +490,7 @@ export default function Admin() {
               <div className="space-y-3 max-h-96 overflow-y-auto border rounded-md p-4 bg-muted/30">
                 {chatMessages
                   ?.filter(msg => msg.email === selectedChatMessage.email || msg.sender === "admin")
+                  .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
                   .map((msg) => {
                     const isAdmin = msg.sender === "admin" || msg.email === "support@tncreditsolutions.com";
                     return (
