@@ -82,10 +82,10 @@ export default function ChatWidget() {
     const hasEscalated = aiMessages.some(msg => msg.isEscalated === "true");
     
     if (hasEscalated) {
-      // Show with 3 second delay for urgent situations to let visitor read the message
+      // Show with 5 second delay for urgent situations to let visitor read the message
       // ALWAYS show, even if previously dismissed
       setHideEscalatePrompt(false); // Reset dismissal state for new urgent escalations
-      const timer = setTimeout(() => setShowEscalatePrompt(true), 3000);
+      const timer = setTimeout(() => setShowEscalatePrompt(true), 5000);
       return () => clearTimeout(timer);
     } else {
       // For non-urgent situations, only show if not already shown and not dismissed by user
