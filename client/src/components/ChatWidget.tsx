@@ -67,13 +67,15 @@ export default function ChatWidget() {
 
   // Show escalate prompt after 1 minute of AI response
   useEffect(() => {
-    const aiMessages = allMessages.filter(msg => msg.sender === "ai" && msg.email === "support@tncreditsolutions.com");
-    if (aiMessages.length > 0 && !showEscalatePrompt) {
+    if (showEscalatePrompt) return; // Already shown, don't set timer again
+    
+    const aiMessages = allMessages.filter(msg => msg.sender === "ai");
+    if (aiMessages.length > 0) {
       // Delay showing escalation prompt by 1 minute (60000ms)
       const timer = setTimeout(() => setShowEscalatePrompt(true), 60000);
       return () => clearTimeout(timer);
     }
-  }, [allMessages, showEscalatePrompt]);
+  }, [allMessages]);
 
   const handleInitialSubmit = (e: React.FormEvent) => {
     e.preventDefault();
