@@ -21,6 +21,7 @@ export default function ChatWidget() {
   const [showEscalatePrompt, setShowEscalatePrompt] = useState(false);
   const [hideEscalatePrompt, setHideEscalatePrompt] = useState(false);
   const lastEscalatedMessageIdRef = useRef<string | null>(null);
+  const escalationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
   // Load visitor info and escalate dismissal state from localStorage on mount
@@ -92,22 +93,32 @@ export default function ChatWidget() {
       // Show with 5 second delay for urgent situations to let visitor read the message
       // Only schedule if this is a NEW escalated message (not seen before)
       if (lastEscalatedMessageIdRef.current !== escalatedMessage.id) {
-        setShowEscalatePrompt(false); // Reset button state for new escalations
+        // Clear any existing timeout
+        if (escalationTimeoutRef.current) {
+          clearTimeout(escalationTimeoutRef.current);
+        }
+        
         setHideEscalatePrompt(false); // Reset dismissal state for new urgent escalations
         lastEscalatedMessageIdRef.current = escalatedMessage.id;
-        setTimeout(() => {
+        
+        // Schedule new timeout for 5 seconds
+        escalationTimeoutRef.current = setTimeout(() => {
           setShowEscalatePrompt(true);
         }, 5000);
       }
     } else {
       // For non-urgent situations, reset the escalation tracking
       lastEscalatedMessageIdRef.current = null;
+      if (escalationTimeoutRef.current) {
+        clearTimeout(escalationTimeoutRef.current);
+        escalationTimeoutRef.current = null;
+      }
       
       // Only show if not already shown and not dismissed by user
       if (showEscalatePrompt || hideEscalatePrompt) return;
       
       // Otherwise delay showing escalation prompt by 1 minute (60000ms)
-      setTimeout(() => setShowEscalatePrompt(true), 60000);
+      escalationTimeoutRef.current = setTimeout(() => setShowEscalatePrompt(true), 60000);
     }
   }, [allMessages]);
 
