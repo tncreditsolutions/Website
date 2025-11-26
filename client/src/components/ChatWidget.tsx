@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { MessageCircle, X, Send } from "lucide-react";
+import { MessageCircle, X, Send, AlertCircle } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { ChatMessage } from "@shared/schema";
@@ -16,6 +16,8 @@ export default function ChatWidget() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [isNewVisitor, setIsNewVisitor] = useState(true);
+  const [isEscalated, setIsEscalated] = useState(false);
+  const [showEscalatePrompt, setShowEscalatePrompt] = useState(false);
   const { toast } = useToast();
 
   // Load visitor info from localStorage on mount
@@ -54,12 +56,31 @@ export default function ChatWidget() {
       localStorage.setItem(VISITOR_INFO_KEY, JSON.stringify({ name, email }));
       setMessage("");
       queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
+      setShowEscalatePrompt(true);
     },
     onError: (error: any) => {
       toast({
         title: "Error",
         description: error.message || "Failed to send message",
         variant: "destructive",
+      });
+    },
+  });
+
+  const aiResponseMutation = useMutation({
+    mutationFn: async (visitorMessage: string) => {
+      const data: any = await apiRequest("POST", "/api/chat/ai-response", { message: visitorMessage });
+      return data.response;
+    },
+    onSuccess: (aiResponse) => {
+      // Send AI response as a chat message
+      apiRequest("POST", "/api/chat", {
+        name: "TN Credit Solutions Support",
+        email: "support@tncreditsolutions.com",
+        message: aiResponse,
+        sender: "ai",
+      }).then(() => {
+        queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
       });
     },
   });
@@ -89,10 +110,28 @@ export default function ChatWidget() {
       return;
     }
 
+    const visitorMessage = message.trim();
+    
+    // Send visitor message
     sendMutation.mutate({
       name: name.trim(),
       email: email.trim(),
-      message: message.trim(),
+      message: visitorMessage,
+    });
+
+    // Generate AI response
+    if (!isEscalated) {
+      aiResponseMutation.mutate(visitorMessage);
+    }
+  };
+
+  const handleEscalate = () => {
+    // Mark conversation as escalated
+    setIsEscalated(true);
+    setShowEscalatePrompt(false);
+    toast({
+      title: "Support Escalated",
+      description: "A support specialist will respond to your message shortly.",
     });
   };
 
