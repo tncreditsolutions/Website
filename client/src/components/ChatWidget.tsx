@@ -114,7 +114,7 @@ export default function ChatWidget() {
       await apiRequest("POST", "/api/chat", {
         name: "Riley",
         email: "support@tncreditsolutions.com",
-        message: `Hi ${trimmedName}! I'm Riley, your TN Credit Solutions support agent. I'm here to help you navigate credit restoration and tax optimization. What can I help you with today?`,
+        message: `Hi ${trimmedName}! How can I help you today?`,
         sender: "ai",
         isEscalated: "false",
       });
@@ -203,7 +203,7 @@ export default function ChatWidget() {
             {isNewVisitor ? (
               <div className="flex-1 overflow-y-auto p-4 flex flex-col justify-center">
                 <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground">Hey I'm Riley your live agent here to assist you with credit and taxes. How can I help you?</p>
+                  <p className="text-sm text-muted-foreground">Hey I'm Riley, your TN Credit Solutions support agent. I'm here to help you navigate credit restoration and tax optimization. What can I help you with today?</p>
                   <form onSubmit={handleInitialSubmit} className="space-y-3">
                     <Input
                       placeholder="Your name"
