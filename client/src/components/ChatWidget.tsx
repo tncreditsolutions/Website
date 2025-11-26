@@ -74,16 +74,21 @@ export default function ChatWidget() {
     },
     onSuccess: (aiResponse) => {
       // Send AI response as a chat message
-      apiRequest("POST", "/api/chat", {
-        name: "TN Credit Solutions Support",
-        email: "support@tncreditsolutions.com",
-        message: aiResponse,
-        sender: "ai",
-      }).then(() => {
-        queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
-        // Show escalate prompt after AI responds
-        setTimeout(() => setShowEscalatePrompt(true), 500);
-      });
+      if (aiResponse && aiResponse.trim()) {
+        apiRequest("POST", "/api/chat", {
+          name: "TN Credit Solutions Support",
+          email: "support@tncreditsolutions.com",
+          message: aiResponse.trim(),
+          sender: "ai",
+          isEscalated: "false",
+        }).then(() => {
+          queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
+          // Show escalate prompt after AI responds
+          setTimeout(() => setShowEscalatePrompt(true), 500);
+        }).catch((error) => {
+          console.error("Failed to save AI response:", error);
+        });
+      }
     },
     onError: (error: any) => {
       // If AI response fails, show escalate prompt and error
