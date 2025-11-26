@@ -43,8 +43,8 @@ export default function ChatWidget() {
   // Filter messages to only show this visitor's conversation
   const messages = allMessages.filter(msg => {
     if (!email) return false;
-    // Show visitor's own messages OR admin replies
-    return msg.email === email || msg.sender === "admin";
+    // Show visitor's own messages OR admin/AI replies
+    return msg.email === email || msg.sender === "admin" || msg.sender === "ai" || msg.email === "support@tncreditsolutions.com";
   });
 
   const sendMutation = useMutation({
