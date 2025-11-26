@@ -2,21 +2,47 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Shield } from "lucide-react";
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import { Link } from "wouter";
 
 export default function Footer() {
   const [email, setEmail] = useState("");
   const { toast } = useToast();
 
+  const newsletterMutation = useMutation({
+    mutationFn: async (data: { email: string }) => {
+      return apiRequest("POST", "/api/newsletter", data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Welcome to our newsletter!",
+        description: "You'll receive monthly credit tips and tax strategies.",
+      });
+      setEmail("");
+    },
+    onError: (error: any) => {
+      if (error.message && error.message.includes("already subscribed")) {
+        toast({
+          title: "Already subscribed",
+          description: "This email is already on our newsletter list.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to subscribe",
+          variant: "destructive",
+        });
+      }
+    },
+  });
+
   const handleNewsletterSignup = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Newsletter signup:', email);
-    toast({
-      title: "Welcome to our newsletter!",
-      description: "You'll receive monthly credit tips and tax strategies.",
-    });
-    setEmail("");
+    if (!email.trim()) return;
+    newsletterMutation.mutate({ email: email.trim() });
   };
 
   return (
