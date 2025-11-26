@@ -334,7 +334,7 @@ export default function Admin() {
       </Dialog>
 
       {/* Admin Reply Dialog */}
-      <Dialog open={!!selectedChatMessage && selectedChatMessage.sender !== "admin"} onOpenChange={() => setSelectedChatMessage(null)}>
+      <Dialog open={!!selectedChatMessage && (selectedChatMessage.sender === "visitor" || !selectedChatMessage.sender)} onOpenChange={() => setSelectedChatMessage(null)}>
         <DialogContent className="max-w-2xl" data-testid="dialog-admin-reply">
           <DialogHeader>
             <DialogTitle>Reply to Chat Message</DialogTitle>
@@ -342,7 +342,7 @@ export default function Admin() {
               Send a message to {selectedChatMessage?.name} at {selectedChatMessage?.email}
             </DialogDescription>
           </DialogHeader>
-          {selectedChatMessage && selectedChatMessage.sender !== "admin" && (
+          {selectedChatMessage && (selectedChatMessage.sender === "visitor" || !selectedChatMessage.sender) && (
             <div className="space-y-4">
               <div className="bg-muted p-4 rounded-md">
                 <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Their Message</p>
