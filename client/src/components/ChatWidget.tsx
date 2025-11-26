@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,12 +8,28 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { ChatMessage } from "@shared/schema";
 
+const VISITOR_INFO_KEY = "chat_visitor_info";
+
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const { toast } = useToast();
+
+  // Load visitor info from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem(VISITOR_INFO_KEY);
+    if (stored) {
+      try {
+        const { name: storedName, email: storedEmail } = JSON.parse(stored);
+        setName(storedName);
+        setEmail(storedEmail);
+      } catch (e) {
+        // Silently fail if localStorage data is corrupted
+      }
+    }
+  }, []);
 
   const { data: messages = [], isLoading } = useQuery<ChatMessage[]>({
     queryKey: ["/api/chat"],
@@ -25,8 +41,8 @@ export default function ChatWidget() {
       return apiRequest("POST", "/api/chat", data);
     },
     onSuccess: () => {
-      setName("");
-      setEmail("");
+      // Save visitor info for next time
+      localStorage.setItem(VISITOR_INFO_KEY, JSON.stringify({ name, email }));
       setMessage("");
       toast({
         title: "Message sent!",
