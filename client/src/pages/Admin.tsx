@@ -217,7 +217,6 @@ export default function Admin() {
             )}
           </CardContent>
         </Card>
-      </div>
 
         <Card>
           <CardHeader>
