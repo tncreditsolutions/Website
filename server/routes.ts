@@ -11,24 +11,32 @@ console.log("[AI] OpenAI initialized:", !!openai, "API key available:", !!proces
 const SYSTEM_PROMPT = `You are Riley, a smart customer support agent for TN Credit Solutions. You provide personalized guidance on credit restoration and tax optimization.
 
 CRITICAL RULES:
-1. REMEMBER EVERYTHING: Reference previous messages. Never ask the same question twice in the conversation.
-2. PERSONALIZED RESPONSES: Use their specific situation. Not generic answers about "collections" - discuss THEIR collections.
-3. SMART CONVERSATION FLOW: If they keep answering "yes" or giving vague answers after 3+ messages, suggest specialist help.
-4. BRIEF: 1-2 sentences max + ONE relevant follow-up question.
-5. ACTIONABLE: Give specific next steps when possible.
+1. REMEMBER EVERYTHING: Reference previous messages. Never ask similar questions in different words.
+2. CONVERSATION PROGRESSION: After 2-3 similar responses, move to offering next steps or escalate to specialist.
+3. PERSONALIZED RESPONSES: Use their specific details from what they told you.
+4. BRIEF: 1-2 sentences max + move toward a solution or escalation.
+5. ACTIONABLE: Give specific next steps. If they've answered vaguely multiple times, escalate.
+
+QUESTION FLOW STRATEGY:
+- Message 1-2: Ask clarifying questions about their situation
+- Message 3+: If still vague answers, stop asking and either: (a) provide concrete next steps, or (b) escalate to specialist
+- NEVER rephrase the same question
 
 ESCALATION LOGIC - Always end with marker:
-- [ESCALATE:YES] if: (1) complex legal/financial needs, (2) multiple unsolved issues, (3) after 4+ messages of vague answers
-- [ESCALATE:NO] if: simple Q&A, one-time questions, clear actionable path forward
+- [ESCALATE:YES] if: (1) After 3+ vague/similar answers, (2) Complex legal/financial needs, (3) Multiple unresolved issues, (4) Visitor needs professional strategy
+- [ESCALATE:NO] if: Clear answers provided, actionable path forward
 
-Example responses:
-"Medical collections can definitely be disputed. Have you checked if they're on all three credit bureaus? [ESCALATE:NO]"
-"You've had collections for 3 years with limited success - this needs expert strategy. Let me connect you with a specialist. [ESCALATE:YES]"
+Example progression:
+Q: "Are you dealing with active collections?"
+A: "Yes"
+Q: "Have you already tried disputing them?" 
+A: "No"
+NEXT: Provide step-by-step next steps OR escalate if they seem confused
 
 NEVER:
-- Ask the same question they already answered
-- Repeat advice already given
-- Ignore what they told you`;
+- Ask "Have you tried..." followed by "Have you already..."
+- Rephrase the same question with different words
+- Keep asking without providing solutions`;
 
 // Keywords that indicate urgent debt collection/lawsuit situations
 const URGENT_KEYWORDS = ["sued", "debt collector", "lawsuit", "collection agency", "court", "judgment", "garnish", "wage garnishment", "summons"];
@@ -107,7 +115,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               // Count visitor turns for smart escalation
               const visitorTurns = conversationHistory.filter(msg => msg.role === "user").length;
-              console.log("[AI] Conversation turns:", visitorTurns);
+              
+              // Extract previous questions/topics to prevent repetition
+              const aiMessages = conversationHistory.filter(msg => msg.role === "assistant");
+              const previousTopics = aiMessages.map(msg => {
+                const content = msg.content.toLowerCase();
+                const topics = [];
+                if (content.includes("dispute") || content.includes("disputing")) topics.push("disputing");
+                if (content.includes("credit bureau")) topics.push("credit bureaus");
+                if (content.includes("verify") || content.includes("accuracy")) topics.push("verification");
+                if (content.includes("debt validation")) topics.push("debt validation");
+                if (content.includes("payment")) topics.push("payment options");
+                return topics;
+              }).flat();
+              
+              const uniqueTopics = Array.from(new Set(previousTopics));
+              console.log("[AI] Conversation turns:", visitorTurns, "Previous topics:", uniqueTopics);
               
               let aiResponse;
               if (isUrgent) {
@@ -126,10 +149,13 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
                 });
               } else {
                 console.log("[AI] Using standard prompt");
-                // Add turn-based escalation hint for conversations that are going in circles
+                // Add context about previously covered topics and conversation progression
                 let systemPromptWithContext = SYSTEM_PROMPT;
-                if (visitorTurns >= 4) {
-                  systemPromptWithContext += `\n\nThis is message ${visitorTurns + 1} in the conversation. If still not getting clear information or complex situation, escalate now.`;
+                if (uniqueTopics.length > 0) {
+                  systemPromptWithContext += `\n\nPreviously discussed: ${uniqueTopics.join(", ")}. Do NOT ask about these again. Move to new topics or escalate.`;
+                }
+                if (visitorTurns >= 3) {
+                  systemPromptWithContext += `\n\nThis is turn ${visitorTurns + 1}. If visitor is still giving vague answers or going in circles, escalate to specialist now.`;
                 }
                 aiResponse = await openai.chat.completions.create({
                   model: "gpt-4o",
