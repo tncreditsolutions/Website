@@ -73,7 +73,7 @@ export default function ChatWidget() {
     },
   });
 
-  // Show escalate prompt after 1 minute of AI response, or with 3 second delay if escalated
+  // Show escalate prompt after 1 minute of AI response, or with 5 second delay if escalated
   useEffect(() => {
     const aiMessages = allMessages.filter(msg => msg.sender === "ai");
     if (aiMessages.length === 0) return;
@@ -83,10 +83,12 @@ export default function ChatWidget() {
     
     if (hasEscalated) {
       // Show with 5 second delay for urgent situations to let visitor read the message
-      // ALWAYS show, even if previously dismissed
-      setHideEscalatePrompt(false); // Reset dismissal state for new urgent escalations
-      const timer = setTimeout(() => setShowEscalatePrompt(true), 5000);
-      return () => clearTimeout(timer);
+      // Only set timer if we haven't already scheduled showing the prompt
+      if (!showEscalatePrompt) {
+        setHideEscalatePrompt(false); // Reset dismissal state for new urgent escalations
+        const timer = setTimeout(() => setShowEscalatePrompt(true), 5000);
+        return () => clearTimeout(timer);
+      }
     } else {
       // For non-urgent situations, only show if not already shown and not dismissed by user
       if (showEscalatePrompt || hideEscalatePrompt) return;
@@ -95,7 +97,7 @@ export default function ChatWidget() {
       const timer = setTimeout(() => setShowEscalatePrompt(true), 60000);
       return () => clearTimeout(timer);
     }
-  }, [allMessages]);
+  }, [allMessages, showEscalatePrompt]);
 
   const handleInitialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
