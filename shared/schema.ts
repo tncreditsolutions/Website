@@ -48,6 +48,8 @@ export const chatMessages = pgTable("chat_messages", {
 export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
   id: true,
   createdAt: true,
+}).extend({
+  sender: z.string().default("visitor"),
 });
 
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
