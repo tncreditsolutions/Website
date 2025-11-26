@@ -41,7 +41,8 @@ export default function ChatWidget() {
   // Filter messages to only show this visitor's conversation
   const messages = allMessages.filter(msg => {
     if (!email) return false;
-    return msg.email === email || msg.name === name;
+    // Show visitor's own messages OR admin replies
+    return msg.email === email || msg.sender === "admin";
   });
 
   const sendMutation = useMutation({
