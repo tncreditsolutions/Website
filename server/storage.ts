@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type ContactSubmission, type InsertContactSubmission, type ChatMessage, type InsertChatMessage } from "@shared/schema";
+import { type User, type InsertUser, type ContactSubmission, type InsertContactSubmission, type ChatMessage, type InsertChatMessage, type NewsletterSubscription, type InsertNewsletterSubscription } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -9,17 +9,21 @@ export interface IStorage {
   getAllContactSubmissions(): Promise<ContactSubmission[]>;
   createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
   getAllChatMessages(): Promise<ChatMessage[]>;
+  subscribeNewsletter(subscription: InsertNewsletterSubscription): Promise<NewsletterSubscription | null>;
+  getAllNewsletterSubscriptions(): Promise<NewsletterSubscription[]>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<string, User>;
   private contactSubmissions: Map<string, ContactSubmission>;
   private chatMessages: Map<string, ChatMessage>;
+  private newsletterSubscriptions: Set<string>;
 
   constructor() {
     this.users = new Map();
     this.contactSubmissions = new Map();
     this.chatMessages = new Map();
+    this.newsletterSubscriptions = new Set();
   }
 
   async getUser(id: string): Promise<User | undefined> {
@@ -73,6 +77,28 @@ export class MemStorage implements IStorage {
     return Array.from(this.chatMessages.values()).sort(
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     );
+  }
+
+  async subscribeNewsletter(insertSubscription: InsertNewsletterSubscription): Promise<NewsletterSubscription | null> {
+    if (this.newsletterSubscriptions.has(insertSubscription.email)) {
+      return null;
+    }
+    const id = randomUUID();
+    const subscription: NewsletterSubscription = {
+      ...insertSubscription,
+      id,
+      createdAt: new Date(),
+    };
+    this.newsletterSubscriptions.add(insertSubscription.email);
+    return subscription;
+  }
+
+  async getAllNewsletterSubscriptions(): Promise<NewsletterSubscription[]> {
+    return Array.from(this.newsletterSubscriptions).map((email) => ({
+      id: randomUUID(),
+      email,
+      createdAt: new Date(),
+    }));
   }
 }
 

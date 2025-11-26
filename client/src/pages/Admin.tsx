@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { ArrowLeft, Mail, Phone, Calendar, User, MessageSquare, X, MessageCircle } from "lucide-react";
 import { Link } from "wouter";
-import type { ContactSubmission, ChatMessage } from "@shared/schema";
+import type { ContactSubmission, ChatMessage, NewsletterSubscription } from "@shared/schema";
 
 export default function Admin() {
   const [selectedSubmission, setSelectedSubmission] = useState<ContactSubmission | null>(null);
@@ -32,6 +32,11 @@ export default function Admin() {
   
   const { data: chatMessages, isLoading: chatLoading } = useQuery<ChatMessage[]>({
     queryKey: ["/api/chat"],
+    refetchInterval: 5000,
+  });
+  
+  const { data: newsletterSubscriptions, isLoading: newsletterLoading } = useQuery<NewsletterSubscription[]>({
+    queryKey: ["/api/newsletter"],
     refetchInterval: 5000,
   });
 
@@ -428,6 +433,55 @@ export default function Admin() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Newsletter Subscriptions Section */}
+      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-8">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Newsletter Subscriptions</CardTitle>
+            <CardDescription>
+              {newsletterSubscriptions?.length ? `${newsletterSubscriptions.length} total subscribers` : "No subscribers yet"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {newsletterLoading ? (
+              <div className="text-center py-8 text-muted-foreground">Loading subscribers...</div>
+            ) : !newsletterSubscriptions || newsletterSubscriptions.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No newsletter subscribers yet. Promote your newsletter to start building your list!
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Subscribed</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {[...newsletterSubscriptions].reverse().map((sub) => (
+                      <TableRow key={sub.id} data-testid={`row-newsletter-${sub.id}`}>
+                        <TableCell>
+                          <a href={`mailto:${sub.email}`} className="text-primary hover:underline text-sm">
+                            {sub.email}
+                          </a>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4" />
+                            {formatDate(sub.createdAt)}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

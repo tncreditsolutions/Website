@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertContactSubmissionSchema, insertChatMessageSchema } from "@shared/schema";
+import { insertContactSubmissionSchema, insertChatMessageSchema, insertNewsletterSubscriptionSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/contact", async (req, res) => {
@@ -37,6 +37,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const messages = await storage.getAllChatMessages();
       res.json(messages);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/newsletter", async (req, res) => {
+    try {
+      const validatedData = insertNewsletterSubscriptionSchema.parse(req.body);
+      const subscription = await storage.subscribeNewsletter(validatedData);
+      if (!subscription) {
+        return res.status(400).json({ error: "Email already subscribed" });
+      }
+      res.json(subscription);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/newsletter", async (req, res) => {
+    try {
+      const subscriptions = await storage.getAllNewsletterSubscriptions();
+      res.json(subscriptions);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
