@@ -423,7 +423,6 @@ export default function Admin() {
                     const latestMessage = [...allMessages].sort((a, b) => 
                       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
                     )[0];
-                    const unreadCount = visitorMessages.filter(m => !m.sender || m.sender !== "admin").length;
                     
                     return (
                       <Card key={email} className="hover-elevate" data-testid={`card-conversation-${email}`}>
@@ -438,17 +437,10 @@ export default function Admin() {
                                 </a>
                               </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                              {unreadCount > 0 && (
-                                <Badge variant="default" data-testid={`badge-unread-${email}`}>
-                                  {unreadCount} unread
-                                </Badge>
-                              )}
-                              <Badge variant="outline" className="flex items-center gap-1">
-                                <MessageCircle className="w-3 h-3" />
-                                {allMessages.length} messages
-                              </Badge>
-                            </div>
+                            <Badge variant="outline" className="flex items-center gap-1">
+                              <MessageCircle className="w-3 h-3" />
+                              {allMessages.length} messages
+                            </Badge>
                           </div>
 
                           <div className="pt-2 border-t space-y-2">
