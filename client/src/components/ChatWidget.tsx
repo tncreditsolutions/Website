@@ -125,14 +125,32 @@ export default function ChatWidget() {
     }
   };
 
-  const handleEscalate = () => {
-    // Mark conversation as escalated
-    setIsEscalated(true);
-    setShowEscalatePrompt(false);
-    toast({
-      title: "Support Escalated",
-      description: "A support specialist will respond to your message shortly.",
-    });
+  const handleEscalate = async () => {
+    try {
+      // Send escalation message to mark conversation
+      await apiRequest("POST", "/api/chat", {
+        name: email,
+        email: email,
+        message: "[ESCALATED TO SUPPORT SPECIALIST]",
+        sender: "escalation",
+        isEscalated: "true",
+      });
+      
+      setIsEscalated(true);
+      setShowEscalatePrompt(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
+      
+      toast({
+        title: "Support Escalated",
+        description: "A support specialist will respond to your message shortly.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to escalate conversation",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -228,6 +246,25 @@ export default function ChatWidget() {
                   )}
                 </div>
 
+                {/* Escalate Prompt */}
+                {showEscalatePrompt && !isEscalated && (
+                  <div className="p-3 border-t bg-amber-50 dark:bg-amber-950 border-b space-y-2">
+                    <div className="flex items-center gap-2 text-sm">
+                      <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+                      <p className="text-amber-900 dark:text-amber-100">Need immediate support?</p>
+                    </div>
+                    <Button
+                      onClick={handleEscalate}
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      data-testid="button-escalate-support"
+                    >
+                      Escalate to Support Specialist
+                    </Button>
+                  </div>
+                )}
+
                 {/* Message Input */}
                 <div className="p-4 border-t">
                   <form onSubmit={handleSend} className="flex gap-2">
@@ -237,16 +274,22 @@ export default function ChatWidget() {
                       onChange={(e) => setMessage(e.target.value)}
                       className="text-sm"
                       data-testid="input-chat-message"
+                      disabled={isEscalated}
                     />
                     <Button
                       type="submit"
                       size="icon"
-                      disabled={sendMutation.isPending}
+                      disabled={sendMutation.isPending || isEscalated}
                       data-testid="button-send-chat"
                     >
                       <Send className="w-4 h-4" />
                     </Button>
                   </form>
+                  {isEscalated && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      A support specialist is reviewing your conversation
+                    </p>
+                  )}
                 </div>
               </>
             )}

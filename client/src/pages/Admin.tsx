@@ -424,6 +424,9 @@ export default function Admin() {
                       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
                     )[0];
                     
+                    // Check if conversation is escalated
+                    const isEscalated = allMessages.some(msg => msg.isEscalated === "true" || msg.sender === "escalation");
+                    
                     return (
                       <Card key={email} className="hover-elevate" data-testid={`card-conversation-${email}`}>
                         <CardContent className="pt-6 space-y-3">
@@ -437,10 +440,18 @@ export default function Admin() {
                                 </a>
                               </div>
                             </div>
-                            <Badge variant="outline" className="flex items-center gap-1">
-                              <MessageCircle className="w-3 h-3" />
-                              {allMessages.length} messages
-                            </Badge>
+                            <div className="flex items-center gap-2 flex-wrap justify-end">
+                              {isEscalated && (
+                                <Badge variant="destructive" className="flex items-center gap-1" data-testid={`badge-escalated-${email}`}>
+                                  <AlertCircle className="w-3 h-3" />
+                                  Escalated
+                                </Badge>
+                              )}
+                              <Badge variant="outline" className="flex items-center gap-1">
+                                <MessageCircle className="w-3 h-3" />
+                                {allMessages.length} messages
+                              </Badge>
+                            </div>
                           </div>
 
                           <div className="pt-2 border-t space-y-2">
