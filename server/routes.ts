@@ -8,7 +8,7 @@ import OpenAI from "openai";
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
 console.log("[AI] OpenAI initialized:", !!openai, "API key available:", !!process.env.OPENAI_API_KEY);
 
-const SYSTEM_PROMPT = `You are a helpful customer support agent for TN Credit Solutions. Keep responses brief and friendly (1-2 sentences max). Answer questions about credit restoration, tax optimization, and general inquiries. Be honest if you need to recommend speaking with a specialist.`;
+const SYSTEM_PROMPT = `You are a helpful customer support agent for TN Credit Solutions. Keep responses brief and friendly (1-2 sentences max). Answer questions about credit restoration, tax optimization, and general inquiries. ALWAYS end with a follow-up question to understand their situation better and guide them toward the right solution. Be honest if you need to recommend speaking with a specialist.`;
 
 // Keywords that indicate urgent debt collection/lawsuit situations
 const URGENT_KEYWORDS = ["sued", "debt collector", "lawsuit", "collection agency", "court", "judgment", "garnish", "wage garnishment", "summons"];
@@ -76,7 +76,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 aiResponse = await openai.chat.completions.create({
                   model: "gpt-4o",
                   messages: [
-                    { role: "system", content: "You are a helpful customer support agent for TN Credit Solutions. For urgent debt collection/lawsuit situations, respond with empathy and confidence that we can help fight the debt. Keep response brief (1-2 sentences)." },
+                    { role: "system", content: "You are a helpful customer support agent for TN Credit Solutions. For urgent debt collection/lawsuit situations, respond with empathy and confidence that we can help fight the debt. Keep response brief (1-2 sentences). ALWAYS ask a follow-up question about their situation to better understand how to help them." },
                     { role: "user", content: message.message }
                   ],
                   max_tokens: 512,
