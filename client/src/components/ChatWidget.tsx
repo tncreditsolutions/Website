@@ -85,7 +85,7 @@ export default function ChatWidget() {
     if (escalatedMessage) {
       // Show with 5 second delay for urgent situations to let visitor read the message
       // Only schedule if this is a NEW escalated message (not seen before)
-      if (lastEscalatedMessageIdRef.current !== escalatedMessage.id && !showEscalatePrompt) {
+      if (lastEscalatedMessageIdRef.current !== escalatedMessage.id) {
         setHideEscalatePrompt(false); // Reset dismissal state for new urgent escalations
         lastEscalatedMessageIdRef.current = escalatedMessage.id;
         const timer = setTimeout(() => {
@@ -104,7 +104,7 @@ export default function ChatWidget() {
       const timer = setTimeout(() => setShowEscalatePrompt(true), 60000);
       return () => clearTimeout(timer);
     }
-  }, [allMessages]);
+  }, [allMessages, showEscalatePrompt, hideEscalatePrompt]);
 
   const handleInitialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
