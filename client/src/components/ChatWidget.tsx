@@ -20,7 +20,7 @@ export default function ChatWidget() {
   const [isEscalated, setIsEscalated] = useState(false);
   const [showEscalatePrompt, setShowEscalatePrompt] = useState(false);
   const [hideEscalatePrompt, setHideEscalatePrompt] = useState(false);
-  const lastScheduledMessageIdRef = useRef<string | null>(null);
+  const escalationDetectedAtRef = useRef<number | null>(null);
   const { toast } = useToast();
 
   // Load visitor info and escalate dismissal state from localStorage on mount
@@ -91,27 +91,26 @@ export default function ChatWidget() {
     let timeoutId: NodeJS.Timeout | null = null;
     
     if (escalatedMessage) {
-      // Show with 5 second delay for urgent situations to let visitor read the message
-      // Only schedule if this is a NEW escalated message (not seen before)
-      if (lastScheduledMessageIdRef.current !== escalatedMessage.id) {
-        console.log("New escalation detected, scheduling 5 second delay for ID:", escalatedMessage.id);
+      // NEW escalation detected - record the timestamp
+      if (escalationDetectedAtRef.current === null) {
+        console.log("New escalation detected at", new Date().toISOString(), "ID:", escalatedMessage.id);
+        escalationDetectedAtRef.current = Date.now();
         setHideEscalatePrompt(false); // Reset dismissal state for new urgent escalations
-        lastScheduledMessageIdRef.current = escalatedMessage.id;
         
-        // Schedule new timeout for 5 seconds
+        // Schedule check after 5 seconds to show button
         timeoutId = setTimeout(() => {
-          console.log("5 second timeout fired, showing escalate prompt");
+          console.log("5 seconds passed, showing escalate prompt");
           setShowEscalatePrompt(true);
         }, 5000);
       }
     } else {
-      // For non-urgent situations, reset the escalation tracking
-      lastScheduledMessageIdRef.current = null;
+      // No escalation - reset tracking
+      escalationDetectedAtRef.current = null;
       
-      // Only show if not already shown and not dismissed by user
+      // Only show standard prompt if not already shown and not dismissed
       if (showEscalatePrompt || hideEscalatePrompt) return;
       
-      // Otherwise delay showing escalation prompt by 1 minute (60000ms)
+      // Delay showing standard escalation prompt by 1 minute
       timeoutId = setTimeout(() => setShowEscalatePrompt(true), 60000);
     }
     
