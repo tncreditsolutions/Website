@@ -20,7 +20,9 @@ export default function ChatWidget() {
   const [isEscalated, setIsEscalated] = useState(false);
   const [showEscalatePrompt, setShowEscalatePrompt] = useState(false);
   const [hideEscalatePrompt, setHideEscalatePrompt] = useState(false);
+  const [renderTrigger, setRenderTrigger] = useState(0); // Force re-render after 5 seconds
   const escalationDetectedAtRef = useRef<number | null>(null);
+  const escalationMessageIdRef = useRef<string | null>(null);
   const { toast } = useToast();
 
   // Load visitor info and escalate dismissal state from localStorage on mount
@@ -74,7 +76,7 @@ export default function ChatWidget() {
     },
   });
 
-  // Show escalate prompt after 1 minute of AI response, or with 5 second delay if escalated
+  // Detect escalation and schedule 5-second delay
   useEffect(() => {
     const aiMessages = allMessages.filter(msg => msg.sender === "ai");
     if (aiMessages.length === 0) return;
@@ -88,36 +90,45 @@ export default function ChatWidget() {
       }
     }
     
-    let timeoutId: NodeJS.Timeout | null = null;
-    
-    if (escalatedMessage) {
-      // NEW escalation detected - record the timestamp
-      if (escalationDetectedAtRef.current === null) {
-        console.log("New escalation detected at", new Date().toISOString(), "ID:", escalatedMessage.id);
-        escalationDetectedAtRef.current = Date.now();
-        setHideEscalatePrompt(false); // Reset dismissal state for new urgent escalations
-        
-        // Schedule check after 5 seconds to show button
-        timeoutId = setTimeout(() => {
-          console.log("5 seconds passed, showing escalate prompt");
-          setShowEscalatePrompt(true);
-        }, 5000);
-      }
-    } else {
-      // No escalation - reset tracking
+    if (escalatedMessage && escalationMessageIdRef.current !== escalatedMessage.id) {
+      // NEW escalation detected
+      console.log("New escalation detected, ID:", escalatedMessage.id);
+      escalationMessageIdRef.current = escalatedMessage.id;
+      escalationDetectedAtRef.current = Date.now();
+      setShowEscalatePrompt(false); // Reset to ensure delay
+      setHideEscalatePrompt(false); // Clear dismissal for new escalation
+      
+      // Schedule timer to trigger re-render after 5 seconds
+      const timeoutId = setTimeout(() => {
+        console.log("5 seconds passed, triggering re-render");
+        setRenderTrigger(t => t + 1);
+      }, 5000);
+      
+      return () => clearTimeout(timeoutId);
+    } else if (!escalatedMessage) {
+      // No escalation - reset
+      escalationMessageIdRef.current = null;
       escalationDetectedAtRef.current = null;
-      
-      // Only show standard prompt if not already shown and not dismissed
-      if (showEscalatePrompt || hideEscalatePrompt) return;
-      
-      // Delay showing standard escalation prompt by 1 minute
-      timeoutId = setTimeout(() => setShowEscalatePrompt(true), 60000);
+    }
+  }, [allMessages]);
+  
+  // Compute whether to show button based on timestamp (5+ seconds passed)
+  const shouldShowEscalateButton = () => {
+    if (hideEscalatePrompt || isEscalated) return false;
+    if (!escalationDetectedAtRef.current) return false;
+    
+    const elapsedMs = Date.now() - escalationDetectedAtRef.current;
+    const shouldShow = elapsedMs >= 5000;
+    
+    if (shouldShow) {
+      console.log("Computed shouldShow=true, elapsed:", elapsedMs);
     }
     
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-    };
-  }, [allMessages]);
+    return shouldShow;
+  };
+  
+  // Trigger button visibility after 5 seconds (using renderTrigger to force computation)
+  const showButton = shouldShowEscalateButton();
 
   const handleInitialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -301,7 +312,7 @@ export default function ChatWidget() {
                 </div>
 
                 {/* Escalate Prompt */}
-                {showEscalatePrompt && !isEscalated && !hideEscalatePrompt && (
+                {showButton && (
                   <div className="p-5 border-t border-card-border bg-gradient-to-r from-primary/8 to-primary/5 dark:from-primary/20 dark:to-primary/10 space-y-4">
                     <div className="flex items-start gap-3 relative">
                       <div className="w-9 h-9 rounded-full bg-primary/25 dark:bg-primary/40 flex items-center justify-center flex-shrink-0 mt-0.5">
