@@ -56,8 +56,7 @@ export default function ChatWidget() {
       localStorage.setItem(VISITOR_INFO_KEY, JSON.stringify({ name, email }));
       setMessage("");
       queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
-      // Show escalate prompt after message is sent
-      setTimeout(() => setShowEscalatePrompt(true), 1000);
+      // Will check for escalation need in useEffect
     },
     onError: (error: any) => {
       toast({
@@ -67,6 +66,17 @@ export default function ChatWidget() {
       });
     },
   });
+
+  // Check if AI response indicates escalation is needed
+  useEffect(() => {
+    const aiMessages = allMessages.filter(msg => msg.sender === "ai" && msg.email === "support@tncreditsolutions.com");
+    if (aiMessages.length > 0) {
+      const latestAiMessage = aiMessages[aiMessages.length - 1];
+      if (latestAiMessage.message.includes("[ESCALATION_NEEDED]")) {
+        setShowEscalatePrompt(true);
+      }
+    }
+  }, [allMessages]);
 
   const handleInitialSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -197,6 +207,8 @@ export default function ChatWidget() {
                   ) : (
                     [...messages].reverse().map((msg) => {
                       const isAdmin = msg.sender === "admin" || msg.email === "support@tncreditsolutions.com";
+                      // Strip the escalation marker from display
+                      const displayMessage = msg.message.replace("[ESCALATION_NEEDED]", "").trim();
                       return (
                         <div
                           key={msg.id}
@@ -209,7 +221,7 @@ export default function ChatWidget() {
                                 ? "bg-primary text-primary-foreground"
                                 : "bg-muted"
                             }`}>
-                              {msg.message}
+                              {displayMessage}
                             </div>
                             <div className="text-xs text-muted-foreground mt-1">
                               {new Date(msg.createdAt).toLocaleTimeString()}
