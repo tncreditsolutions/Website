@@ -5,17 +5,19 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { MessageCircle, X, Send } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import type { ChatMessage } from "@shared/schema";
-import { insertChatMessageSchema } from "@shared/schema";
 
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const { toast } = useToast();
 
-  const { data: messages = [] } = useQuery<ChatMessage[]>({
+  const { data: messages = [], isLoading } = useQuery<ChatMessage[]>({
     queryKey: ["/api/chat"],
+    refetchInterval: 2000,
   });
 
   const sendMutation = useMutation({
@@ -23,16 +25,34 @@ export default function ChatWidget() {
       return apiRequest("POST", "/api/chat", data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
       setName("");
       setEmail("");
       setMessage("");
+      toast({
+        title: "Message sent!",
+        description: "Your message has been received.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send message",
+        variant: "destructive",
+      });
     },
   });
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !email.trim() || !message.trim()) return;
+    if (!name.trim() || !email.trim() || !message.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in all fields",
+        variant: "destructive",
+      });
+      return;
+    }
 
     sendMutation.mutate({
       name: name.trim(),
@@ -69,12 +89,16 @@ export default function ChatWidget() {
 
           <div className="flex flex-col h-96">
             <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-background">
-              {messages.length === 0 ? (
+              {isLoading ? (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  Loading messages...
+                </p>
+              ) : messages.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-4">
                   Start a conversation
                 </p>
               ) : (
-                messages.map((msg) => (
+                [...messages].reverse().map((msg) => (
                   <div
                     key={msg.id}
                     data-testid={`chat-message-${msg.id}`}
@@ -84,8 +108,11 @@ export default function ChatWidget() {
                     <div className="text-xs text-muted-foreground mb-1">
                       {msg.email}
                     </div>
-                    <div className="bg-muted p-2 rounded text-sm">
+                    <div className="bg-muted p-2 rounded text-sm break-words">
                       {msg.message}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {new Date(msg.createdAt).toLocaleTimeString()}
                     </div>
                   </div>
                 ))
