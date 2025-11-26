@@ -42,6 +42,7 @@ export const chatMessages = pgTable("chat_messages", {
   email: text("email").notNull(),
   message: text("message").notNull(),
   sender: text("sender").notNull().default("visitor"),
+  isEscalated: text("is_escalated").notNull().default("false"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -50,6 +51,7 @@ export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
   createdAt: true,
 }).extend({
   sender: z.string().default("visitor"),
+  isEscalated: z.string().default("false"),
 });
 
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
