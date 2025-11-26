@@ -8,7 +8,21 @@ import OpenAI from "openai";
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
 console.log("[AI] OpenAI initialized:", !!openai, "API key available:", !!process.env.OPENAI_API_KEY);
 
-const SYSTEM_PROMPT = `You are a helpful customer support agent for TN Credit Solutions. Keep responses brief and friendly (1-2 sentences max). Answer questions about credit restoration, tax optimization, and general inquiries. ALWAYS end with a follow-up question to understand their situation better and guide them toward the right solution. Be honest if you need to recommend speaking with a specialist.`;
+const SYSTEM_PROMPT = `You are a helpful customer support agent for TN Credit Solutions. Keep responses brief and friendly (1-2 sentences max). Answer questions about credit restoration, tax optimization, and general inquiries. ALWAYS end with a follow-up question to understand their situation better and guide them toward the right solution. Be honest if you need to recommend speaking with a specialist.
+
+IMPORTANT: Determine if the visitor needs immediate specialist assistance. Consider factors like:
+- Complex financial/legal situations
+- Urgent debt collection, lawsuits, wage garnishment
+- Situations requiring professional expertise
+- Multiple issues or severe problems
+
+At the END of your response, ALWAYS include this marker on its own line:
+[ESCALATE:YES] if they need a specialist, or [ESCALATE:NO] if they don't
+
+Example format:
+"Your situation sounds challenging. Have you received any court documents? [ESCALATE:YES]"
+or
+"That's a common question! Are you dealing with a specific debt? [ESCALATE:NO]"`;
 
 // Keywords that indicate urgent debt collection/lawsuit situations
 const URGENT_KEYWORDS = ["sued", "debt collector", "lawsuit", "collection agency", "court", "judgment", "garnish", "wage garnishment", "summons"];
@@ -94,17 +108,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
               
               console.log("[AI] Full response:", JSON.stringify(aiResponse, null, 2));
-              const aiMessage = aiResponse.choices[0]?.message?.content?.trim() || "";
-              console.log("[AI] AI response received:", aiMessage.substring(0, 50));
+              let fullMessage = aiResponse.choices[0]?.message?.content?.trim() || "";
+              console.log("[AI] AI response received:", fullMessage.substring(0, 50));
+              
+              // Parse escalation marker from AI response
+              let shouldEscalate = isUrgent; // Default to urgent keyword detection
+              const escalateYesMatch = fullMessage.match(/\[ESCALATE:YES\]/);
+              const escalateNoMatch = fullMessage.match(/\[ESCALATE:NO\]/);
+              
+              if (escalateYesMatch) {
+                shouldEscalate = true;
+                console.log("[AI] AI determined escalation needed");
+              } else if (escalateNoMatch) {
+                shouldEscalate = false;
+                console.log("[AI] AI determined escalation not needed");
+              }
+              
+              // Remove the escalation marker from the message shown to user
+              const aiMessage = fullMessage.replace(/\s*\[ESCALATE:(YES|NO)\]\s*$/, "").trim();
+              
               if (aiMessage) {
                 const saved = await storage.createChatMessage({
                   name: "TN Credit Solutions Support",
                   email: "support@tncreditsolutions.com",
                   message: aiMessage,
                   sender: "ai",
-                  isEscalated: isUrgent ? "true" : "false",
+                  isEscalated: shouldEscalate ? "true" : "false",
                 });
-                console.log("[AI] AI message saved successfully:", saved.id);
+                console.log("[AI] AI message saved successfully:", saved.id, "Escalated:", shouldEscalate);
               } else {
                 console.error("[AI] No message content in response");
               }
