@@ -22,7 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowLeft, Mail, Phone, Calendar, User, MessageSquare, X, MessageCircle } from "lucide-react";
+import { ArrowLeft, Mail, Phone, Calendar, User, MessageSquare, X, MessageCircle, AlertCircle } from "lucide-react";
 import { Link } from "wouter";
 import type { ContactSubmission, ChatMessage, NewsletterSubscription } from "@shared/schema";
 
