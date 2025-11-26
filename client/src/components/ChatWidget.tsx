@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { MessageCircle, X, Send, AlertCircle } from "lucide-react";
+import { MessageCircle, X, Send, AlertCircle, Sparkles } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { ChatMessage } from "@shared/schema";
@@ -184,14 +184,22 @@ export default function ChatWidget() {
           <MessageCircle className="w-6 h-6" />
         </Button>
       ) : (
-        <Card className="w-96 shadow-xl overflow-hidden">
-          <div className="bg-primary text-primary-foreground p-4 flex justify-between items-center">
-            <h3 className="font-semibold">Contact Us</h3>
+        <Card className="w-96 shadow-2xl overflow-hidden rounded-2xl border-0">
+          <div className="bg-gradient-to-r from-primary to-primary/90 text-primary-foreground p-5 flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-primary-foreground/20 flex items-center justify-center">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-base">Riley</h3>
+                <p className="text-xs opacity-90">TN Credit Solutions</p>
+              </div>
+            </div>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setIsOpen(false)}
-              className="text-primary-foreground hover:bg-primary/80"
+              className="text-primary-foreground hover:bg-primary-foreground/20 rounded-full"
               data-testid="button-close-chat"
             >
               <X className="w-4 h-4" />
@@ -201,15 +209,18 @@ export default function ChatWidget() {
           <div className="flex flex-col h-96">
             {/* New Visitor Form */}
             {isNewVisitor ? (
-              <div className="flex-1 overflow-y-auto p-4 flex flex-col justify-center">
-                <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground">Hey I'm Riley, your TN Credit Solutions support agent. I'm here to help you with credit restoration and tax optimization. What can I help you with today?</p>
-                  <form onSubmit={handleInitialSubmit} className="space-y-3">
+              <div className="flex-1 overflow-y-auto p-6 flex flex-col justify-center bg-gradient-to-b from-background to-card/50">
+                <div className="space-y-5">
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-foreground">Hey I'm Riley, your TN Credit Solutions support agent.</p>
+                    <p className="text-sm text-muted-foreground">I'm here to help you with credit restoration and tax optimization. What can I help you with today?</p>
+                  </div>
+                  <form onSubmit={handleInitialSubmit} className="space-y-3 pt-2">
                     <Input
                       placeholder="Your name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="text-sm"
+                      className="text-sm rounded-lg border-2 focus:ring-2"
                       data-testid="input-chat-name"
                     />
                     <Input
@@ -217,10 +228,10 @@ export default function ChatWidget() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="text-sm"
+                      className="text-sm rounded-lg border-2 focus:ring-2"
                       data-testid="input-chat-email"
                     />
-                    <Button type="submit" className="w-full">
+                    <Button type="submit" className="w-full rounded-lg font-medium">
                       Start Chat
                     </Button>
                   </form>
@@ -229,13 +240,13 @@ export default function ChatWidget() {
             ) : (
               <>
                 {/* Message History */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-background">
+                <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-gradient-to-b from-background to-card/30">
                   {isLoading ? (
-                    <p className="text-sm text-muted-foreground text-center py-4">
+                    <p className="text-sm text-muted-foreground text-center py-8">
                       Loading messages...
                     </p>
                   ) : messages.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-4">
+                    <p className="text-sm text-muted-foreground text-center py-8">
                       Start a conversation
                     </p>
                   ) : (
@@ -248,15 +259,15 @@ export default function ChatWidget() {
                           className={`text-sm flex ${isAdmin ? "justify-end" : "justify-start"}`}
                         >
                           <div className={`max-w-xs ${isAdmin ? "text-right" : ""}`}>
-                            <div className={`p-2 rounded text-sm break-words ${
+                            <div className={`px-4 py-3 rounded-lg text-sm break-words font-medium ${
                               isAdmin
-                                ? "bg-primary text-primary-foreground"
-                                : "bg-muted"
+                                ? "bg-primary text-primary-foreground rounded-br-none shadow-md"
+                                : "bg-card border border-card-border rounded-bl-none shadow-sm"
                             }`}>
                               {msg.message}
                             </div>
-                            <div className="text-xs text-muted-foreground mt-1">
-                              {new Date(msg.createdAt).toLocaleTimeString()}
+                            <div className="text-xs text-muted-foreground mt-1.5 px-1">
+                              {new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                             </div>
                           </div>
                         </div>
@@ -267,21 +278,21 @@ export default function ChatWidget() {
 
                 {/* Escalate Prompt */}
                 {showEscalatePrompt && !isEscalated && !hideEscalatePrompt && (
-                  <div className="p-4 border-t bg-gradient-to-r from-primary/5 to-primary/10 dark:from-primary/20 dark:to-primary/30 space-y-3">
+                  <div className="p-5 border-t border-card-border bg-gradient-to-r from-primary/8 to-primary/5 dark:from-primary/20 dark:to-primary/10 space-y-4">
                     <div className="flex items-start gap-3 relative">
-                      <div className="w-8 h-8 rounded-full bg-primary/20 dark:bg-primary/40 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <MessageCircle className="w-4 h-4 text-primary" />
+                      <div className="w-9 h-9 rounded-full bg-primary/25 dark:bg-primary/40 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Sparkles className="w-5 h-5 text-primary" />
                       </div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-sm">Connect with a Specialist</h4>
-                        <p className="text-xs text-muted-foreground mt-1">Get personalized support for your specific needs</p>
+                      <div className="flex-1 pt-0.5">
+                        <h4 className="font-semibold text-sm text-foreground">Connect with a Specialist</h4>
+                        <p className="text-xs text-muted-foreground mt-1.5">Get personalized guidance for your unique situation</p>
                       </div>
                       <button
                         onClick={() => {
                           setHideEscalatePrompt(true);
                           localStorage.setItem(ESCALATE_DISMISSED_KEY, "true");
                         }}
-                        className="text-muted-foreground hover:text-foreground flex-shrink-0"
+                        className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 mt-0.5"
                         data-testid="button-close-escalate"
                       >
                         <X className="w-4 h-4" />
@@ -289,7 +300,7 @@ export default function ChatWidget() {
                     </div>
                     <Button
                       onClick={handleEscalate}
-                      className="w-full"
+                      className="w-full rounded-lg font-medium"
                       data-testid="button-escalate-support"
                     >
                       Talk to a Specialist
@@ -298,13 +309,13 @@ export default function ChatWidget() {
                 )}
 
                 {/* Message Input */}
-                <div className="p-4 border-t">
-                  <form onSubmit={handleSend} className="flex gap-2">
+                <div className="p-5 border-t border-card-border bg-gradient-to-b from-background to-card/40 space-y-2">
+                  <form onSubmit={handleSend} className="flex gap-2.5">
                     <Input
                       placeholder="Type a message..."
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      className="text-sm"
+                      className="text-sm rounded-lg border-2 focus:ring-2"
                       data-testid="input-chat-message"
                       disabled={isEscalated}
                     />
@@ -312,13 +323,14 @@ export default function ChatWidget() {
                       type="submit"
                       size="icon"
                       disabled={sendMutation.isPending || isEscalated}
+                      className="rounded-lg"
                       data-testid="button-send-chat"
                     >
                       <Send className="w-4 h-4" />
                     </Button>
                   </form>
                   {isEscalated && (
-                    <p className="text-xs text-muted-foreground mt-2">
+                    <p className="text-xs text-muted-foreground px-2 py-1.5 bg-card/50 rounded-md border border-card-border">
                       A support specialist is reviewing your conversation
                     </p>
                   )}
