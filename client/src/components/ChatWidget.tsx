@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { ChatMessage } from "@shared/schema";
 
 const VISITOR_INFO_KEY = "chat_visitor_info";
+const ESCALATE_DISMISSED_KEY = "chat_escalate_dismissed";
 
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,7 +22,7 @@ export default function ChatWidget() {
   const [hideEscalatePrompt, setHideEscalatePrompt] = useState(false);
   const { toast } = useToast();
 
-  // Load visitor info from localStorage on mount
+  // Load visitor info and escalate dismissal state from localStorage on mount
   useEffect(() => {
     const stored = localStorage.getItem(VISITOR_INFO_KEY);
     if (stored) {
@@ -33,6 +34,12 @@ export default function ChatWidget() {
       } catch (e) {
         // Silently fail if localStorage data is corrupted
       }
+    }
+    
+    // Restore escalate dismissal state
+    const dismissed = localStorage.getItem(ESCALATE_DISMISSED_KEY);
+    if (dismissed === "true") {
+      setHideEscalatePrompt(true);
     }
   }, []);
 
@@ -268,7 +275,10 @@ export default function ChatWidget() {
                         <p className="text-xs text-muted-foreground mt-1">Get personalized support for your specific needs</p>
                       </div>
                       <button
-                        onClick={() => setHideEscalatePrompt(true)}
+                        onClick={() => {
+                          setHideEscalatePrompt(true);
+                          localStorage.setItem(ESCALATE_DISMISSED_KEY, "true");
+                        }}
                         className="text-muted-foreground hover:text-foreground flex-shrink-0"
                         data-testid="button-close-escalate"
                       >
