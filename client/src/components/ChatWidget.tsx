@@ -75,7 +75,7 @@ export default function ChatWidget() {
 
   // Show escalate prompt after 1 minute of AI response, or immediately if escalated
   useEffect(() => {
-    if (showEscalatePrompt) return; // Already shown, don't set timer again
+    if (showEscalatePrompt || hideEscalatePrompt) return; // Already shown or dismissed, don't set timer again
     
     const aiMessages = allMessages.filter(msg => msg.sender === "ai");
     if (aiMessages.length > 0) {
@@ -91,7 +91,7 @@ export default function ChatWidget() {
         return () => clearTimeout(timer);
       }
     }
-  }, [allMessages]);
+  }, [allMessages, hideEscalatePrompt]);
 
   const handleInitialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
