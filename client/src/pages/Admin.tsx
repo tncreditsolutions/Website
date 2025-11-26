@@ -18,14 +18,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowLeft, Mail, Phone, Calendar, User, MessageSquare, X } from "lucide-react";
+import { ArrowLeft, Mail, Phone, Calendar, User, MessageSquare, X, MessageCircle } from "lucide-react";
 import { Link } from "wouter";
-import type { ContactSubmission } from "@shared/schema";
+import type { ContactSubmission, ChatMessage } from "@shared/schema";
 
 export default function Admin() {
   const [selectedSubmission, setSelectedSubmission] = useState<ContactSubmission | null>(null);
-  const { data: submissions, isLoading } = useQuery<ContactSubmission[]>({
+  const [selectedChatMessage, setSelectedChatMessage] = useState<ChatMessage | null>(null);
+  
+  const { data: submissions, isLoading: submissionsLoading } = useQuery<ContactSubmission[]>({
     queryKey: ["/api/contact"],
+  });
+  
+  const { data: chatMessages, isLoading: chatLoading } = useQuery<ChatMessage[]>({
+    queryKey: ["/api/chat"],
+    refetchInterval: 5000,
   });
 
   const formatDate = (date: Date | string) => {
@@ -78,7 +85,7 @@ export default function Admin() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {isLoading ? (
+            {submissionsLoading ? (
               <div className="text-center py-8 text-muted-foreground">Loading submissions...</div>
             ) : !submissions || submissions.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
@@ -268,6 +275,155 @@ export default function Admin() {
                   </div>
                 </div>
               )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Chat Messages Section */}
+      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-8">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Live Chat Messages</CardTitle>
+            <CardDescription>
+              {chatMessages?.length ? `${chatMessages.length} total messages` : "No chat messages yet"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {chatLoading ? (
+              <div className="text-center py-8 text-muted-foreground">Loading messages...</div>
+            ) : !chatMessages || chatMessages.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No live chat messages yet. Chat will appear here when visitors use the chat widget.
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Message</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {[...chatMessages].reverse().map((message) => (
+                        <TableRow key={message.id} data-testid={`row-chat-message-${message.id}`}>
+                          <TableCell className="text-sm text-muted-foreground">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="w-4 h-4" />
+                              {formatDate(message.createdAt)}
+                            </div>
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            <div className="flex items-center gap-2">
+                              <User className="w-4 h-4 text-muted-foreground" />
+                              {message.name}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Mail className="w-4 h-4 text-muted-foreground" />
+                              <a href={`mailto:${message.email}`} className="text-primary hover:underline text-sm">
+                                {message.email}
+                              </a>
+                            </div>
+                          </TableCell>
+                          <TableCell className="max-w-xs">
+                            <button
+                              onClick={() => setSelectedChatMessage(message)}
+                              className="flex items-start gap-2 hover-elevate p-2 rounded-md text-left w-full"
+                              data-testid={`button-view-chat-message-${message.id}`}
+                            >
+                              <MessageSquare className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                              <p className="text-sm text-muted-foreground line-clamp-2">
+                                {message.message}
+                              </p>
+                            </button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden space-y-4">
+                  {[...chatMessages].reverse().map((message) => (
+                    <Card key={message.id} data-testid={`card-chat-message-${message.id}`}>
+                      <CardContent className="pt-6 space-y-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <h3 className="font-semibold text-lg">{message.name}</h3>
+                          <Badge variant="outline" className="flex items-center gap-1">
+                            <MessageCircle className="w-3 h-3" />
+                            Chat
+                          </Badge>
+                        </div>
+                        
+                        <div className="space-y-2 text-sm">
+                          <div className="flex items-center gap-2">
+                            <Mail className="w-4 h-4 text-muted-foreground" />
+                            <a href={`mailto:${message.email}`} className="text-primary hover:underline">
+                              {message.email}
+                            </a>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-muted-foreground">{formatDate(message.createdAt)}</span>
+                          </div>
+                        </div>
+
+                        <div className="pt-2 border-t">
+                          <div className="flex items-start gap-2">
+                            <MessageSquare className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                            <p className="text-sm text-muted-foreground">{message.message}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Full Chat Message Dialog */}
+      <Dialog open={!!selectedChatMessage} onOpenChange={() => setSelectedChatMessage(null)}>
+        <DialogContent className="max-w-2xl max-h-96 overflow-y-auto" data-testid="dialog-full-chat-message">
+          <DialogHeader>
+            <DialogTitle>Chat Message Details</DialogTitle>
+            <DialogDescription>View the complete message</DialogDescription>
+          </DialogHeader>
+          {selectedChatMessage && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase">Name</p>
+                  <p className="text-sm font-medium">{selectedChatMessage.name}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase">Email</p>
+                  <a href={`mailto:${selectedChatMessage.email}`} className="text-sm text-primary hover:underline">
+                    {selectedChatMessage.email}
+                  </a>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase">Received</p>
+                  <p className="text-sm">{formatDate(selectedChatMessage.createdAt)}</p>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Message</p>
+                <div className="bg-muted p-3 rounded-md">
+                  <p className="text-sm whitespace-pre-wrap break-words">{selectedChatMessage.message}</p>
+                </div>
+              </div>
             </div>
           )}
         </DialogContent>
