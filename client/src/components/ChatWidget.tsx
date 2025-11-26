@@ -114,7 +114,7 @@ export default function ChatWidget() {
       await apiRequest("POST", "/api/chat", {
         name: "Riley",
         email: "support@tncreditsolutions.com",
-        message: `Hi ${trimmedName}! I'm Riley, your TN Credit Solutions support agent. I'm here to help you navigate credit restoration and tax optimization. What brings you in today?`,
+        message: `Hi ${trimmedName}! I'm Riley, your TN Credit Solutions support agent. I'm here to help you navigate credit restoration and tax optimization. What can I help you with today?`,
         sender: "ai",
         isEscalated: "false",
       });
