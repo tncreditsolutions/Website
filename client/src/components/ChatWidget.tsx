@@ -203,7 +203,7 @@ export default function ChatWidget() {
             {isNewVisitor ? (
               <div className="flex-1 overflow-y-auto p-4 flex flex-col justify-center">
                 <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground">Please enter your information to start the conversation:</p>
+                  <p className="text-sm text-muted-foreground">Hey I'm Riley your live agent here to assist you with credit and taxes. How can I help you?</p>
                   <form onSubmit={handleInitialSubmit} className="space-y-3">
                     <Input
                       placeholder="Your name"
