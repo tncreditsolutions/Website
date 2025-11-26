@@ -56,7 +56,8 @@ export default function ChatWidget() {
       localStorage.setItem(VISITOR_INFO_KEY, JSON.stringify({ name, email }));
       setMessage("");
       queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
-      // Don't show escalate prompt yet - wait for AI response or timeout
+      // Show escalate prompt after message is sent
+      setTimeout(() => setShowEscalatePrompt(true), 1000);
     },
     onError: (error: any) => {
       toast({
@@ -64,36 +65,6 @@ export default function ChatWidget() {
         description: error.message || "Failed to send message",
         variant: "destructive",
       });
-    },
-  });
-
-  const aiResponseMutation = useMutation({
-    mutationFn: async (visitorMessage: string) => {
-      const data: any = await apiRequest("POST", "/api/chat/ai-response", { message: visitorMessage });
-      return data.response;
-    },
-    onSuccess: (aiResponse) => {
-      // Send AI response as a chat message
-      if (aiResponse && aiResponse.trim()) {
-        apiRequest("POST", "/api/chat", {
-          name: "TN Credit Solutions Support",
-          email: "support@tncreditsolutions.com",
-          message: aiResponse.trim(),
-          sender: "ai",
-          isEscalated: "false",
-        }).then(() => {
-          queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
-          // Show escalate prompt after AI responds
-          setTimeout(() => setShowEscalatePrompt(true), 500);
-        }).catch((error) => {
-          console.error("Failed to save AI response:", error);
-        });
-      }
-    },
-    onError: (error: any) => {
-      // If AI response fails, show escalate prompt and error
-      setShowEscalatePrompt(true);
-      console.error("AI response error:", error);
     },
   });
 
@@ -122,19 +93,11 @@ export default function ChatWidget() {
       return;
     }
 
-    const visitorMessage = message.trim();
-    
-    // Send visitor message
     sendMutation.mutate({
       name: name.trim(),
       email: email.trim(),
-      message: visitorMessage,
+      message: message.trim(),
     });
-
-    // Generate AI response
-    if (!isEscalated) {
-      aiResponseMutation.mutate(visitorMessage);
-    }
   };
 
   const handleEscalate = async () => {

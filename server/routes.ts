@@ -38,10 +38,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { sender, ...data } = req.body;
       const validatedData = insertChatMessageSchema.parse(data);
+      const senderType = sender || "visitor";
       const message = await storage.createChatMessage({
         ...validatedData,
-        sender: sender || "visitor",
+        sender: senderType,
       });
+      
+      // If visitor sent a message and AI is configured, generate AI response
+      if (senderType === "visitor" && openai && message.email) {
+        try {
+          const aiResponse = await openai.chat.completions.create({
+            model: "gpt-5",
+            messages: [
+              { role: "system", content: SYSTEM_PROMPT },
+              { role: "user", content: message.message }
+            ],
+            max_completion_tokens: 512,
+          });
+          
+          const aiMessage = aiResponse.choices[0].message.content?.trim() || "";
+          if (aiMessage) {
+            await storage.createChatMessage({
+              name: "TN Credit Solutions Support",
+              email: "support@tncreditsolutions.com",
+              message: aiMessage,
+              sender: "ai",
+              isEscalated: "false",
+            });
+          }
+        } catch (aiError) {
+          console.error("AI response generation failed:", aiError);
+        }
+      }
+      
       res.json(message);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
