@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { insertContactSubmissionSchema, insertChatMessageSchema, insertNewsletterSubscriptionSchema } from "@shared/schema";
 import OpenAI from "openai";
 
-// the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
+// Using gpt-4o (most recent stable model)
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
 console.log("[AI] OpenAI initialized:", !!openai, "API key available:", !!process.env.OPENAI_API_KEY);
 
@@ -74,26 +74,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 // For urgent situations, send direct affirmative response
                 console.log("[AI] Using urgent prompt");
                 aiResponse = await openai.chat.completions.create({
-                  model: "gpt-5",
+                  model: "gpt-4o",
                   messages: [
                     { role: "system", content: "You are a helpful customer support agent for TN Credit Solutions. For urgent debt collection/lawsuit situations, respond with empathy and confidence that we can help fight the debt. Keep response brief (1-2 sentences)." },
                     { role: "user", content: message.message }
                   ],
-                  max_completion_tokens: 512,
+                  max_tokens: 512,
                 });
               } else {
                 console.log("[AI] Using standard prompt");
                 aiResponse = await openai.chat.completions.create({
-                  model: "gpt-5",
+                  model: "gpt-4o",
                   messages: [
                     { role: "system", content: SYSTEM_PROMPT },
                     { role: "user", content: message.message }
                   ],
-                  max_completion_tokens: 512,
+                  max_tokens: 512,
                 });
               }
               
-              const aiMessage = aiResponse.choices[0].message.content?.trim() || "";
+              console.log("[AI] Full response:", JSON.stringify(aiResponse, null, 2));
+              const aiMessage = aiResponse.choices[0]?.message?.content?.trim() || "";
               console.log("[AI] AI response received:", aiMessage.substring(0, 50));
               if (aiMessage) {
                 const saved = await storage.createChatMessage({
