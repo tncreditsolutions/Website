@@ -18,6 +18,7 @@ export default function ChatWidget() {
   const [isNewVisitor, setIsNewVisitor] = useState(true);
   const [isEscalated, setIsEscalated] = useState(false);
   const [showEscalatePrompt, setShowEscalatePrompt] = useState(false);
+  const [hideEscalatePrompt, setHideEscalatePrompt] = useState(false);
   const { toast } = useToast();
 
   // Load visitor info from localStorage on mount
@@ -243,16 +244,23 @@ export default function ChatWidget() {
                 </div>
 
                 {/* Escalate Prompt */}
-                {showEscalatePrompt && !isEscalated && (
+                {showEscalatePrompt && !isEscalated && !hideEscalatePrompt && (
                   <div className="p-4 border-t bg-gradient-to-r from-primary/5 to-primary/10 dark:from-primary/20 dark:to-primary/30 space-y-3">
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-start gap-3 relative">
                       <div className="w-8 h-8 rounded-full bg-primary/20 dark:bg-primary/40 flex items-center justify-center flex-shrink-0 mt-0.5">
                         <MessageCircle className="w-4 h-4 text-primary" />
                       </div>
-                      <div>
+                      <div className="flex-1">
                         <h4 className="font-semibold text-sm">Connect with a Specialist</h4>
                         <p className="text-xs text-muted-foreground mt-1">Get personalized support for your specific needs</p>
                       </div>
+                      <button
+                        onClick={() => setHideEscalatePrompt(true)}
+                        className="text-muted-foreground hover:text-foreground flex-shrink-0"
+                        data-testid="button-close-escalate"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
                     </div>
                     <Button
                       onClick={handleEscalate}
