@@ -53,10 +53,6 @@ export default function ChatWidget() {
       // Save visitor info for next time
       localStorage.setItem(VISITOR_INFO_KEY, JSON.stringify({ name, email }));
       setMessage("");
-      toast({
-        title: "Message sent!",
-        description: "Your message has been received.",
-      });
       queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
     },
     onError: (error: any) => {
