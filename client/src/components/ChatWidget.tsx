@@ -67,11 +67,18 @@ export default function ChatWidget() {
     },
   });
 
-  // Show escalate prompt after first AI response
+  // Show escalate prompt if AI indicates it needs specialist or after first response
   useEffect(() => {
     const aiMessages = allMessages.filter(msg => msg.sender === "ai" && msg.email === "support@tncreditsolutions.com");
     if (aiMessages.length > 0 && !showEscalatePrompt) {
-      setTimeout(() => setShowEscalatePrompt(true), 500);
+      const latestAiMsg = aiMessages[aiMessages.length - 1];
+      // Always show escalate prompt if AI signals it needs specialist
+      if (latestAiMsg.message.includes("[NEEDS_SPECIALIST]")) {
+        setShowEscalatePrompt(true);
+      } else {
+        // Otherwise show it after a small delay for general responses
+        setTimeout(() => setShowEscalatePrompt(true), 500);
+      }
     }
   }, [allMessages, showEscalatePrompt]);
 
@@ -204,6 +211,8 @@ export default function ChatWidget() {
                   ) : (
                     [...messages].reverse().map((msg) => {
                       const isAdmin = msg.sender === "admin" || msg.email === "support@tncreditsolutions.com";
+                      // Strip the specialist marker from display
+                      const displayMessage = msg.message.replace("[NEEDS_SPECIALIST]", "").trim();
                       return (
                         <div
                           key={msg.id}
@@ -216,7 +225,7 @@ export default function ChatWidget() {
                                 ? "bg-primary text-primary-foreground"
                                 : "bg-muted"
                             }`}>
-                              {msg.message}
+                              {displayMessage}
                             </div>
                             <div className="text-xs text-muted-foreground mt-1">
                               {new Date(msg.createdAt).toLocaleTimeString()}
