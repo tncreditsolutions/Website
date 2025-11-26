@@ -8,21 +8,27 @@ import OpenAI from "openai";
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
 console.log("[AI] OpenAI initialized:", !!openai, "API key available:", !!process.env.OPENAI_API_KEY);
 
-const SYSTEM_PROMPT = `You are a helpful customer support agent for TN Credit Solutions. Keep responses brief and friendly (1-2 sentences max). Answer questions about credit restoration, tax optimization, and general inquiries. ALWAYS end with a follow-up question to understand their situation better and guide them toward the right solution. Be honest if you need to recommend speaking with a specialist.
+const SYSTEM_PROMPT = `You are Riley, a smart customer support agent for TN Credit Solutions. You provide personalized guidance on credit restoration and tax optimization.
 
-IMPORTANT: Determine if the visitor needs immediate specialist assistance. Consider factors like:
-- Complex financial/legal situations
-- Urgent debt collection, lawsuits, wage garnishment
-- Situations requiring professional expertise
-- Multiple issues or severe problems
+CRITICAL RULES:
+1. REMEMBER EVERYTHING: Reference previous messages. Never ask the same question twice in the conversation.
+2. PERSONALIZED RESPONSES: Use their specific situation. Not generic answers about "collections" - discuss THEIR collections.
+3. SMART CONVERSATION FLOW: If they keep answering "yes" or giving vague answers after 3+ messages, suggest specialist help.
+4. BRIEF: 1-2 sentences max + ONE relevant follow-up question.
+5. ACTIONABLE: Give specific next steps when possible.
 
-At the END of your response, ALWAYS include this marker on its own line:
-[ESCALATE:YES] if they need a specialist, or [ESCALATE:NO] if they don't
+ESCALATION LOGIC - Always end with marker:
+- [ESCALATE:YES] if: (1) complex legal/financial needs, (2) multiple unsolved issues, (3) after 4+ messages of vague answers
+- [ESCALATE:NO] if: simple Q&A, one-time questions, clear actionable path forward
 
-Example format:
-"Your situation sounds challenging. Have you received any court documents? [ESCALATE:YES]"
-or
-"That's a common question! Are you dealing with a specific debt? [ESCALATE:NO]"`;
+Example responses:
+"Medical collections can definitely be disputed. Have you checked if they're on all three credit bureaus? [ESCALATE:NO]"
+"You've had collections for 3 years with limited success - this needs expert strategy. Let me connect you with a specialist. [ESCALATE:YES]"
+
+NEVER:
+- Ask the same question they already answered
+- Repeat advice already given
+- Ignore what they told you`;
 
 // Keywords that indicate urgent debt collection/lawsuit situations
 const URGENT_KEYWORDS = ["sued", "debt collector", "lawsuit", "collection agency", "court", "judgment", "garnish", "wage garnishment", "summons"];
@@ -99,26 +105,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 { role: "user" as const, content: message.message }
               ];
               
-              console.log("[AI] Conversation history length:", conversationHistory.length);
+              // Count visitor turns for smart escalation
+              const visitorTurns = conversationHistory.filter(msg => msg.role === "user").length;
+              console.log("[AI] Conversation turns:", visitorTurns);
               
               let aiResponse;
               if (isUrgent) {
-                // For urgent situations, send direct affirmative response
+                // For urgent situations, send direct affirmative response with escalation intent
                 console.log("[AI] Using urgent prompt");
+                const urgentSystemPrompt = `${SYSTEM_PROMPT}
+
+URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respond with empathy and confidence that we can help fight the debt. Be ready to escalate to specialist immediately.`;
                 aiResponse = await openai.chat.completions.create({
                   model: "gpt-4o",
                   messages: [
-                    { role: "system", content: "You are a helpful customer support agent for TN Credit Solutions. For urgent debt collection/lawsuit situations, respond with empathy and confidence that we can help fight the debt. Keep response brief (1-2 sentences). ALWAYS ask a follow-up question about their situation to better understand how to help them." },
+                    { role: "system", content: urgentSystemPrompt },
                     ...messagesForAI
                   ],
                   max_tokens: 512,
                 });
               } else {
                 console.log("[AI] Using standard prompt");
+                // Add turn-based escalation hint for conversations that are going in circles
+                let systemPromptWithContext = SYSTEM_PROMPT;
+                if (visitorTurns >= 4) {
+                  systemPromptWithContext += `\n\nThis is message ${visitorTurns + 1} in the conversation. If still not getting clear information or complex situation, escalate now.`;
+                }
                 aiResponse = await openai.chat.completions.create({
                   model: "gpt-4o",
                   messages: [
-                    { role: "system", content: SYSTEM_PROMPT },
+                    { role: "system", content: systemPromptWithContext },
                     ...messagesForAI
                   ],
                   max_tokens: 512,
