@@ -398,95 +398,76 @@ export default function Admin() {
                 No live chat messages yet. Chat will appear here when visitors use the chat widget.
               </div>
             ) : (
-              <div className="space-y-6">
-                {/* Desktop Table View */}
-                <div className="hidden md:block overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Message</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {[...chatMessages].reverse().map((message) => (
-                        <TableRow key={message.id} data-testid={`row-chat-message-${message.id}`}>
-                          <TableCell className="text-sm text-muted-foreground">
-                            <div className="flex items-center gap-2">
-                              <Calendar className="w-4 h-4" />
-                              {formatDate(message.createdAt)}
+              <div className="space-y-4">
+                {Object.entries(
+                  chatMessages.reduce((acc, msg) => {
+                    if (!acc[msg.email]) {
+                      acc[msg.email] = [];
+                    }
+                    acc[msg.email].push(msg);
+                    return acc;
+                  }, {} as Record<string, typeof chatMessages>)
+                )
+                  .sort(([, a], [, b]) => {
+                    const aLatest = new Date(Math.max(...a.map(m => new Date(m.createdAt).getTime())));
+                    const bLatest = new Date(Math.max(...b.map(m => new Date(m.createdAt).getTime())));
+                    return bLatest.getTime() - aLatest.getTime();
+                  })
+                  .map(([email, messages]) => {
+                    const firstMessage = messages[0];
+                    const latestMessage = [...messages].reverse()[0];
+                    const unreadCount = messages.filter(m => !m.sender || m.sender !== "admin").length;
+                    
+                    return (
+                      <Card key={email} className="hover-elevate" data-testid={`card-conversation-${email}`}>
+                        <CardContent className="pt-6 space-y-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-lg">{firstMessage.name}</h3>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Mail className="w-4 h-4 text-muted-foreground" />
+                                <a href={`mailto:${email}`} className="text-sm text-primary hover:underline">
+                                  {email}
+                                </a>
+                              </div>
                             </div>
-                          </TableCell>
-                          <TableCell className="font-medium">
                             <div className="flex items-center gap-2">
-                              <User className="w-4 h-4 text-muted-foreground" />
-                              {message.name}
+                              {unreadCount > 0 && (
+                                <Badge variant="default" data-testid={`badge-unread-${email}`}>
+                                  {unreadCount} unread
+                                </Badge>
+                              )}
+                              <Badge variant="outline" className="flex items-center gap-1">
+                                <MessageCircle className="w-3 h-3" />
+                                {messages.length} messages
+                              </Badge>
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Mail className="w-4 h-4 text-muted-foreground" />
-                              <a href={`mailto:${message.email}`} className="text-primary hover:underline text-sm">
-                                {message.email}
-                              </a>
+                          </div>
+
+                          <div className="pt-2 border-t space-y-2">
+                            <div className="flex items-start gap-2">
+                              <Calendar className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                              <span className="text-xs text-muted-foreground">Latest: {formatDate(latestMessage.createdAt)}</span>
                             </div>
-                          </TableCell>
-                          <TableCell className="max-w-xs">
-                            <button
-                              onClick={() => setSelectedChatMessage(message)}
-                              className="flex items-start gap-2 hover-elevate p-2 rounded-md text-left w-full"
-                              data-testid={`button-view-chat-message-${message.id}`}
-                            >
+                            <div className="flex items-start gap-2">
                               <MessageSquare className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                              <p className="text-sm text-muted-foreground line-clamp-2">
-                                {message.message}
-                              </p>
-                            </button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                              <p className="text-sm text-muted-foreground line-clamp-2">{latestMessage.message}</p>
+                            </div>
+                          </div>
 
-                {/* Mobile Card View */}
-                <div className="md:hidden space-y-4">
-                  {[...chatMessages].reverse().map((message) => (
-                    <Card key={message.id} data-testid={`card-chat-message-${message.id}`}>
-                      <CardContent className="pt-6 space-y-3">
-                        <div className="flex items-start justify-between gap-2">
-                          <h3 className="font-semibold text-lg">{message.name}</h3>
-                          <Badge variant="outline" className="flex items-center gap-1">
-                            <MessageCircle className="w-3 h-3" />
-                            Chat
-                          </Badge>
-                        </div>
-                        
-                        <div className="space-y-2 text-sm">
-                          <div className="flex items-center gap-2">
-                            <Mail className="w-4 h-4 text-muted-foreground" />
-                            <a href={`mailto:${message.email}`} className="text-primary hover:underline">
-                              {message.email}
-                            </a>
+                          <div className="pt-2 border-t">
+                            <Button
+                              onClick={() => setSelectedChatMessage(latestMessage)}
+                              className="w-full"
+                              data-testid={`button-view-conversation-${email}`}
+                            >
+                              View Conversation
+                            </Button>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">{formatDate(message.createdAt)}</span>
-                          </div>
-                        </div>
-
-                        <div className="pt-2 border-t">
-                          <div className="flex items-start gap-2">
-                            <MessageSquare className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                            <p className="text-sm text-muted-foreground">{message.message}</p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
               </div>
             )}
           </CardContent>
