@@ -39,34 +39,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sender: senderType,
       });
       
-      // If visitor sent a message and AI is configured, generate AI response
-      if (senderType === "visitor" && openai && message.email) {
-        try {
-          const aiResponse = await openai.chat.completions.create({
-            model: "gpt-5",
-            messages: [
-              { role: "system", content: SYSTEM_PROMPT },
-              { role: "user", content: message.message }
-            ],
-            max_completion_tokens: 512,
-          });
-          
-          const aiMessage = aiResponse.choices[0].message.content?.trim() || "";
-          if (aiMessage) {
-            await storage.createChatMessage({
-              name: "TN Credit Solutions Support",
-              email: "support@tncreditsolutions.com",
-              message: aiMessage,
-              sender: "ai",
-              isEscalated: "false",
-            });
-          }
-        } catch (aiError) {
-          console.error("AI response generation failed:", aiError);
-        }
-      }
-      
+      // Return immediately, then generate AI response in background (non-blocking)
       res.json(message);
+      
+      // Generate AI response asynchronously without blocking the response
+      if (senderType === "visitor" && openai && message.email) {
+        setImmediate(async () => {
+          try {
+            const aiResponse = await openai.chat.completions.create({
+              model: "gpt-5",
+              messages: [
+                { role: "system", content: SYSTEM_PROMPT },
+                { role: "user", content: message.message }
+              ],
+              max_completion_tokens: 512,
+            });
+            
+            const aiMessage = aiResponse.choices[0].message.content?.trim() || "";
+            if (aiMessage) {
+              await storage.createChatMessage({
+                name: "TN Credit Solutions Support",
+                email: "support@tncreditsolutions.com",
+                message: aiMessage,
+                sender: "ai",
+                isEscalated: "false",
+              });
+            }
+          } catch (aiError) {
+            console.error("AI response generation failed:", aiError);
+          }
+        });
+      }
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
