@@ -91,7 +91,8 @@ export default function ChatWidget() {
     if (escalatedMessage) {
       // Show with 5 second delay for urgent situations to let visitor read the message
       // Only schedule if this is a NEW escalated message (not seen before)
-      if (lastEscalatedMessageIdRef.current !== escalatedMessage.id && !showEscalatePrompt) {
+      if (lastEscalatedMessageIdRef.current !== escalatedMessage.id) {
+        setShowEscalatePrompt(false); // Reset button state for new escalations
         setHideEscalatePrompt(false); // Reset dismissal state for new urgent escalations
         lastEscalatedMessageIdRef.current = escalatedMessage.id;
         setTimeout(() => {
