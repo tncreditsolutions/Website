@@ -88,10 +88,9 @@ export default function ChatWidget() {
       if (lastEscalatedMessageIdRef.current !== escalatedMessage.id && !showEscalatePrompt) {
         setHideEscalatePrompt(false); // Reset dismissal state for new urgent escalations
         lastEscalatedMessageIdRef.current = escalatedMessage.id;
-        const timer = setTimeout(() => {
+        setTimeout(() => {
           setShowEscalatePrompt(true);
         }, 5000);
-        return () => clearTimeout(timer);
       }
     } else {
       // For non-urgent situations, reset the escalation tracking
@@ -101,8 +100,7 @@ export default function ChatWidget() {
       if (showEscalatePrompt || hideEscalatePrompt) return;
       
       // Otherwise delay showing escalation prompt by 1 minute (60000ms)
-      const timer = setTimeout(() => setShowEscalatePrompt(true), 60000);
-      return () => clearTimeout(timer);
+      setTimeout(() => setShowEscalatePrompt(true), 60000);
     }
   }, [allMessages]);
 
