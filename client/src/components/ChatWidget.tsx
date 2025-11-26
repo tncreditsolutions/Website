@@ -20,7 +20,7 @@ export default function ChatWidget() {
   const [isEscalated, setIsEscalated] = useState(false);
   const [showEscalatePrompt, setShowEscalatePrompt] = useState(false);
   const [hideEscalatePrompt, setHideEscalatePrompt] = useState(false);
-  const escalationScheduledRef = useRef(false);
+  const lastEscalatedMessageIdRef = useRef<string | null>(null);
   const { toast } = useToast();
 
   // Load visitor info and escalate dismissal state from localStorage on mount
@@ -80,25 +80,25 @@ export default function ChatWidget() {
     if (aiMessages.length === 0) return;
     
     // Check if any AI message is marked as escalated (urgent situation from Riley)
-    const hasEscalated = aiMessages.some(msg => msg.isEscalated === "true");
+    const escalatedMessage = aiMessages.find(msg => msg.isEscalated === "true");
     
-    if (hasEscalated) {
+    if (escalatedMessage) {
       // Show with 5 second delay for urgent situations to let visitor read the message
-      // Only schedule once per escalation
-      if (!escalationScheduledRef.current && !showEscalatePrompt) {
+      // Only schedule if this is a NEW escalated message (not seen before)
+      if (lastEscalatedMessageIdRef.current !== escalatedMessage.id && !showEscalatePrompt) {
         setHideEscalatePrompt(false); // Reset dismissal state for new urgent escalations
-        escalationScheduledRef.current = true;
+        lastEscalatedMessageIdRef.current = escalatedMessage.id;
         const timer = setTimeout(() => {
           setShowEscalatePrompt(true);
         }, 5000);
         return () => clearTimeout(timer);
       }
     } else {
-      // For non-urgent situations, only show if not already shown and not dismissed by user
-      if (showEscalatePrompt || hideEscalatePrompt) return;
+      // For non-urgent situations, reset the escalation tracking
+      lastEscalatedMessageIdRef.current = null;
       
-      // Reset ref when no longer escalated
-      escalationScheduledRef.current = false;
+      // Only show if not already shown and not dismissed by user
+      if (showEscalatePrompt || hideEscalatePrompt) return;
       
       // Otherwise delay showing escalation prompt by 1 minute (60000ms)
       const timer = setTimeout(() => setShowEscalatePrompt(true), 60000);
