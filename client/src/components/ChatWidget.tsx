@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,7 @@ export default function ChatWidget() {
   const [isEscalated, setIsEscalated] = useState(false);
   const [showEscalatePrompt, setShowEscalatePrompt] = useState(false);
   const [hideEscalatePrompt, setHideEscalatePrompt] = useState(false);
+  const escalationScheduledRef = useRef(false);
   const { toast } = useToast();
 
   // Load visitor info and escalate dismissal state from localStorage on mount
@@ -83,21 +84,27 @@ export default function ChatWidget() {
     
     if (hasEscalated) {
       // Show with 5 second delay for urgent situations to let visitor read the message
-      // Only set timer if we haven't already scheduled showing the prompt
-      if (!showEscalatePrompt) {
+      // Only schedule once per escalation
+      if (!escalationScheduledRef.current && !showEscalatePrompt) {
         setHideEscalatePrompt(false); // Reset dismissal state for new urgent escalations
-        const timer = setTimeout(() => setShowEscalatePrompt(true), 5000);
+        escalationScheduledRef.current = true;
+        const timer = setTimeout(() => {
+          setShowEscalatePrompt(true);
+        }, 5000);
         return () => clearTimeout(timer);
       }
     } else {
       // For non-urgent situations, only show if not already shown and not dismissed by user
       if (showEscalatePrompt || hideEscalatePrompt) return;
       
+      // Reset ref when no longer escalated
+      escalationScheduledRef.current = false;
+      
       // Otherwise delay showing escalation prompt by 1 minute (60000ms)
       const timer = setTimeout(() => setShowEscalatePrompt(true), 60000);
       return () => clearTimeout(timer);
     }
-  }, [allMessages, showEscalatePrompt]);
+  }, [allMessages]);
 
   const handleInitialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
