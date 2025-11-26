@@ -65,11 +65,13 @@ export default function ChatWidget() {
     },
   });
 
-  // Show escalate prompt after any AI response
+  // Show escalate prompt after 1 minute of AI response
   useEffect(() => {
     const aiMessages = allMessages.filter(msg => msg.sender === "ai" && msg.email === "support@tncreditsolutions.com");
     if (aiMessages.length > 0 && !showEscalatePrompt) {
-      setShowEscalatePrompt(true);
+      // Delay showing escalation prompt by 1 minute (60000ms)
+      const timer = setTimeout(() => setShowEscalatePrompt(true), 60000);
+      return () => clearTimeout(timer);
     }
   }, [allMessages, showEscalatePrompt]);
 
@@ -232,19 +234,22 @@ export default function ChatWidget() {
 
                 {/* Escalate Prompt */}
                 {showEscalatePrompt && !isEscalated && (
-                  <div className="p-3 border-t bg-amber-50 dark:bg-amber-950 border-b space-y-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-                      <p className="text-amber-900 dark:text-amber-100">Need immediate support?</p>
+                  <div className="p-4 border-t bg-gradient-to-r from-primary/5 to-primary/10 dark:from-primary/20 dark:to-primary/30 space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-full bg-primary/20 dark:bg-primary/40 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <MessageCircle className="w-4 h-4 text-primary" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-sm">Connect with a Specialist</h4>
+                        <p className="text-xs text-muted-foreground mt-1">Get personalized support for your specific needs</p>
+                      </div>
                     </div>
                     <Button
                       onClick={handleEscalate}
-                      variant="outline"
-                      size="sm"
                       className="w-full"
                       data-testid="button-escalate-support"
                     >
-                      Escalate to Support Specialist
+                      Talk to a Specialist
                     </Button>
                   </div>
                 )}
