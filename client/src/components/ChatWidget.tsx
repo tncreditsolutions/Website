@@ -56,7 +56,7 @@ export default function ChatWidget() {
       localStorage.setItem(VISITOR_INFO_KEY, JSON.stringify({ name, email }));
       setMessage("");
       queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
-      setShowEscalatePrompt(true);
+      // Don't show escalate prompt yet - wait for AI response or timeout
     },
     onError: (error: any) => {
       toast({
@@ -81,7 +81,14 @@ export default function ChatWidget() {
         sender: "ai",
       }).then(() => {
         queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
+        // Show escalate prompt after AI responds
+        setTimeout(() => setShowEscalatePrompt(true), 500);
       });
+    },
+    onError: (error: any) => {
+      // If AI response fails, show escalate prompt and error
+      setShowEscalatePrompt(true);
+      console.error("AI response error:", error);
     },
   });
 
