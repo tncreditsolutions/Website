@@ -520,6 +520,21 @@ export default function Admin() {
                   <p className="text-sm whitespace-pre-wrap break-words">{selectedChatMessage.message}</p>
                 </div>
               </div>
+
+              {(selectedChatMessage.sender === "visitor" || !selectedChatMessage.sender) && (
+                <div className="border-t pt-4">
+                  <Button 
+                    onClick={() => {
+                      // Keep the message selected but the reply dialog will show
+                    }}
+                    data-testid="button-open-reply-form"
+                    className="w-full"
+                  >
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    Reply to This Message
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </DialogContent>
