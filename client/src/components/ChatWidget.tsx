@@ -67,16 +67,13 @@ export default function ChatWidget() {
     },
   });
 
-  // Check if AI response indicates escalation is needed
+  // Show escalate prompt after first AI response
   useEffect(() => {
     const aiMessages = allMessages.filter(msg => msg.sender === "ai" && msg.email === "support@tncreditsolutions.com");
-    if (aiMessages.length > 0) {
-      const latestAiMessage = aiMessages[aiMessages.length - 1];
-      if (latestAiMessage.message.includes("[ESCALATION_NEEDED]")) {
-        setShowEscalatePrompt(true);
-      }
+    if (aiMessages.length > 0 && !showEscalatePrompt) {
+      setTimeout(() => setShowEscalatePrompt(true), 500);
     }
-  }, [allMessages]);
+  }, [allMessages, showEscalatePrompt]);
 
   const handleInitialSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -207,8 +204,6 @@ export default function ChatWidget() {
                   ) : (
                     [...messages].reverse().map((msg) => {
                       const isAdmin = msg.sender === "admin" || msg.email === "support@tncreditsolutions.com";
-                      // Strip the escalation marker from display
-                      const displayMessage = msg.message.replace("[ESCALATION_NEEDED]", "").trim();
                       return (
                         <div
                           key={msg.id}
@@ -221,7 +216,7 @@ export default function ChatWidget() {
                                 ? "bg-primary text-primary-foreground"
                                 : "bg-muted"
                             }`}>
-                              {displayMessage}
+                              {msg.message}
                             </div>
                             <div className="text-xs text-muted-foreground mt-1">
                               {new Date(msg.createdAt).toLocaleTimeString()}
