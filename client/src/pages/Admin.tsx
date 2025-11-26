@@ -55,10 +55,6 @@ export default function Admin() {
       setAdminReplyMessage("");
       setIsReplying(false);
       setSelectedChatMessage(null);
-      toast({
-        title: "Reply sent!",
-        description: "Your message has been sent to the visitor.",
-      });
       queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
     },
     onError: (error: any) => {
@@ -474,37 +470,42 @@ export default function Admin() {
         </Card>
       </div>
 
-      {/* Full Chat Message Dialog */}
+      {/* Full Chat Conversation Dialog */}
       <Dialog open={!!selectedChatMessage && !isReplying} onOpenChange={() => setSelectedChatMessage(null)}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto" data-testid="dialog-full-chat-message">
           <DialogHeader>
-            <DialogTitle>Chat Message Details</DialogTitle>
-            <DialogDescription>View and reply to this message</DialogDescription>
+            <DialogTitle>Conversation with {selectedChatMessage?.name}</DialogTitle>
+            <DialogDescription>
+              <a href={`mailto:${selectedChatMessage?.email}`} className="text-primary hover:underline">
+                {selectedChatMessage?.email}
+              </a>
+            </DialogDescription>
           </DialogHeader>
           {selectedChatMessage && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs font-semibold text-muted-foreground uppercase">Name</p>
-                  <p className="text-sm font-medium">{selectedChatMessage.name}</p>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-muted-foreground uppercase">Email</p>
-                  <a href={`mailto:${selectedChatMessage.email}`} className="text-sm text-primary hover:underline">
-                    {selectedChatMessage.email}
-                  </a>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase">Received</p>
-                  <p className="text-sm">{formatDate(selectedChatMessage.createdAt)}</p>
-                </div>
-              </div>
-
-              <div className="border-t pt-4">
-                <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Message</p>
-                <div className="bg-muted p-3 rounded-md">
-                  <p className="text-sm whitespace-pre-wrap break-words">{selectedChatMessage.message}</p>
-                </div>
+              {/* Full conversation thread */}
+              <div className="space-y-3 max-h-96 overflow-y-auto border rounded-md p-4 bg-muted/30">
+                {chatMessages
+                  ?.filter(msg => msg.email === selectedChatMessage.email)
+                  .map((msg) => {
+                    const isAdmin = msg.sender === "admin" || msg.email === "support@tncreditsolutions.com";
+                    return (
+                      <div key={msg.id} className={`flex ${isAdmin ? "justify-end" : "justify-start"}`}>
+                        <div className={`max-w-xs ${isAdmin ? "text-right" : ""}`}>
+                          <div className={`p-3 rounded text-sm break-words ${
+                            isAdmin
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-background border"
+                          }`}>
+                            {msg.message}
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            {formatDate(msg.createdAt)}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
               </div>
 
               {(selectedChatMessage.sender === "visitor" || !selectedChatMessage.sender) && (
@@ -517,7 +518,7 @@ export default function Admin() {
                     className="w-full"
                   >
                     <MessageSquare className="w-4 h-4 mr-2" />
-                    Reply to This Message
+                    Reply to This Conversation
                   </Button>
                 </div>
               )}
