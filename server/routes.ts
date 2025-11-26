@@ -25,8 +25,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/chat", async (req, res) => {
     try {
-      const validatedData = insertChatMessageSchema.parse(req.body);
-      const message = await storage.createChatMessage(validatedData);
+      const { sender, ...data } = req.body;
+      const validatedData = insertChatMessageSchema.parse(data);
+      const message = await storage.createChatMessage({
+        ...validatedData,
+        sender: sender || "visitor",
+      });
       res.json(message);
     } catch (error: any) {
       res.status(400).json({ error: error.message });

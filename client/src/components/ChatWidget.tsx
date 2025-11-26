@@ -102,17 +102,23 @@ export default function ChatWidget() {
                   <div
                     key={msg.id}
                     data-testid={`chat-message-${msg.id}`}
-                    className="text-sm"
+                    className={`text-sm flex ${msg.sender === "admin" ? "justify-end" : "justify-start"}`}
                   >
-                    <div className="font-semibold text-sm">{msg.name}</div>
-                    <div className="text-xs text-muted-foreground mb-1">
-                      {msg.email}
-                    </div>
-                    <div className="bg-muted p-2 rounded text-sm break-words">
-                      {msg.message}
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {new Date(msg.createdAt).toLocaleTimeString()}
+                    <div className={`max-w-xs ${msg.sender === "admin" ? "text-right" : ""}`}>
+                      <div className="font-semibold text-sm">{msg.name}</div>
+                      <div className="text-xs text-muted-foreground mb-1">
+                        {msg.email}
+                      </div>
+                      <div className={`p-2 rounded text-sm break-words ${
+                        msg.sender === "admin"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted"
+                      }`}>
+                        {msg.message}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {new Date(msg.createdAt).toLocaleTimeString()}
+                      </div>
                     </div>
                   </div>
                 ))

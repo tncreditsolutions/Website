@@ -41,6 +41,7 @@ export const chatMessages = pgTable("chat_messages", {
   name: text("name").notNull(),
   email: text("email").notNull(),
   message: text("message").notNull(),
+  sender: text("sender").notNull().default("visitor"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

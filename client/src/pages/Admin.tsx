@@ -1,7 +1,11 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import {
   Table,
   TableBody,
@@ -25,6 +29,9 @@ import type { ContactSubmission, ChatMessage, NewsletterSubscription } from "@sh
 export default function Admin() {
   const [selectedSubmission, setSelectedSubmission] = useState<ContactSubmission | null>(null);
   const [selectedChatMessage, setSelectedChatMessage] = useState<ChatMessage | null>(null);
+  const [adminReplyMessage, setAdminReplyMessage] = useState("");
+  const [adminReplyEmail, setAdminReplyEmail] = useState("");
+  const { toast } = useToast();
   
   const { data: submissions, isLoading: submissionsLoading } = useQuery<ContactSubmission[]>({
     queryKey: ["/api/contact"],
@@ -39,6 +46,47 @@ export default function Admin() {
     queryKey: ["/api/newsletter"],
     refetchInterval: 5000,
   });
+
+  const sendAdminReplyMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return apiRequest("POST", "/api/chat", data);
+    },
+    onSuccess: () => {
+      setAdminReplyMessage("");
+      setAdminReplyEmail("");
+      setSelectedChatMessage(null);
+      toast({
+        title: "Reply sent!",
+        description: "Your message has been sent to the visitor.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send reply",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSendAdminReply = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adminReplyMessage.trim()) {
+      toast({
+        title: "Empty message",
+        description: "Please type a message",
+        variant: "destructive",
+      });
+      return;
+    }
+    sendAdminReplyMutation.mutate({
+      name: "TN Credit Solutions",
+      email: adminReplyEmail || "support@tncreditsolutions.com",
+      message: adminReplyMessage.trim(),
+      sender: "admin",
+    });
+  };
 
   const formatDate = (date: Date | string) => {
     return new Date(date).toLocaleDateString("en-US", {
@@ -285,6 +333,60 @@ export default function Admin() {
         </DialogContent>
       </Dialog>
 
+      {/* Admin Reply Dialog */}
+      <Dialog open={!!selectedChatMessage && selectedChatMessage.sender !== "admin"} onOpenChange={() => setSelectedChatMessage(null)}>
+        <DialogContent className="max-w-2xl" data-testid="dialog-admin-reply">
+          <DialogHeader>
+            <DialogTitle>Reply to Chat Message</DialogTitle>
+            <DialogDescription>
+              Send a message to {selectedChatMessage?.name} at {selectedChatMessage?.email}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedChatMessage && selectedChatMessage.sender !== "admin" && (
+            <div className="space-y-4">
+              <div className="bg-muted p-4 rounded-md">
+                <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Their Message</p>
+                <p className="text-sm whitespace-pre-wrap break-words">{selectedChatMessage.message}</p>
+              </div>
+
+              <form onSubmit={handleSendAdminReply} className="space-y-3">
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase mb-1 block">Your Email</label>
+                  <Input
+                    placeholder="support@tncreditsolutions.com"
+                    value={adminReplyEmail}
+                    onChange={(e) => setAdminReplyEmail(e.target.value)}
+                    data-testid="input-admin-reply-email"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase mb-1 block">Reply Message</label>
+                  <Textarea
+                    placeholder="Type your reply..."
+                    value={adminReplyMessage}
+                    onChange={(e) => setAdminReplyMessage(e.target.value)}
+                    className="min-h-24"
+                    data-testid="textarea-admin-reply"
+                  />
+                </div>
+                <div className="flex gap-2 justify-end">
+                  <Button variant="outline" onClick={() => setSelectedChatMessage(null)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={sendAdminReplyMutation.isPending}
+                    data-testid="button-send-admin-reply"
+                  >
+                    {sendAdminReplyMutation.isPending ? "Sending..." : "Send Reply"}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       {/* Chat Messages Section */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-8">
         <Card>
@@ -399,10 +501,10 @@ export default function Admin() {
 
       {/* Full Chat Message Dialog */}
       <Dialog open={!!selectedChatMessage} onOpenChange={() => setSelectedChatMessage(null)}>
-        <DialogContent className="max-w-2xl max-h-96 overflow-y-auto" data-testid="dialog-full-chat-message">
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto" data-testid="dialog-full-chat-message">
           <DialogHeader>
             <DialogTitle>Chat Message Details</DialogTitle>
-            <DialogDescription>View the complete message</DialogDescription>
+            <DialogDescription>View and reply to this message</DialogDescription>
           </DialogHeader>
           {selectedChatMessage && (
             <div className="space-y-4">
