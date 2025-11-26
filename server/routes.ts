@@ -83,6 +83,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
               const isUrgent = detectUrgentSituation(message.message);
               console.log("[AI] Detected urgent situation:", isUrgent);
               
+              // Get conversation history for context
+              const allMessages = await storage.getAllChatMessages();
+              const conversationHistory = allMessages
+                .filter(msg => msg.email === message.email)
+                .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+                .map(msg => ({
+                  role: msg.sender === "visitor" ? "user" as const : "assistant" as const,
+                  content: msg.message
+                }));
+              
+              // Add the current visitor message to the history
+              const messagesForAI = [
+                ...conversationHistory,
+                { role: "user" as const, content: message.message }
+              ];
+              
+              console.log("[AI] Conversation history length:", conversationHistory.length);
+              
               let aiResponse;
               if (isUrgent) {
                 // For urgent situations, send direct affirmative response
@@ -91,7 +109,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   model: "gpt-4o",
                   messages: [
                     { role: "system", content: "You are a helpful customer support agent for TN Credit Solutions. For urgent debt collection/lawsuit situations, respond with empathy and confidence that we can help fight the debt. Keep response brief (1-2 sentences). ALWAYS ask a follow-up question about their situation to better understand how to help them." },
-                    { role: "user", content: message.message }
+                    ...messagesForAI
                   ],
                   max_tokens: 512,
                 });
@@ -101,7 +119,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   model: "gpt-4o",
                   messages: [
                     { role: "system", content: SYSTEM_PROMPT },
-                    { role: "user", content: message.message }
+                    ...messagesForAI
                   ],
                   max_tokens: 512,
                 });

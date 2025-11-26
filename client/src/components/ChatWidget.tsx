@@ -141,27 +141,23 @@ export default function ChatWidget() {
 
   const handleEscalate = async () => {
     try {
-      // Send escalation message to mark conversation
+      // Send friendly escalation message from Riley
       await apiRequest("POST", "/api/chat", {
-        name: email,
-        email: email,
-        message: "[ESCALATED TO SUPPORT SPECIALIST]",
-        sender: "escalation",
+        name: "Riley",
+        email: "support@tncreditsolutions.com",
+        message: "Perfect! I've connected you with our specialist team. They'll review your situation and get back to you shortly with personalized guidance. Thank you for choosing TN Credit Solutions!",
+        sender: "ai",
         isEscalated: "true",
       });
       
       setIsEscalated(true);
       setShowEscalatePrompt(false);
+      setHideEscalatePrompt(true);
       queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
-      
-      toast({
-        title: "Support Escalated",
-        description: "A support specialist will respond to your message shortly.",
-      });
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to escalate conversation",
+        description: "Failed to connect with specialist",
         variant: "destructive",
       });
     }
