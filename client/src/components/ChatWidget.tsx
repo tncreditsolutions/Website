@@ -163,26 +163,29 @@ export default function ChatWidget() {
                       Start a conversation
                     </p>
                   ) : (
-                    [...messages].reverse().map((msg) => (
-                      <div
-                        key={msg.id}
-                        data-testid={`chat-message-${msg.id}`}
-                        className={`text-sm flex ${msg.sender === "admin" ? "justify-end" : "justify-start"}`}
-                      >
-                        <div className={`max-w-xs ${msg.sender === "admin" ? "text-right" : ""}`}>
-                          <div className={`p-2 rounded text-sm break-words ${
-                            msg.sender === "admin"
-                              ? "bg-primary text-primary-foreground"
-                              : "bg-muted"
-                          }`}>
-                            {msg.message}
-                          </div>
-                          <div className="text-xs text-muted-foreground mt-1">
-                            {new Date(msg.createdAt).toLocaleTimeString()}
+                    [...messages].reverse().map((msg) => {
+                      const isAdmin = msg.sender === "admin" || msg.email === "support@tncreditsolutions.com";
+                      return (
+                        <div
+                          key={msg.id}
+                          data-testid={`chat-message-${msg.id}`}
+                          className={`text-sm flex ${isAdmin ? "justify-end" : "justify-start"}`}
+                        >
+                          <div className={`max-w-xs ${isAdmin ? "text-right" : ""}`}>
+                            <div className={`p-2 rounded text-sm break-words ${
+                              isAdmin
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted"
+                            }`}>
+                              {msg.message}
+                            </div>
+                            <div className="text-xs text-muted-foreground mt-1">
+                              {new Date(msg.createdAt).toLocaleTimeString()}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
 
