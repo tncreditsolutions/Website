@@ -29,6 +29,7 @@ import type { ContactSubmission, ChatMessage, NewsletterSubscription } from "@sh
 export default function Admin() {
   const [selectedSubmission, setSelectedSubmission] = useState<ContactSubmission | null>(null);
   const [selectedChatMessage, setSelectedChatMessage] = useState<ChatMessage | null>(null);
+  const [isReplying, setIsReplying] = useState(false);
   const [adminReplyMessage, setAdminReplyMessage] = useState("");
   const { toast } = useToast();
   
@@ -52,6 +53,7 @@ export default function Admin() {
     },
     onSuccess: () => {
       setAdminReplyMessage("");
+      setIsReplying(false);
       setSelectedChatMessage(null);
       toast({
         title: "Reply sent!",
@@ -332,7 +334,10 @@ export default function Admin() {
       </Dialog>
 
       {/* Admin Reply Dialog */}
-      <Dialog open={!!selectedChatMessage && (selectedChatMessage.sender === "visitor" || !selectedChatMessage.sender)} onOpenChange={() => setSelectedChatMessage(null)}>
+      <Dialog open={!!selectedChatMessage && isReplying && (selectedChatMessage.sender === "visitor" || !selectedChatMessage.sender)} onOpenChange={() => {
+        setIsReplying(false);
+        setSelectedChatMessage(null);
+      }}>
         <DialogContent className="max-w-2xl" data-testid="dialog-admin-reply">
           <DialogHeader>
             <DialogTitle>Reply to Chat Message</DialogTitle>
@@ -489,7 +494,7 @@ export default function Admin() {
       </div>
 
       {/* Full Chat Message Dialog */}
-      <Dialog open={!!selectedChatMessage} onOpenChange={() => setSelectedChatMessage(null)}>
+      <Dialog open={!!selectedChatMessage && !isReplying} onOpenChange={() => setSelectedChatMessage(null)}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto" data-testid="dialog-full-chat-message">
           <DialogHeader>
             <DialogTitle>Chat Message Details</DialogTitle>
@@ -525,7 +530,7 @@ export default function Admin() {
                 <div className="border-t pt-4">
                   <Button 
                     onClick={() => {
-                      // Keep the message selected but the reply dialog will show
+                      setIsReplying(true);
                     }}
                     data-testid="button-open-reply-form"
                     className="w-full"
