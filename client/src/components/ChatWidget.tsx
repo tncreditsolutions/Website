@@ -86,7 +86,7 @@ export default function ChatWidget() {
     }
   }, [allMessages]);
 
-  const handleInitialSubmit = (e: React.FormEvent) => {
+  const handleInitialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !email.trim()) {
       toast({
@@ -96,7 +96,24 @@ export default function ChatWidget() {
       });
       return;
     }
-    localStorage.setItem(VISITOR_INFO_KEY, JSON.stringify({ name: name.trim(), email: email.trim() }));
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+    localStorage.setItem(VISITOR_INFO_KEY, JSON.stringify({ name: trimmedName, email: trimmedEmail }));
+    
+    // Send greeting message from AI agent
+    try {
+      await apiRequest("POST", "/api/chat", {
+        name: "Riley",
+        email: "support@tncreditsolutions.com",
+        message: `Hi ${trimmedName}! I'm Riley, your TN Credit Solutions support agent. I'm here to help you navigate credit restoration and tax optimization. What brings you in today?`,
+        sender: "ai",
+        isEscalated: "false",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
+    } catch (error) {
+      console.error("Failed to send greeting:", error);
+    }
+    
     setIsNewVisitor(false);
   };
 
@@ -218,7 +235,7 @@ export default function ChatWidget() {
                     </p>
                   ) : (
                     [...messages].reverse().map((msg) => {
-                      const isAdmin = msg.sender === "admin" || msg.email === "support@tncreditsolutions.com";
+                      const isAdmin = msg.sender === "admin" || msg.sender === "ai" || msg.email === "support@tncreditsolutions.com";
                       return (
                         <div
                           key={msg.id}

@@ -129,7 +129,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               if (aiMessage) {
                 const saved = await storage.createChatMessage({
-                  name: "TN Credit Solutions Support",
+                  name: "Riley",
                   email: "support@tncreditsolutions.com",
                   message: aiMessage,
                   sender: "ai",
