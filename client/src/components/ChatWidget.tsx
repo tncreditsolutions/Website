@@ -54,9 +54,7 @@ export default function ChatWidget() {
     onSuccess: () => {
       // Save visitor info for next time
       localStorage.setItem(VISITOR_INFO_KEY, JSON.stringify({ name, email }));
-      setMessage("");
       queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
-      // Will check for escalation need in useEffect
     },
     onError: (error: any) => {
       toast({
@@ -67,17 +65,14 @@ export default function ChatWidget() {
     },
   });
 
-  // Show escalate prompt if AI indicates it needs specialist or after first response
+  // Show escalate prompt ONLY if AI indicates it needs specialist
   useEffect(() => {
     const aiMessages = allMessages.filter(msg => msg.sender === "ai" && msg.email === "support@tncreditsolutions.com");
     if (aiMessages.length > 0 && !showEscalatePrompt) {
       const latestAiMsg = aiMessages[aiMessages.length - 1];
-      // Always show escalate prompt if AI signals it needs specialist
+      // Only show escalate prompt if AI explicitly signals it needs specialist
       if (latestAiMsg.message.includes("[NEEDS_SPECIALIST]")) {
         setShowEscalatePrompt(true);
-      } else {
-        // Otherwise show it after a small delay for general responses
-        setTimeout(() => setShowEscalatePrompt(true), 500);
       }
     }
   }, [allMessages, showEscalatePrompt]);
@@ -107,10 +102,14 @@ export default function ChatWidget() {
       return;
     }
 
+    // Clear the input immediately for better UX
+    const messageToSend = message.trim();
+    setMessage("");
+    
     sendMutation.mutate({
       name: name.trim(),
       email: email.trim(),
-      message: message.trim(),
+      message: messageToSend,
     });
   };
 
