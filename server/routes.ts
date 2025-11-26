@@ -7,14 +7,7 @@ import OpenAI from "openai";
 // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
 
-const SYSTEM_PROMPT = `You are a helpful customer support agent for TN Credit Solutions. You assist with questions about:
-- Credit restoration and credit repair services
-- Tax optimization services
-- General inquiries about our services
-
-Keep responses concise (2-3 sentences max). Be professional and friendly.
-
-CRITICAL: If you cannot answer the question, if it requires personal consultation, involves account-specific details, or is outside your scope, then END your response with [NEEDS_SPECIALIST] on a new line. Otherwise, do NOT include this marker.`;
+const SYSTEM_PROMPT = `You are a helpful customer support agent for TN Credit Solutions. Keep responses brief and friendly (1-2 sentences max). Answer questions about credit restoration, tax optimization, and general inquiries. Be honest if you need to recommend speaking with a specialist.`;
 
 export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/contact", async (req, res) => {
