@@ -395,24 +395,35 @@ export default function Admin() {
               </div>
             ) : (
               <div className="space-y-4">
-                {Object.entries(
+                {Array.from(
                   chatMessages.reduce((acc, msg) => {
-                    if (!acc[msg.email]) {
-                      acc[msg.email] = [];
+                    // Only group by visitor emails (exclude admin email)
+                    if (msg.email !== "support@tncreditsolutions.com") {
+                      if (!acc.has(msg.email)) {
+                        acc.set(msg.email, []);
+                      }
+                      acc.get(msg.email)!.push(msg);
                     }
-                    acc[msg.email].push(msg);
                     return acc;
-                  }, {} as Record<string, typeof chatMessages>)
+                  }, new Map<string, typeof chatMessages>())
                 )
                   .sort(([, a], [, b]) => {
                     const aLatest = new Date(Math.max(...a.map(m => new Date(m.createdAt).getTime())));
                     const bLatest = new Date(Math.max(...b.map(m => new Date(m.createdAt).getTime())));
                     return bLatest.getTime() - aLatest.getTime();
                   })
-                  .map(([email, messages]) => {
-                    const firstMessage = messages[0];
-                    const latestMessage = [...messages].reverse()[0];
-                    const unreadCount = messages.filter(m => !m.sender || m.sender !== "admin").length;
+                  .map(([email, visitorMessages]) => {
+                    // Include visitor messages AND all admin replies
+                    const allMessages = [
+                      ...visitorMessages,
+                      ...chatMessages.filter(msg => msg.sender === "admin" || msg.email === "support@tncreditsolutions.com")
+                    ];
+                    
+                    const firstMessage = visitorMessages[0];
+                    const latestMessage = [...allMessages].sort((a, b) => 
+                      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                    )[0];
+                    const unreadCount = visitorMessages.filter(m => !m.sender || m.sender !== "admin").length;
                     
                     return (
                       <Card key={email} className="hover-elevate" data-testid={`card-conversation-${email}`}>
@@ -435,7 +446,7 @@ export default function Admin() {
                               )}
                               <Badge variant="outline" className="flex items-center gap-1">
                                 <MessageCircle className="w-3 h-3" />
-                                {messages.length} messages
+                                {allMessages.length} messages
                               </Badge>
                             </div>
                           </div>
@@ -453,7 +464,7 @@ export default function Admin() {
 
                           <div className="pt-2 border-t">
                             <Button
-                              onClick={() => setSelectedChatMessage(latestMessage)}
+                              onClick={() => setSelectedChatMessage(firstMessage)}
                               className="w-full"
                               data-testid={`button-view-conversation-${email}`}
                             >
