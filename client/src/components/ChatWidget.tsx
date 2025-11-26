@@ -75,23 +75,25 @@ export default function ChatWidget() {
 
   // Show escalate prompt after 1 minute of AI response, or immediately if escalated
   useEffect(() => {
-    if (showEscalatePrompt || hideEscalatePrompt) return; // Already shown or dismissed, don't set timer again
-    
     const aiMessages = allMessages.filter(msg => msg.sender === "ai");
-    if (aiMessages.length > 0) {
-      // Check if any message is marked as escalated (urgent situation)
-      const hasEscalated = aiMessages.some(msg => msg.isEscalated === "true");
+    if (aiMessages.length === 0) return;
+    
+    // Check if any AI message is marked as escalated (urgent situation from Riley)
+    const hasEscalated = aiMessages.some(msg => msg.isEscalated === "true");
+    
+    if (hasEscalated) {
+      // Show immediately for urgent situations - ALWAYS show, even if previously dismissed
+      setShowEscalatePrompt(true);
+      setHideEscalatePrompt(false); // Reset dismissal state for new urgent escalations
+    } else {
+      // For non-urgent situations, only show if not already shown and not dismissed by user
+      if (showEscalatePrompt || hideEscalatePrompt) return;
       
-      if (hasEscalated) {
-        // Show immediately for urgent situations
-        setShowEscalatePrompt(true);
-      } else {
-        // Otherwise delay showing escalation prompt by 1 minute (60000ms)
-        const timer = setTimeout(() => setShowEscalatePrompt(true), 60000);
-        return () => clearTimeout(timer);
-      }
+      // Otherwise delay showing escalation prompt by 1 minute (60000ms)
+      const timer = setTimeout(() => setShowEscalatePrompt(true), 60000);
+      return () => clearTimeout(timer);
     }
-  }, [allMessages, hideEscalatePrompt]);
+  }, [allMessages]);
 
   const handleInitialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
