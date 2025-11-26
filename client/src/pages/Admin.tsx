@@ -20,15 +20,12 @@ import {
 } from "@/components/ui/dialog";
 import { ArrowLeft, Mail, Phone, Calendar, User, MessageSquare, X } from "lucide-react";
 import { Link } from "wouter";
-import type { ContactSubmission, NewsletterSubscription } from "@shared/schema";
+import type { ContactSubmission } from "@shared/schema";
 
 export default function Admin() {
   const [selectedSubmission, setSelectedSubmission] = useState<ContactSubmission | null>(null);
   const { data: submissions, isLoading } = useQuery<ContactSubmission[]>({
     queryKey: ["/api/contact"],
-  });
-  const { data: newsletters, isLoading: isLoadingNewsletters } = useQuery<NewsletterSubscription[]>({
-    queryKey: ["/api/newsletter"],
   });
 
   const formatDate = (date: Date | string) => {
@@ -72,7 +69,7 @@ export default function Admin() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-8 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-8">
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Contact Submissions</CardTitle>
@@ -209,80 +206,6 @@ export default function Admin() {
                             </div>
                           </div>
                         )}
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Newsletter Subscribers</CardTitle>
-            <CardDescription>
-              {newsletters?.length ? `${newsletters.length} total subscribers` : "No subscribers yet"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoadingNewsletters ? (
-              <div className="text-center py-8 text-muted-foreground">Loading subscribers...</div>
-            ) : !newsletters || newsletters.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No newsletter subscribers yet. Share your website to grow your list!
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {/* Desktop Table View */}
-                <div className="hidden md:block overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Date Subscribed</TableHead>
-                        <TableHead>Email Address</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {newsletters.map((subscriber) => (
-                        <TableRow key={subscriber.id} data-testid={`row-subscriber-${subscriber.id}`}>
-                          <TableCell className="text-sm text-muted-foreground">
-                            <div className="flex items-center gap-2">
-                              <Calendar className="w-4 h-4" />
-                              {formatDate(subscriber.createdAt)}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Mail className="w-4 h-4 text-muted-foreground" />
-                              <a href={`mailto:${subscriber.email}`} className="text-primary hover:underline">
-                                {subscriber.email}
-                              </a>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-
-                {/* Mobile Card View */}
-                <div className="md:hidden space-y-3">
-                  {newsletters.map((subscriber) => (
-                    <Card key={subscriber.id} data-testid={`card-subscriber-${subscriber.id}`}>
-                      <CardContent className="pt-6 space-y-3">
-                        <div className="space-y-2 text-sm">
-                          <div className="flex items-center gap-2">
-                            <Mail className="w-4 h-4 text-muted-foreground" />
-                            <a href={`mailto:${subscriber.email}`} className="text-primary hover:underline break-all">
-                              {subscriber.email}
-                            </a>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">{formatDate(subscriber.createdAt)}</span>
-                          </div>
-                        </div>
                       </CardContent>
                     </Card>
                   ))}

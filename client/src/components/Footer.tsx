@@ -7,33 +7,16 @@ import { Link } from "wouter";
 
 export default function Footer() {
   const [email, setEmail] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleNewsletterSignup = async (e: React.FormEvent) => {
+  const handleNewsletterSignup = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    try {
-      const response = await fetch("/api/newsletter", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      if (!response.ok) throw new Error("Failed to subscribe");
-      toast({
-        title: "Welcome to our newsletter!",
-        description: "You'll receive monthly credit tips and tax strategies.",
-      });
-      setEmail("");
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to subscribe. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    console.log('Newsletter signup:', email);
+    toast({
+      title: "Welcome to our newsletter!",
+      description: "You'll receive monthly credit tips and tax strategies.",
+    });
+    setEmail("");
   };
 
   return (
@@ -79,11 +62,10 @@ export default function Footer() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                disabled={isLoading}
                 data-testid="input-newsletter"
               />
-              <Button type="submit" className="w-full" disabled={isLoading} data-testid="button-subscribe">
-                {isLoading ? "Subscribing..." : "Subscribe"}
+              <Button type="submit" className="w-full" data-testid="button-subscribe">
+                Subscribe
               </Button>
             </form>
             <p className="text-xs text-muted-foreground mt-3">

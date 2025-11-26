@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type ContactSubmission, type InsertContactSubmission, type ChatMessage, type InsertChatMessage, type NewsletterSubscription, type InsertNewsletterSubscription } from "@shared/schema";
+import { type User, type InsertUser, type ContactSubmission, type InsertContactSubmission } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -7,23 +7,15 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   createContactSubmission(submission: InsertContactSubmission): Promise<ContactSubmission>;
   getAllContactSubmissions(): Promise<ContactSubmission[]>;
-  createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
-  getAllChatMessages(): Promise<ChatMessage[]>;
-  createNewsletterSubscription(email: InsertNewsletterSubscription): Promise<NewsletterSubscription>;
-  getAllNewsletterSubscriptions(): Promise<NewsletterSubscription[]>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<string, User>;
   private contactSubmissions: Map<string, ContactSubmission>;
-  private chatMessages: Map<string, ChatMessage>;
-  private newsletterSubscriptions: Map<string, NewsletterSubscription>;
 
   constructor() {
     this.users = new Map();
     this.contactSubmissions = new Map();
-    this.chatMessages = new Map();
-    this.newsletterSubscriptions = new Map();
   }
 
   async getUser(id: string): Promise<User | undefined> {
@@ -58,40 +50,6 @@ export class MemStorage implements IStorage {
 
   async getAllContactSubmissions(): Promise<ContactSubmission[]> {
     return Array.from(this.contactSubmissions.values()).sort(
-      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
-    );
-  }
-
-  async createChatMessage(message: InsertChatMessage): Promise<ChatMessage> {
-    const id = randomUUID();
-    const chatMessage: ChatMessage = {
-      ...message,
-      id,
-      createdAt: new Date(),
-    };
-    this.chatMessages.set(id, chatMessage);
-    return chatMessage;
-  }
-
-  async getAllChatMessages(): Promise<ChatMessage[]> {
-    return Array.from(this.chatMessages.values()).sort(
-      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
-    );
-  }
-
-  async createNewsletterSubscription(insertSubscription: InsertNewsletterSubscription): Promise<NewsletterSubscription> {
-    const id = randomUUID();
-    const subscription: NewsletterSubscription = {
-      ...insertSubscription,
-      id,
-      createdAt: new Date(),
-    };
-    this.newsletterSubscriptions.set(id, subscription);
-    return subscription;
-  }
-
-  async getAllNewsletterSubscriptions(): Promise<NewsletterSubscription[]> {
-    return Array.from(this.newsletterSubscriptions.values()).sort(
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     );
   }
