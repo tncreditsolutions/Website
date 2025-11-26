@@ -9,6 +9,14 @@ const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPE
 
 const SYSTEM_PROMPT = `You are a helpful customer support agent for TN Credit Solutions. Keep responses brief and friendly (1-2 sentences max). Answer questions about credit restoration, tax optimization, and general inquiries. Be honest if you need to recommend speaking with a specialist.`;
 
+// Keywords that indicate urgent debt collection/lawsuit situations
+const URGENT_KEYWORDS = ["sued", "debt collector", "lawsuit", "collection agency", "court", "judgment", "garnish", "wage garnishment", "summons"];
+
+function detectUrgentSituation(message: string): boolean {
+  const lowerMessage = message.toLowerCase();
+  return URGENT_KEYWORDS.some(keyword => lowerMessage.includes(keyword));
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/contact", async (req, res) => {
     try {
@@ -46,14 +54,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (senderType === "visitor" && openai && message.email) {
         setImmediate(async () => {
           try {
-            const aiResponse = await openai.chat.completions.create({
-              model: "gpt-5",
-              messages: [
-                { role: "system", content: SYSTEM_PROMPT },
-                { role: "user", content: message.message }
-              ],
-              max_completion_tokens: 512,
-            });
+            // Check if this is an urgent debt collection situation
+            const isUrgent = detectUrgentSituation(message.message);
+            
+            let aiResponse;
+            if (isUrgent) {
+              // For urgent situations, send direct affirmative response
+              aiResponse = await openai.chat.completions.create({
+                model: "gpt-5",
+                messages: [
+                  { role: "system", content: "You are a helpful customer support agent for TN Credit Solutions. For urgent debt collection/lawsuit situations, respond with empathy and confidence that we can help fight the debt. Keep response brief (1-2 sentences)." },
+                  { role: "user", content: message.message }
+                ],
+                max_completion_tokens: 512,
+              });
+            } else {
+              aiResponse = await openai.chat.completions.create({
+                model: "gpt-5",
+                messages: [
+                  { role: "system", content: SYSTEM_PROMPT },
+                  { role: "user", content: message.message }
+                ],
+                max_completion_tokens: 512,
+              });
+            }
             
             const aiMessage = aiResponse.choices[0].message.content?.trim() || "";
             if (aiMessage) {
@@ -62,7 +86,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 email: "support@tncreditsolutions.com",
                 message: aiMessage,
                 sender: "ai",
-                isEscalated: "false",
+                isEscalated: isUrgent ? "true" : "false",
               });
             }
           } catch (aiError) {
