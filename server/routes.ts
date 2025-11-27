@@ -6,19 +6,28 @@ import OpenAI from "openai";
 import fs from "fs";
 import path from "path";
 
+let pdfParse: any = null;
+
 // Using gpt-4o (most recent stable model)
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
 console.log("[AI] OpenAI initialized:", !!openai, "API key available:", !!process.env.OPENAI_API_KEY);
 
-// Lazy load pdf-parse
-async function getPdfParser() {
-  try {
-    const pdfModule = await import("pdf-parse");
-    return pdfModule.default || pdfModule;
-  } catch (e) {
-    console.error("[PDF] Failed to load pdf-parse:", e);
-    return null;
+// Load pdf-parse lazily
+async function loadPdfParse() {
+  if (!pdfParse) {
+    try {
+      const module = await import("pdf-parse/lib/pdf-parse.js");
+      pdfParse = module;
+    } catch {
+      try {
+        const module = await import("pdf-parse");
+        pdfParse = module.default || module;
+      } catch (e) {
+        console.error("[PDF] Failed to load pdf-parse:", e);
+      }
+    }
   }
+  return pdfParse;
 }
 
 const SYSTEM_PROMPT = `You are Riley, a smart customer support agent for TN Credit Solutions. You provide personalized guidance on credit restoration and tax optimization.
@@ -329,21 +338,31 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
           try {
             const filePath = path.join(import.meta.dirname, "..", "uploads", fileId);
             const pdfBuffer = fs.readFileSync(filePath);
-            const pdfParser = await getPdfParser();
-            if (!pdfParser) {
-              throw new Error("PDF parser not available");
-            }
-            const pdfData = await pdfParser(pdfBuffer);
-            const extractedText = pdfData.text;
+            const pdfModule = await loadPdfParse();
             
-            if (extractedText.trim()) {
-              // Send extracted PDF text to OpenAI for analysis
-              const response = await openai.chat.completions.create({
-                model: "gpt-4o",
-                messages: [
-                  {
-                    role: "user",
-                    content: `You are a financial advisor specializing in credit restoration and tax optimization. Analyze the following credit report or financial document and provide detailed insights.
+            if (!pdfModule) {
+              analysisText = "PDF received but text extraction is not available.";
+            } else {
+              let pdfData: any;
+              // Try calling as function first, then as object
+              if (typeof pdfModule === "function") {
+                pdfData = await pdfModule(pdfBuffer);
+              } else if (pdfModule && typeof pdfModule === "object") {
+                pdfData = await pdfModule(pdfBuffer);
+              } else {
+                throw new Error("PDF parser format not recognized");
+              }
+              
+              const extractedText = pdfData && pdfData.text ? pdfData.text : "";
+            
+              if (extractedText.trim()) {
+                // Send extracted PDF text to OpenAI for analysis
+                const response = await openai.chat.completions.create({
+                  model: "gpt-4o",
+                  messages: [
+                    {
+                      role: "user",
+                      content: `You are a financial advisor specializing in credit restoration and tax optimization. Analyze the following credit report or financial document and provide detailed insights.
 
 DOCUMENT CONTENT:
 ${extractedText}
@@ -356,13 +375,14 @@ Please provide:
 5. **Priority Items**: What to tackle first
 
 Format your response clearly with headers and bullet points for easy reading.`
-                  }
-                ],
-                max_tokens: 1000,
-              });
-              analysisText = response.choices[0].message.content || "PDF received but analysis could not be generated.";
-            } else {
-              analysisText = "PDF received but contains no readable text. Please ensure the document is a text-based PDF (not a scanned image).";
+                    }
+                  ],
+                  max_tokens: 1000,
+                });
+                analysisText = response.choices[0].message.content || "PDF received but analysis could not be generated.";
+              } else {
+                analysisText = "PDF received but contains no readable text. Please ensure the document is a text-based PDF (not a scanned image).";
+              }
             }
           } catch (pdfError) {
             console.error("[AI] PDF text extraction failed:", pdfError);
