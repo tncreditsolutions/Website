@@ -19,6 +19,7 @@ export default function ChatWidget() {
   const [isNewVisitor, setIsNewVisitor] = useState(true);
   const [isEscalated, setIsEscalated] = useState(false);
   const [escalationTime, setEscalationTime] = useState<number | null>(null);
+  const [shouldShowEscalationButton, setShouldShowEscalationButton] = useState(false);
   const escalationMessageIdRef = useRef<string | null>(null);
   const { toast } = useToast();
 
@@ -86,11 +87,12 @@ export default function ChatWidget() {
       console.log("New escalation detected, ID:", escalatedMessage.id);
       escalationMessageIdRef.current = escalatedMessage.id;
       setEscalationTime(Date.now());
+      setShouldShowEscalationButton(false); // Reset button visibility
       
       // Schedule timer to show button after 5 seconds
       const timeoutId = setTimeout(() => {
         console.log("5 seconds passed, showing button now");
-        setEscalationTime(prev => prev); // Force re-render by updating state
+        setShouldShowEscalationButton(true); // Set to true to trigger re-render
       }, 5000);
       
       return () => clearTimeout(timeoutId);
@@ -98,17 +100,12 @@ export default function ChatWidget() {
       // No escalation - reset
       escalationMessageIdRef.current = null;
       setEscalationTime(null);
+      setShouldShowEscalationButton(false);
     }
   }, [allMessages]);
   
-  // Compute whether to show button based on timestamp (5+ seconds passed)
-  const showButton = (() => {
-    if (isEscalated) return false;
-    if (!escalationTime) return false;
-    
-    const elapsedMs = Date.now() - escalationTime;
-    return elapsedMs >= 5000;
-  })();
+  // Show button if escalation detected AND 5 seconds have passed
+  const showButton = shouldShowEscalationButton && !isEscalated;
 
   const handleInitialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -177,6 +174,7 @@ export default function ChatWidget() {
       // Reset escalation tracking
       escalationMessageIdRef.current = null;
       setEscalationTime(null);
+      setShouldShowEscalationButton(false);
       setIsEscalated(true);
       queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
     } catch (error) {
@@ -307,6 +305,7 @@ export default function ChatWidget() {
                         onClick={() => {
                           escalationMessageIdRef.current = null;
                           setEscalationTime(null);
+                          setShouldShowEscalationButton(false);
                           localStorage.setItem(ESCALATE_DISMISSED_KEY, "true");
                         }}
                         className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 mt-0.5"
