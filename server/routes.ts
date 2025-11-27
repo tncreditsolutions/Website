@@ -18,12 +18,32 @@ console.log("[AI] OpenAI initialized:", !!openai, "API key available:", !!proces
 function loadPdfParseSync() {
   if (!pdfParse) {
     try {
-      const parsed = require("pdf-parse");
-      pdfParse = parsed.default || parsed;
+      const module = require("pdf-parse");
+      // pdf-parse exports the function as default or as the module itself
+      pdfParse = module.default || module;
+      
+      // If it's an object, try to find the parse function
+      if (typeof pdfParse !== "function") {
+        console.log("[PDF] Module is object, checking for parse function");
+        // Look for a parse or similar function in the object
+        for (const key in module) {
+          if (typeof module[key] === "function" && (key === "parse" || key === "default" || key.toLowerCase().includes("parse"))) {
+            pdfParse = module[key];
+            console.log("[PDF] Found parse function at key:", key);
+            break;
+          }
+        }
+      }
+      
+      // Last resort - if module itself is callable
+      if (typeof pdfParse !== "function" && typeof module === "function") {
+        pdfParse = module;
+      }
+      
       if (typeof pdfParse === "function") {
         console.log("[PDF] PDF parse module loaded successfully");
       } else {
-        console.error("[PDF] Could not load pdf-parse as function, got type:", typeof pdfParse);
+        console.error("[PDF] Could not load pdf-parse as function. Module keys:", Object.keys(module).slice(0, 10));
         pdfParse = null;
       }
     } catch (e) {
