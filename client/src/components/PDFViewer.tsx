@@ -50,7 +50,9 @@ export function PDFViewer({ fileData, fileName }: PDFViewerProps) {
     setRendering(true);
     try {
       const page = await pdfDoc.getPage(pageNum);
-      const viewport = page.getViewport({ scale: 1.5 * zoomLevel });
+      const baseScale = 1.2;
+      const finalScale = baseScale * zoomLevel;
+      const viewport = page.getViewport({ scale: finalScale });
       const canvas = document.createElement("canvas");
       const context = canvas.getContext("2d");
       if (!context) throw new Error("Failed to get canvas context");
@@ -90,11 +92,11 @@ export function PDFViewer({ fileData, fileName }: PDFViewerProps) {
   };
 
   const handleZoomIn = () => {
-    setZoom(prev => Math.min(prev + 0.25, 3));
+    setZoom(prev => Math.min(prev + 0.5, 4));
   };
 
   const handleZoomOut = () => {
-    setZoom(prev => Math.max(prev - 0.25, 0.5));
+    setZoom(prev => Math.max(prev - 0.5, 0.5));
   };
 
   const handleResetZoom = () => {
@@ -160,7 +162,7 @@ export function PDFViewer({ fileData, fileName }: PDFViewerProps) {
               <ZoomOut className="w-4 h-4" />
             </Button>
 
-            <div className="text-sm text-muted-foreground min-w-16 text-center">
+            <div className="text-sm text-muted-foreground min-w-20 text-center">
               {Math.round(zoom * 100)}%
             </div>
 
@@ -168,7 +170,7 @@ export function PDFViewer({ fileData, fileName }: PDFViewerProps) {
               variant="outline"
               size="sm"
               onClick={handleZoomIn}
-              disabled={zoom >= 3 || rendering}
+              disabled={zoom >= 4 || rendering}
               data-testid="button-pdf-zoom-in"
             >
               <ZoomIn className="w-4 h-4" />
