@@ -49,13 +49,10 @@ export default function ChatWidget() {
       // Before email is set, no messages to show
       return false;
     }
-    // Show only messages from this visitor or AI responses within their conversation
+    // Show messages from this visitor
     if (msg.email === email) return true;
-    // Show AI messages only if they come after this visitor has sent a message
-    if (msg.sender === "ai") {
-      const visitorHasMessaged = allMessages.some(m => m.email === email);
-      return visitorHasMessaged;
-    }
+    // Show AI/Riley messages (greeting and responses)
+    if (msg.sender === "ai" && msg.email === "support@tncreditsolutions.com") return true;
     return false;
   });
 
