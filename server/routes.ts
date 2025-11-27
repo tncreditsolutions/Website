@@ -359,92 +359,41 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
           });
           analysisText = response.choices[0].message.content || "No analysis available";
         } else if (isPdf) {
-          // For PDFs, extract text using pdfjs-dist
+          // For PDFs, send directly to OpenAI as base64-encoded document
           try {
             const filePath = path.join(import.meta.dirname, "..", "uploads", fileId);
             console.log("[AI] PDF file path:", filePath);
             const pdfBuffer = fs.readFileSync(filePath);
-            console.log("[AI] PDF buffer size:", pdfBuffer.length);
+            const pdfBase64 = encodeToBase64(pdfBuffer);
+            console.log("[AI] PDF buffer size:", pdfBuffer.length, "Base64 length:", pdfBase64.length);
             
-            try {
-              const extractedText = await extractTextFromPDF(pdfBuffer);
-              console.log("[AI] Extracted text length:", extractedText.length, "characters");
-              
-              if (extractedText && extractedText.length > 10) {
-                console.log("[AI] Text extraction successful, sending to OpenAI");
-                // Send extracted text to OpenAI for analysis using the visual summary template
-                const response = await openai.chat.completions.create({
-                  model: "gpt-4o",
-                  messages: [
+            // Send PDF directly to OpenAI for analysis
+            const response = await openai.chat.completions.create({
+              model: "gpt-4o",
+              messages: [
+                {
+                  role: "user",
+                  content: [
                     {
-                      role: "user",
-                      content: `You are a professional financial advisor specializing in credit restoration and tax optimization. Analyze this credit report and provide a detailed professional visual summary.
-
-DOCUMENT CONTENT:
-${extractedText}
-
-MUST USE THIS EXACT TEMPLATE FORMAT:
----
-**CREDIT ANALYSIS SUMMARY**
-
-**Current Status**
-• Credit Score: [specific score] ([rating like Fair/Good/Excellent])
-• Overall Risk Level: [high/medium/low]
-• Key Concern: [main issue identified]
-
-**Top Priority Issues** (Address First)
-1. [Most critical issue] - Impact: [specific score impact]
-2. [Second priority issue] - Impact: [specific details]
-3. [Third priority issue] - Impact: [specific details]
-
-**Detailed Breakdown**
-
-**Payment History** 
-• Late Payments: [count with timeline]
-• On-Time: [count]
-• Status: [brief assessment]
-
-**Credit Utilization**
-• Current Rate: [exact %]
-• Recommended: [target %]
-• Action: [specific steps to reduce]
-
-**Collections & Delinquencies**
-• Active Collections: [count]
-• Derogatory Marks: [details]
-• Timeline: [when they fall off]
-
-**Immediate Action Plan** (Next 30 Days)
-1. [Specific action with timeline]
-2. [Specific action with timeline]
-3. [Specific action with timeline]
-
-**90-Day Strategy**
-• [Focus area 1 with expected improvement]
-• [Focus area 2 with expected improvement]
-• [Expected score improvement range]
-
-**Questions?** Feel free to ask about any section!
----
-
-Be specific with numbers, percentages, and actionable steps. Make it professional and structured.`
-                      }
-                    ],
-                    max_tokens: 1500,
-                  });
-                  analysisText = response.choices[0].message.content || "PDF received. Our specialists will review it and provide detailed feedback shortly.";
-                  console.log("[AI] OpenAI analysis received, length:", analysisText.length);
-                } else {
-                  // Could not extract sufficient text, use fallback message
-                  console.log("[AI] No sufficient text extracted from PDF");
-                  analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations to help improve your credit score and financial situation.";
-                }
-            } catch (textError) {
-              console.error("[AI] PDF text extraction error:", textError instanceof Error ? textError.message : String(textError));
-              analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations to help improve your credit score and financial situation.";
-            }
+                      type: "text",
+                      text: "You are a professional financial advisor specializing in credit restoration and tax optimization. Analyze this credit report PDF and provide a detailed professional visual summary using this exact format:\n\n---\n**CREDIT ANALYSIS SUMMARY**\n\n**Current Status**\n• Credit Score: [specific score] ([rating like Fair/Good/Excellent])\n• Overall Risk Level: [high/medium/low]\n• Key Concern: [main issue identified]\n\n**Top Priority Issues** (Address First)\n1. [Most critical issue] - Impact: [specific score impact]\n2. [Second priority issue] - Impact: [specific details]\n3. [Third priority issue] - Impact: [specific details]\n\n**Detailed Breakdown**\n\n**Payment History**\n• Late Payments: [count with timeline]\n• On-Time: [count]\n• Status: [brief assessment]\n\n**Credit Utilization**\n• Current Rate: [exact %]\n• Recommended: [target %]\n• Action: [specific steps to reduce]\n\n**Collections & Delinquencies**\n• Active Collections: [count]\n• Derogatory Marks: [details]\n• Timeline: [when they fall off]\n\n**Immediate Action Plan** (Next 30 Days)\n1. [Specific action with timeline]\n2. [Specific action with timeline]\n3. [Specific action with timeline]\n\n**90-Day Strategy**\n• [Focus area 1 with expected improvement]\n• [Focus area 2 with expected improvement]\n• [Expected score improvement range]\n\n**Questions?** Feel free to ask about any section!\n---\n\nBe specific with numbers, percentages, and actionable steps. Make it professional and structured.",
+                    },
+                    {
+                      type: "document",
+                      document: {
+                        type: "application/pdf",
+                        data: pdfBase64,
+                      },
+                    },
+                  ],
+                },
+              ],
+              max_tokens: 1500,
+            });
+            analysisText = response.choices[0].message.content || "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
+            console.log("[AI] PDF analysis received, length:", analysisText.length);
           } catch (pdfError) {
-            console.error("[AI] PDF processing error:", pdfError);
+            console.error("[AI] PDF processing error:", pdfError instanceof Error ? pdfError.message : String(pdfError));
             analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations to help improve your credit score and financial situation.";
           }
         } else {
