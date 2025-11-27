@@ -396,21 +396,49 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
               console.log("[AI] PDF module loaded:", !!pdfModule);
               
               if (pdfModule && typeof pdfModule === "function") {
-                // Try calling as function with options
-                let pdfData;
+                // PDF-Parse: try various invocation patterns
+                let pdfData = null;
+                
+                // Pattern 1: Direct function call with just buffer
                 try {
-                  pdfData = await pdfModule(pdfBuffer, { max: 0 });
-                } catch (e) {
-                  // If it's a class constructor, use new with options
-                  console.log("[AI] Trying as class constructor with options");
+                  console.log("[AI] Attempting: pdfModule(buffer)");
+                  pdfData = await pdfModule(pdfBuffer);
+                  console.log("[AI] Success with pdfModule(buffer)");
+                } catch (e1) {
+                  console.log("[AI] Pattern 1 failed, trying with options");
+                  
+                  // Pattern 2: Direct function call with options
                   try {
-                    const instance = new pdfModule({ max: 0 });
-                    pdfData = await instance.parse(pdfBuffer);
-                  } catch (classError) {
-                    console.error("[AI] Class instantiation failed:", classError instanceof Error ? classError.message : String(classError));
-                    throw classError;
+                    console.log("[AI] Attempting: pdfModule(buffer, { max: 0 })");
+                    pdfData = await pdfModule(pdfBuffer, { max: 0 });
+                    console.log("[AI] Success with pdfModule(buffer, options)");
+                  } catch (e2) {
+                    console.log("[AI] Pattern 2 failed, trying class instantiation");
+                    
+                    // Pattern 3: Class constructor
+                    try {
+                      console.log("[AI] Attempting: new pdfModule()");
+                      const instance = new pdfModule();
+                      // Try different method names
+                      if (typeof instance === "function") {
+                        pdfData = await instance(pdfBuffer);
+                      } else if (instance.parse && typeof instance.parse === "function") {
+                        pdfData = await instance.parse(pdfBuffer);
+                      } else if (instance.parseBuffer && typeof instance.parseBuffer === "function") {
+                        pdfData = await instance.parseBuffer(pdfBuffer);
+                      } else {
+                        const methods = Object.getOwnPropertyNames(Object.getPrototypeOf(instance)).filter(m => m !== "constructor");
+                        console.log("[AI] Instance methods available:", methods);
+                        throw new Error(`Instance has no recognized parse method. Available: ${methods.join(", ")}`);
+                      }
+                      console.log("[AI] Success with class instantiation");
+                    } catch (e3) {
+                      console.error("[AI] All patterns failed. Errors:", e1 instanceof Error ? e1.message : String(e1));
+                      throw e3;
+                    }
                   }
                 }
+                
                 const extractedText = pdfData && pdfData.text ? pdfData.text.trim() : "";
                 console.log("[AI] Extracted text length:", extractedText.length, "characters");
                 
