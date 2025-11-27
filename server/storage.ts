@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type ContactSubmission, type InsertContactSubmission, type ChatMessage, type InsertChatMessage, type NewsletterSubscription, type InsertNewsletterSubscription } from "@shared/schema";
+import { type User, type InsertUser, type ContactSubmission, type InsertContactSubmission, type ChatMessage, type InsertChatMessage, type NewsletterSubscription, type InsertNewsletterSubscription, type Document, type InsertDocument } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -11,6 +11,11 @@ export interface IStorage {
   getAllChatMessages(): Promise<ChatMessage[]>;
   subscribeNewsletter(subscription: InsertNewsletterSubscription): Promise<NewsletterSubscription | null>;
   getAllNewsletterSubscriptions(): Promise<NewsletterSubscription[]>;
+  createDocument(document: InsertDocument): Promise<Document>;
+  getAllDocuments(): Promise<Document[]>;
+  getDocumentsByEmail(email: string): Promise<Document[]>;
+  updateDocumentAnalysis(id: string, analysis: string): Promise<void>;
+  updateDocumentStatus(id: string, status: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {

@@ -70,3 +70,27 @@ export const insertNewsletterSubscriptionSchema = createInsertSchema(newsletterS
 
 export type InsertNewsletterSubscription = z.infer<typeof insertNewsletterSubscriptionSchema>;
 export type NewsletterSubscription = typeof newsletterSubscriptions.$inferSelect;
+
+export const documents = pgTable("documents", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  visitorEmail: text("visitor_email").notNull(),
+  visitorName: text("visitor_name").notNull(),
+  fileName: text("file_name").notNull(),
+  fileType: text("file_type").notNull(), // e.g. "application/pdf", "image/png"
+  filePath: text("file_path").notNull(),
+  aiAnalysis: text("ai_analysis"),
+  adminReview: text("admin_review"),
+  status: text("status").notNull().default("pending"), // pending, reviewed, archived
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertDocumentSchema = createInsertSchema(documents).omit({
+  id: true,
+  createdAt: true,
+  aiAnalysis: true,
+  adminReview: true,
+  status: true,
+});
+
+export type InsertDocument = z.infer<typeof insertDocumentSchema>;
+export type Document = typeof documents.$inferSelect;
