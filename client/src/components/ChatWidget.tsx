@@ -49,9 +49,12 @@ export default function ChatWidget() {
       // Before email is set, no messages to show
       return false;
     }
-    // Once email is set, show this visitor's conversation (their messages + AI responses)
+    // Once email is set, show this visitor's conversation + AI messages
     return msg.email === email || msg.sender === "ai";
   });
+
+  // Simple escalation check - find if ANY AI message in conversation has escalation flag
+  const hasEscalation = messages.some(msg => msg.sender === "ai" && msg.isEscalated === "true");
 
   const sendMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -73,57 +76,24 @@ export default function ChatWidget() {
 
   // Detect escalation and schedule 5-second delay
   useEffect(() => {
-    console.log("Escalation effect running. Email:", email, "Messages count:", messages.length);
-    
-    // If no email yet (visitor hasn't started chat), don't check for escalation
-    if (!email) {
-      console.log("No email set yet, skipping escalation check");
-      return;
-    }
-    
-    // Find all AI messages in this conversation
-    const visitorAiMessages = messages.filter(msg => msg.sender === "ai");
-    console.log("Visitor AI messages count:", visitorAiMessages.length);
-    
-    // Find the MOST RECENT AI message with escalation tag
-    let latestEscalatedMessage = null;
-    for (let i = visitorAiMessages.length - 1; i >= 0; i--) {
-      console.log("Checking message", i, "isEscalated:", visitorAiMessages[i].isEscalated);
-      if (visitorAiMessages[i].isEscalated === "true") {
-        latestEscalatedMessage = visitorAiMessages[i];
-        console.log("Found escalated message:", latestEscalatedMessage.id, "Content:", latestEscalatedMessage.message.substring(0, 50));
-        break;
-      }
-    }
-    
-    // If no escalated message found, reset everything
-    if (!latestEscalatedMessage) {
-      if (escalationMessageIdRef.current !== null) {
-        console.log("No escalated message found, resetting timer");
-        escalationMessageIdRef.current = null;
-        setShouldShowEscalationButton(false);
-      }
+    // Only check for escalation if visitor has entered email
+    if (!email || !hasEscalation) {
       return;
     }
 
-    // Check if this is a NEW escalation we haven't seen before
-    if (escalationMessageIdRef.current !== latestEscalatedMessage.id) {
-      console.log("NEW escalation detected!", latestEscalatedMessage.id, "Starting timer at", new Date().toLocaleTimeString());
-      escalationMessageIdRef.current = latestEscalatedMessage.id;
-      setShouldShowEscalationButton(false); // Hide button initially
-      setEscalationTime(Date.now());
+    // If we haven't started a timer for this escalation, start one now
+    if (escalationMessageIdRef.current === null) {
+      console.log("Escalation detected! Starting 5-second timer");
+      escalationMessageIdRef.current = "escalation-triggered";
       
-      // Set timeout for exactly 5 seconds from now
       const timer = setTimeout(() => {
-        console.log("5 SECOND TIMER FIRED at", new Date().toLocaleTimeString() + " - showing button now");
+        console.log("5 second timer fired - showing escalation button");
         setShouldShowEscalationButton(true);
       }, 5000);
       
-      return () => {
-        clearTimeout(timer);
-      };
+      return () => clearTimeout(timer);
     }
-  }, [messages, email]);
+  }, [email, hasEscalation]);
   
   // Show button if escalation detected AND 5 seconds have passed
   const showButton = shouldShowEscalationButton && !isEscalated;
