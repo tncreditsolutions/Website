@@ -102,18 +102,36 @@ export default function ChatWidget() {
       }
       queryClient.invalidateQueries({ queryKey: ["/api/documents"] });
       
-      // Send AI message with analysis
+      // Send AI message with analysis immediately
       if (document.aiAnalysis) {
         try {
+          // First, send acknowledgment that document was received and reviewed
           await apiRequest("POST", "/api/chat", {
             email: document.visitorEmail,
             name: "Riley",
-            message: `I've analyzed your ${document.fileName}:\n\n${document.aiAnalysis}`,
+            message: `I've reviewed your ${document.fileName}. Here's my detailed analysis:\n\n${document.aiAnalysis}`,
             sender: "ai",
+            isEscalated: "false",
           });
+          
+          // Force immediate refresh of chat messages
+          await new Promise(resolve => setTimeout(resolve, 500));
           queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
         } catch (error) {
           console.error("[Upload] Failed to send analysis message:", error);
+          // Send fallback message if analysis fails
+          try {
+            await apiRequest("POST", "/api/chat", {
+              email: document.visitorEmail,
+              name: "Riley",
+              message: `I've received your ${document.fileName}. Our specialists will analyze it and provide detailed insights shortly.`,
+              sender: "ai",
+              isEscalated: "false",
+            });
+            queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
+          } catch (e) {
+            console.error("[Upload] Fallback message also failed:", e);
+          }
         }
       }
     },
