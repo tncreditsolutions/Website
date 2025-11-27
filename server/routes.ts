@@ -220,6 +220,19 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
     }
   });
 
+  app.delete("/api/chat", async (req, res) => {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        return res.status(400).json({ error: "Email required" });
+      }
+      await storage.deleteMessagesByEmail(email);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   app.post("/api/newsletter", async (req, res) => {
     try {
       const validatedData = insertNewsletterSubscriptionSchema.parse(req.body);
