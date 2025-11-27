@@ -94,7 +94,12 @@ export default function ChatWidget() {
       });
     },
     onSuccess: async (document: any) => {
-      console.log("[Upload] Document upload success:", { id: document.id, hasAnalysis: !!document.aiAnalysis, analysis: document.aiAnalysis });
+      console.log("[Upload] Full document response:", document);
+      console.log("[Upload] Document keys:", Object.keys(document));
+      console.log("[Upload] Document.aiAnalysis:", document.aiAnalysis);
+      console.log("[Upload] Document.aiAnalysis type:", typeof document.aiAnalysis);
+      console.log("[Upload] Has aiAnalysis field:", "aiAnalysis" in document);
+      
       setUploadedFileName("");
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
