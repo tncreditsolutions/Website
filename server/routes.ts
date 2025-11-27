@@ -6,6 +6,8 @@ import OpenAI from "openai";
 import fs from "fs";
 import path from "path";
 
+let pdfParse: any;
+
 // Using gpt-4o (most recent stable model)
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
 console.log("[AI] OpenAI initialized:", !!openai, "API key available:", !!process.env.OPENAI_API_KEY);
@@ -55,6 +57,16 @@ function detectUrgentSituation(message: string): boolean {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Dynamically import pdf-parse
+  if (!pdfParse) {
+    try {
+      const module = await import("pdf-parse/lib/pdf-parse.js");
+      pdfParse = module.default;
+    } catch {
+      console.warn("[PDF] pdf-parse import failed, PDF analysis will be limited");
+    }
+  }
+
   app.post("/api/contact", async (req, res) => {
     try {
       const validatedData = insertContactSubmissionSchema.parse(req.body);
@@ -314,8 +326,45 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
           });
           analysisText = response.choices[0].message.content || "No analysis available";
         } else if (isPdf) {
-          // For PDFs, provide a message that it's been received
-          analysisText = "Your PDF has been received and saved. Our specialists will review it and provide detailed feedback shortly.";
+          // For PDFs, extract text and analyze with OpenAI
+          try {
+            const filePath = path.join(import.meta.dirname, "..", "uploads", fileId);
+            const pdfBuffer = fs.readFileSync(filePath);
+            const pdfData = await pdfParse(pdfBuffer);
+            const extractedText = pdfData.text;
+            
+            if (extractedText.trim()) {
+              // Send extracted PDF text to OpenAI for analysis
+              const response = await openai.chat.completions.create({
+                model: "gpt-4o",
+                messages: [
+                  {
+                    role: "user",
+                    content: `You are a financial advisor specializing in credit restoration and tax optimization. Analyze the following credit report or financial document and provide detailed insights.
+
+DOCUMENT CONTENT:
+${extractedText}
+
+Please provide:
+1. **Summary**: Brief overview of the document
+2. **Key Issues**: Major problems identified (negative accounts, high utilization, delinquencies, etc.)
+3. **Credit Score Factors**: What's impacting the score
+4. **Recommendations**: Specific actionable steps to improve credit
+5. **Priority Items**: What to tackle first
+
+Format your response clearly with headers and bullet points for easy reading.`
+                  }
+                ],
+                max_tokens: 1000,
+              });
+              analysisText = response.choices[0].message.content || "PDF received but analysis could not be generated.";
+            } else {
+              analysisText = "PDF received but contains no readable text. Please ensure the document is a text-based PDF (not a scanned image).";
+            }
+          } catch (pdfError) {
+            console.error("[AI] PDF text extraction failed:", pdfError);
+            analysisText = "PDF received. Unable to extract text for analysis. Please ensure it's a text-based PDF and not a scanned image.";
+          }
         } else {
           analysisText = "Unsupported file format. Please upload a PDF or image (PNG/JPG) and we'll analyze it.";
         }
