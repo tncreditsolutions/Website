@@ -92,7 +92,7 @@ export function PDFViewer({ fileData, fileName }: PDFViewerProps) {
   };
 
   const handleZoomIn = () => {
-    setZoom(prev => Math.min(prev + 0.5, 4));
+    setZoom(prev => Math.min(prev + 0.5, 2));
   };
 
   const handleZoomOut = () => {
@@ -177,7 +177,7 @@ export function PDFViewer({ fileData, fileName }: PDFViewerProps) {
               variant="outline"
               size="sm"
               onClick={handleZoomIn}
-              disabled={zoom >= 4 || rendering}
+              disabled={zoom >= 2 || rendering}
               data-testid="button-pdf-zoom-in"
             >
               <ZoomIn className="w-4 h-4" />
