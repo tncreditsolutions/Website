@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { MessageCircle, X, Send, AlertCircle, Sparkles, Paperclip, FileText } from "lucide-react";
+import { MessageCircle, X, Send, AlertCircle, Sparkles, Paperclip, FileText, Download } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { ChatMessage } from "@shared/schema";
@@ -21,6 +21,7 @@ export default function ChatWidget() {
   const [escalationTime, setEscalationTime] = useState<number | null>(null);
   const [shouldShowEscalationButton, setShouldShowEscalationButton] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState<string>("");
+  const [lastDocumentId, setLastDocumentId] = useState<string | null>(null);
   const escalationMessageIdRef = useRef<string | null>(null);
   const dismissedEscalationIdRef = useRef<string | null>(null);
   const escalationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -98,6 +99,7 @@ export default function ChatWidget() {
     onSuccess: async (document: any) => {
       console.log("[Upload] Document uploaded successfully:", document);
       setUploadedFileName("");
+      setLastDocumentId(document.id);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -347,6 +349,46 @@ export default function ChatWidget() {
     }
   };
 
+  const handleDownloadPDF = async () => {
+    if (!lastDocumentId) {
+      toast({
+        title: "Error",
+        description: "No document available for download",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/documents/${lastDocumentId}/pdf`);
+      if (!response.ok) {
+        throw new Error("Failed to generate PDF");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `credit-analysis-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: "Success",
+        description: "PDF downloaded successfully",
+      });
+    } catch (error: any) {
+      console.error("[PDF Download] Error:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to download PDF",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="fixed bottom-4 right-4 z-50">
       {!isOpen ? (
@@ -502,6 +544,18 @@ export default function ChatWidget() {
                         {uploadMutation.isPending ? "Analyzing..." : "Done"}
                       </span>
                     </div>
+                  )}
+                  {lastDocumentId && !uploadedFileName && (
+                    <Button
+                      onClick={handleDownloadPDF}
+                      size="sm"
+                      variant="outline"
+                      className="w-full rounded-lg flex items-center justify-center gap-2"
+                      data-testid="button-download-pdf"
+                    >
+                      <Download className="w-4 h-4" />
+                      Download PDF Summary
+                    </Button>
                   )}
                   <form onSubmit={handleSend} className="flex gap-2.5">
                     <Input
