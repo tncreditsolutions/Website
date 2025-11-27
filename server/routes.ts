@@ -396,14 +396,20 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
               console.log("[AI] PDF module loaded:", !!pdfModule);
               
               if (pdfModule && typeof pdfModule === "function") {
-                // Try calling as function first, then as class with new
+                // Try calling as function with options
                 let pdfData;
                 try {
-                  pdfData = await pdfModule(pdfBuffer);
+                  pdfData = await pdfModule(pdfBuffer, { max: 0 });
                 } catch (e) {
-                  // If it's a class constructor, use new
-                  const instance = new pdfModule();
-                  pdfData = await instance.parse(pdfBuffer);
+                  // If it's a class constructor, use new with options
+                  console.log("[AI] Trying as class constructor with options");
+                  try {
+                    const instance = new pdfModule({ max: 0 });
+                    pdfData = await instance.parse(pdfBuffer);
+                  } catch (classError) {
+                    console.error("[AI] Class instantiation failed:", classError instanceof Error ? classError.message : String(classError));
+                    throw classError;
+                  }
                 }
                 const extractedText = pdfData && pdfData.text ? pdfData.text.trim() : "";
                 console.log("[AI] Extracted text length:", extractedText.length, "characters");
