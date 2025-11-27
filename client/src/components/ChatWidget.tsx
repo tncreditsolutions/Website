@@ -18,14 +18,12 @@ export default function ChatWidget() {
   const [message, setMessage] = useState("");
   const [isNewVisitor, setIsNewVisitor] = useState(true);
   const [isEscalated, setIsEscalated] = useState(false);
-  const [showEscalatePrompt, setShowEscalatePrompt] = useState(false);
-  const [hideEscalatePrompt, setHideEscalatePrompt] = useState(false);
   const [renderTrigger, setRenderTrigger] = useState(0); // Force re-render after 5 seconds
   const escalationDetectedAtRef = useRef<number | null>(null);
   const escalationMessageIdRef = useRef<string | null>(null);
   const { toast } = useToast();
 
-  // Load visitor info and escalate dismissal state from localStorage on mount
+  // Load visitor info from localStorage on mount
   useEffect(() => {
     const stored = localStorage.getItem(VISITOR_INFO_KEY);
     if (stored) {
@@ -37,12 +35,6 @@ export default function ChatWidget() {
       } catch (e) {
         // Silently fail if localStorage data is corrupted
       }
-    }
-    
-    // Restore escalate dismissal state
-    const dismissed = localStorage.getItem(ESCALATE_DISMISSED_KEY);
-    if (dismissed === "true") {
-      setHideEscalatePrompt(true);
     }
   }, []);
 
@@ -95,8 +87,6 @@ export default function ChatWidget() {
       console.log("New escalation detected, ID:", escalatedMessage.id);
       escalationMessageIdRef.current = escalatedMessage.id;
       escalationDetectedAtRef.current = Date.now();
-      setShowEscalatePrompt(false); // Reset to ensure delay
-      setHideEscalatePrompt(false); // Clear dismissal for new escalation
       
       // Schedule timer to trigger re-render after 5 seconds
       const timeoutId = setTimeout(() => {
@@ -113,22 +103,13 @@ export default function ChatWidget() {
   }, [allMessages]);
   
   // Compute whether to show button based on timestamp (5+ seconds passed)
-  const shouldShowEscalateButton = () => {
-    if (hideEscalatePrompt || isEscalated) return false;
+  const showButton = (() => {
+    if (isEscalated) return false;
     if (!escalationDetectedAtRef.current) return false;
     
     const elapsedMs = Date.now() - escalationDetectedAtRef.current;
-    const shouldShow = elapsedMs >= 5000;
-    
-    if (shouldShow) {
-      console.log("Computed shouldShow=true, elapsed:", elapsedMs);
-    }
-    
-    return shouldShow;
-  };
-  
-  // Trigger button visibility after 5 seconds (using renderTrigger to force computation)
-  const showButton = shouldShowEscalateButton();
+    return elapsedMs >= 5000;
+  })();
 
   const handleInitialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
