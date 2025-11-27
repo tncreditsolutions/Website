@@ -334,13 +334,11 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
           });
           analysisText = response.choices[0].message.content || "No analysis available";
         } else if (isPdf) {
-          // For PDFs, try text extraction first, then fall back to vision API for scanned PDFs
+          // For PDFs, try text extraction for text-based PDFs
           try {
             const filePath = path.join(import.meta.dirname, "..", "uploads", fileId);
             const pdfBuffer = fs.readFileSync(filePath);
-            let analysisGenerated = false;
             
-            // Try text extraction first
             try {
               const pdfModule = await loadPdfParse();
               if (pdfModule && typeof pdfModule === "function") {
@@ -348,7 +346,7 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
                 const extractedText = pdfData && pdfData.text ? pdfData.text.trim() : "";
                 
                 if (extractedText) {
-                  // Send extracted text to OpenAI
+                  // Send extracted text to OpenAI for analysis
                   const response = await openai.chat.completions.create({
                     model: "gpt-4o",
                     messages: [
@@ -371,43 +369,21 @@ Format your response clearly with headers and bullet points for easy reading.`
                     ],
                     max_tokens: 1000,
                   });
-                  analysisText = response.choices[0].message.content || "PDF received but analysis could not be generated.";
-                  analysisGenerated = true;
+                  analysisText = response.choices[0].message.content || "PDF received. Our specialists will review it and provide detailed feedback shortly.";
+                } else {
+                  // Could not extract text, use fallback message
+                  analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations to help improve your credit score and financial situation.";
                 }
+              } else {
+                analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations to help improve your credit score and financial situation.";
               }
             } catch (textError) {
-              console.log("[AI] Text extraction attempt failed, will try vision API fallback");
-            }
-            
-            // If text extraction didn't work, use vision API on PDF as image
-            if (!analysisGenerated) {
-              const pdfBase64 = base64Data;
-              const response = await openai.chat.completions.create({
-                model: "gpt-4o",
-                messages: [
-                  {
-                    role: "user",
-                    content: [
-                      {
-                        type: "text",
-                        text: "Please analyze this credit report or financial document for a credit restoration case. Provide a detailed summary including: (1) Key information and status, (2) Major issues identified (negative accounts, delinquencies, high utilization, etc.), (3) Credit score factors being impacted, (4) Specific recommendations to improve credit, (5) Priority items to tackle first. Format clearly with headers and bullet points.",
-                      },
-                      {
-                        type: "image_url",
-                        image_url: {
-                          url: `data:application/pdf;base64,${pdfBase64}`,
-                        },
-                      },
-                    ],
-                  }
-                ],
-                max_tokens: 1000,
-              });
-              analysisText = response.choices[0].message.content || "PDF received but analysis could not be generated.";
+              console.log("[AI] PDF text extraction not available, using specialist review message");
+              analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations to help improve your credit score and financial situation.";
             }
           } catch (pdfError) {
-            console.error("[AI] PDF analysis failed:", pdfError);
-            analysisText = "PDF received. Our specialists will review it and provide detailed feedback shortly.";
+            console.error("[AI] PDF processing error:", pdfError);
+            analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations to help improve your credit score and financial situation.";
           }
         } else {
           analysisText = "Unsupported file format. Please upload a PDF or image (PNG/JPG) and we'll analyze it.";
