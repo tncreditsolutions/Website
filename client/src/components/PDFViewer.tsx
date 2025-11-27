@@ -15,7 +15,7 @@ interface PDFViewerProps {
 export function PDFViewer({ fileData, fileName }: PDFViewerProps) {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pdf, setPdf] = useState<pdfjsLib.PDFDocument | null>(null);
+  const [pdf, setPdf] = useState<any>(null);
   const [rendering, setRendering] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState<string>("");
@@ -38,7 +38,7 @@ export function PDFViewer({ fileData, fileName }: PDFViewerProps) {
     loadPdf();
   }, [fileData]);
 
-  const renderPage = async (pdfDoc: pdfjsLib.PDFDocument, pageNum: number) => {
+  const renderPage = async (pdfDoc: any, pageNum: number) => {
     setRendering(true);
     try {
       const page = await pdfDoc.getPage(pageNum);
