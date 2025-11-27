@@ -49,11 +49,17 @@ export default function ChatWidget() {
       // Before email is set, no messages to show
       return false;
     }
-    // Once email is set, show this visitor's conversation + AI messages
-    return msg.email === email || msg.sender === "ai";
+    // Show only messages from this visitor or AI responses within their conversation
+    if (msg.email === email) return true;
+    // Show AI messages only if they come after this visitor has sent a message
+    if (msg.sender === "ai") {
+      const visitorHasMessaged = allMessages.some(m => m.email === email);
+      return visitorHasMessaged;
+    }
+    return false;
   });
 
-  // Simple escalation check - find if ANY AI message in conversation has escalation flag
+  // Check if there's an escalated AI message in this conversation
   const hasEscalation = messages.some(msg => msg.sender === "ai" && msg.isEscalated === "true");
 
   const sendMutation = useMutation({
