@@ -285,33 +285,51 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
 
       // Analyze document with OpenAI
       try {
-        const analysis = await openai.chat.completions.create({
-          model: "gpt-4o",
-          messages: [
-            {
-              role: "user",
-              content: [
-                {
-                  type: "text",
-                  text: "Please analyze this document for a credit restoration or tax optimization case. Provide a brief summary of key information, any issues identified, and recommended next steps.",
-                },
-                {
-                  type: "image_url",
-                  image_url: {
-                    url: `data:${fileType};base64,${base64Data}`,
+        // Check if it's an image or PDF
+        const isImage = ["image/png", "image/jpeg", "image/jpg"].includes(fileType);
+        const isPdf = fileType === "application/pdf";
+        
+        let analysisText = "No analysis available";
+        
+        if (isImage) {
+          // For images, use vision API
+          const response = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+              {
+                role: "user",
+                content: [
+                  {
+                    type: "text",
+                    text: "Please analyze this document for a credit restoration or tax optimization case. Provide a brief summary of key information, any issues identified, and recommended next steps.",
                   },
-                },
-              ],
-            },
-          ],
-          max_tokens: 500,
-        });
-
-        const analysisText = analysis.choices[0].message.content || "No analysis available";
+                  {
+                    type: "image_url",
+                    image_url: {
+                      url: `data:${fileType};base64,${base64Data}`,
+                    },
+                  },
+                ],
+              },
+            ],
+            max_tokens: 500,
+          });
+          analysisText = response.choices[0].message.content || "No analysis available";
+        } else if (isPdf) {
+          // For PDFs, we don't have direct support, so provide a message
+          analysisText = "PDF document received. Our AI can analyze images (PNG, JPG) directly. Please upload a screenshot or image of your credit report for detailed analysis, or contact our specialists for manual review of your PDF documents.";
+        } else {
+          analysisText = "Unsupported file format. Please upload a PNG/JPG image or contact our support team.";
+        }
+        
         await storage.updateDocumentAnalysis(document.id, analysisText);
         document.aiAnalysis = analysisText;
       } catch (aiError) {
         console.error("[AI] Document analysis failed:", aiError);
+        // Set a fallback message on error
+        const fallbackMessage = "Document received. Our specialists will review it shortly.";
+        await storage.updateDocumentAnalysis(document.id, fallbackMessage);
+        document.aiAnalysis = fallbackMessage;
       }
 
       res.json(document);
