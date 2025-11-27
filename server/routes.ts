@@ -500,32 +500,33 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `attachment; filename="credit-analysis-${new Date().toISOString().split('T')[0]}.pdf"`);
 
-      const doc = new PDFDocument({ margin: 35, size: "A4" });
+      const doc = new PDFDocument({ margin: 0, size: "A4" });
       doc.pipe(res);
 
-      // Professional header background
-      doc.rect(0, 0, 612, 100).fill("#1e40af");
+      // Gradient-style header with professional blue
+      doc.rect(0, 0, 612, 120).fill("#0f2d6e");
       
-      // Company name and branding
-      doc.fontSize(24).font("Helvetica-Bold").fillColor("#ffffff");
-      doc.text("TN CREDIT SOLUTIONS", 35, 20, { align: "left" });
-      
-      doc.fontSize(12).font("Helvetica").fillColor("#e0e7ff");
-      doc.text("Credit Restoration & Tax Optimization Services", 35, 48, { align: "left" });
-      
-      // Title in white
-      doc.fontSize(18).font("Helvetica-Bold").fillColor("#ffffff");
-      doc.text("CREDIT ANALYSIS SUMMARY", 35, 65, { align: "left" });
+      // Accent bar
+      doc.rect(0, 0, 612, 4).fill("#1e40af");
 
-      // Visitor info below header
-      doc.moveDown(2.5);
-      doc.fontSize(10).font("Helvetica").fillColor("#333");
-      doc.text(`Client: ${document.visitorName} | Date: ${new Date().toLocaleDateString()}`);
-      doc.moveDown(0.8);
+      // Company branding
+      doc.fontSize(28).font("Helvetica-Bold").fillColor("#ffffff");
+      doc.text("TN CREDIT SOLUTIONS", 45, 25);
+      
+      doc.fontSize(11).font("Helvetica").fillColor("#c5d3ff");
+      doc.text("Professional Credit & Tax Optimization Services", 45, 58);
 
-      // Decorative line
-      doc.strokeColor("#1e40af").lineWidth(2).moveTo(35, doc.y).lineTo(577, doc.y).stroke();
-      doc.moveDown(1);
+      // Document title with accent
+      doc.fontSize(16).font("Helvetica-Bold").fillColor("#fbbf24");
+      doc.text("CREDIT ANALYSIS SUMMARY", 45, 78);
+
+      // Client info in header
+      doc.fontSize(9).font("Helvetica").fillColor("#e0e7ff");
+      doc.text(`Client: ${document.visitorName}  |  Generated: ${new Date().toLocaleDateString()}`, 45, 100);
+
+      // Main content area
+      doc.moveDown(4.5);
+      const contentStartY = doc.y;
 
       // Format and display analysis content
       const lines = document.aiAnalysis.split("\n");
@@ -537,48 +538,54 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         }
         
         if (line.match(/^\*\*[A-Z\s]+\*\*$/)) {
-          // Section header with background
+          // Section header with modern design
           if (!isFirstSection) {
-            doc.moveDown(0.3);
+            doc.moveDown(0.5);
           }
           const sectionTitle = line.replace(/\*\*/g, "");
           
-          // Light blue background for section headers
-          const yPos = doc.y;
-          doc.rect(35, yPos, 542, 25).fill("#e0e7ff");
+          // Accent circle and line
+          doc.fillColor("#fbbf24");
+          doc.circle(48, doc.y + 6, 3);
           
-          doc.fontSize(12).font("Helvetica-Bold").fillColor("#1e40af");
-          doc.text(sectionTitle, 40, yPos + 5);
+          doc.fontSize(13).font("Helvetica-Bold").fillColor("#0f2d6e");
+          doc.text(sectionTitle, 60, doc.y);
           
-          doc.moveDown(1.3);
-          doc.fontSize(10).font("Helvetica").fillColor("#333");
+          // Subtle line under section
+          doc.moveTo(60, doc.y + 2).lineTo(567, doc.y + 2).strokeColor("#e5e7eb").stroke();
+          
+          doc.moveDown(0.8);
+          doc.fontSize(10).font("Helvetica").fillColor("#374151");
           isFirstSection = false;
         } else if (line.includes("▪") || line.match(/^\d+\./)) {
-          // Bullet point or numbered list with better spacing
-          doc.fontSize(10).fillColor("#444");
-          doc.text(line, { lineGap: 2 });
-          doc.moveDown(0.25);
+          // Bullet point or numbered list with improved styling
+          const isNumbered = line.match(/^\d+\./) !== null;
+          const content = isNumbered ? line.substring(line.indexOf('.') + 2) : line.substring(1).trim();
+          
+          doc.fontSize(10).fillColor("#1f2937").font("Helvetica");
+          doc.text("•  " + content, 70, doc.y);
+          doc.moveDown(0.35);
         } else if (line.trim().length > 0) {
-          // Regular text
-          doc.fontSize(10).fillColor("#555");
-          doc.text(line, { lineGap: 2 });
-          doc.moveDown(0.15);
+          // Regular text with better readability
+          doc.fontSize(10).fillColor("#4b5563").font("Helvetica");
+          doc.text(line, 48, doc.y, { width: 519, align: "left" });
+          doc.moveDown(0.25);
         } else {
-          // Empty line for spacing
-          doc.moveDown(0.2);
+          // Subtle spacing
+          doc.moveDown(0.15);
         }
       }
 
       // Footer section
-      doc.moveDown(0.8);
-      doc.strokeColor("#ddd").lineWidth(1).moveTo(35, doc.y).lineTo(577, doc.y).stroke();
+      doc.moveDown(1);
+      doc.strokeColor("#e5e7eb").lineWidth(1).moveTo(45, doc.y).lineTo(567, doc.y).stroke();
       doc.moveDown(0.6);
       
-      doc.fontSize(8).fillColor("#888").font("Helvetica");
-      doc.text("This analysis is confidential and for your personal use only. Consult with a financial advisor for personalized guidance.", { align: "center" });
-      doc.moveDown(0.3);
-      doc.fontSize(8).fillColor("#999");
-      doc.text("TN Credit Solutions | Professional Credit & Tax Services", { align: "center" });
+      doc.fontSize(8).fillColor("#6b7280").font("Helvetica");
+      doc.text("Confidential & For Personal Use Only", { align: "center" });
+      doc.moveDown(0.25);
+      doc.fontSize(8).fillColor("#9ca3af");
+      doc.text("© 2025 TN Credit Solutions | All rights reserved", { align: "center" });
 
       doc.end();
     } catch (error: any) {
