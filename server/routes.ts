@@ -417,20 +417,12 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
                     
                     // Pattern 3: Class constructor with options
                     try {
-                      console.log("[AI] Attempting: new pdfModule({ verbosity: 0 })");
+                      console.log("[AI] Attempting: new pdfModule({ verbosity: 0 }) with load/getText");
                       const instance = new pdfModule({ verbosity: 0 });
-                      // Try different method names
-                      if (typeof instance === "function") {
-                        pdfData = await instance(pdfBuffer);
-                      } else if (instance.parse && typeof instance.parse === "function") {
-                        pdfData = await instance.parse(pdfBuffer);
-                      } else if (instance.parseBuffer && typeof instance.parseBuffer === "function") {
-                        pdfData = await instance.parseBuffer(pdfBuffer);
-                      } else {
-                        const methods = Object.getOwnPropertyNames(Object.getPrototypeOf(instance)).filter(m => m !== "constructor");
-                        console.log("[AI] Instance methods available:", methods);
-                        throw new Error(`Instance has no recognized parse method. Available: ${methods.join(", ")}`);
-                      }
+                      // PDFParse instance uses load() then getText()
+                      await instance.load(pdfBuffer);
+                      const fullText = await instance.getText();
+                      pdfData = { text: fullText };
                       console.log("[AI] Success with class instantiation");
                     } catch (e3) {
                       console.error("[AI] All patterns failed. Errors:", e1 instanceof Error ? e1.message : String(e1));
