@@ -359,16 +359,23 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
           });
           analysisText = response.choices[0].message.content || "No analysis available";
         } else if (isPdf) {
-          // For PDFs, send directly to OpenAI as base64-encoded document
+          // For PDFs, upload to OpenAI Files API and send for analysis
           try {
             const filePath = path.join(import.meta.dirname, "..", "uploads", fileId);
             console.log("[AI] PDF file path:", filePath);
             const pdfBuffer = fs.readFileSync(filePath);
-            const pdfBase64 = encodeToBase64(pdfBuffer);
-            console.log("[AI] PDF buffer size:", pdfBuffer.length, "Base64 length:", pdfBase64.length);
+            console.log("[AI] PDF buffer size:", pdfBuffer.length);
             
-            // Send PDF directly to OpenAI for analysis
-            const response = await openai.chat.completions.create({
+            // Upload PDF to OpenAI Files API
+            const fileStream = fs.createReadStream(filePath);
+            const uploadedFile = await openai.beta.files.upload({
+              file: fileStream,
+              purpose: "vision",
+            });
+            console.log("[AI] PDF uploaded to OpenAI, file_id:", uploadedFile.id);
+            
+            // Send PDF to OpenAI for analysis using the file
+            const response = await openai.beta.messages.create({
               model: "gpt-4o",
               messages: [
                 {
@@ -380,17 +387,17 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
                     },
                     {
                       type: "document",
-                      document: {
-                        type: "application/pdf",
-                        data: pdfBase64,
+                      source: {
+                        type: "file",
+                        file_id: uploadedFile.id,
                       },
                     },
                   ],
                 },
               ],
-              max_tokens: 1500,
-            });
-            analysisText = response.choices[0].message.content || "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
+              betas: ["interop-2024-12-01"],
+            } as any);
+            analysisText = (response.content[0] as any)?.text || "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
             console.log("[AI] PDF analysis received, length:", analysisText.length);
           } catch (pdfError) {
             console.error("[AI] PDF processing error:", pdfError instanceof Error ? pdfError.message : String(pdfError));
