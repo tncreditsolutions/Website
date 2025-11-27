@@ -244,6 +244,91 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
     }
   });
 
+  // Document upload endpoint
+  app.post("/api/documents", async (req, res) => {
+    try {
+      if (!openai) {
+        return res.status(500).json({ error: "AI service not configured" });
+      }
+
+      const { visitorEmail, visitorName, fileName, fileType, fileContent } = req.body;
+      
+      if (!visitorEmail || !visitorName || !fileName || !fileType || !fileContent) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+
+      // Store file temporarily
+      const uploadsDir = path.join(import.meta.dirname, "..", "uploads");
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+
+      const fileId = Math.random().toString(36).substring(2);
+      const filePath = path.join(uploadsDir, fileId);
+      const base64Data = fileContent.split(",")[1] || fileContent;
+      fs.writeFileSync(filePath, Buffer.from(base64Data, "base64"));
+
+      // Create document record
+      const document = await storage.createDocument({
+        visitorEmail,
+        visitorName,
+        fileName,
+        fileType,
+        filePath: fileId,
+      });
+
+      // Analyze document with OpenAI
+      try {
+        const analysis = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "text",
+                  text: "Please analyze this document for a credit restoration or tax optimization case. Provide a brief summary of key information, any issues identified, and recommended next steps.",
+                },
+                {
+                  type: "image_url",
+                  image_url: {
+                    url: `data:${fileType};base64,${base64Data}`,
+                  },
+                },
+              ],
+            },
+          ],
+          max_tokens: 500,
+        });
+
+        const analysisText = analysis.choices[0].message.content || "No analysis available";
+        await storage.updateDocumentAnalysis(document.id, analysisText);
+        document.aiAnalysis = analysisText;
+      } catch (aiError) {
+        console.error("[AI] Document analysis failed:", aiError);
+      }
+
+      res.json(document);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/documents", async (req, res) => {
+    try {
+      const email = req.query.email as string | undefined;
+      if (email) {
+        const documents = await storage.getDocumentsByEmail(email);
+        res.json(documents);
+      } else {
+        const documents = await storage.getAllDocuments();
+        res.json(documents);
+      }
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // AI chat response endpoint
   app.post("/api/chat/ai-response", async (req, res) => {
     try {

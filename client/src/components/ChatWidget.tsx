@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { MessageCircle, X, Send, AlertCircle, Sparkles } from "lucide-react";
+import { MessageCircle, X, Send, AlertCircle, Sparkles, Paperclip, FileText } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { ChatMessage } from "@shared/schema";
@@ -20,8 +20,10 @@ export default function ChatWidget() {
   const [isEscalated, setIsEscalated] = useState(false);
   const [escalationTime, setEscalationTime] = useState<number | null>(null);
   const [shouldShowEscalationButton, setShouldShowEscalationButton] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState<string>("");
   const escalationMessageIdRef = useRef<string | null>(null);
   const escalationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   // Load visitor info from localStorage on mount
@@ -68,6 +70,64 @@ export default function ChatWidget() {
       });
     },
   });
+
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const reader = new FileReader();
+      return new Promise((resolve, reject) => {
+        reader.onload = async () => {
+          try {
+            const result = await apiRequest("POST", "/api/documents", {
+              visitorEmail: email,
+              visitorName: name,
+              fileName: file.name,
+              fileType: file.type,
+              fileContent: reader.result as string,
+            });
+            resolve(result);
+          } catch (error) {
+            reject(error);
+          }
+        };
+        reader.onerror = () => reject(new Error("Failed to read file"));
+        reader.readAsDataURL(file);
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Document uploaded and analyzed successfully",
+      });
+      setUploadedFileName("");
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      queryClient.invalidateQueries({ queryKey: ["/api/documents"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to upload document",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!["application/pdf", "image/png", "image/jpeg", "image/jpg"].includes(file.type)) {
+        toast({
+          title: "Invalid file type",
+          description: "Please upload a PDF or image (PNG/JPG)",
+          variant: "destructive",
+        });
+        return;
+      }
+      setUploadedFileName(file.name);
+      uploadMutation.mutate(file);
+    }
+  };
 
   // Detect escalation and schedule 5-second delay - only show after VISITOR responds to escalation request
   useEffect(() => {
