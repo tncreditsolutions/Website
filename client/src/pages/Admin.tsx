@@ -25,12 +25,14 @@ import {
 import { ArrowLeft, Mail, Phone, Calendar, User, MessageSquare, X, MessageCircle, AlertCircle, FileText, Download, Eye } from "lucide-react";
 import { Link } from "wouter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PDFViewer } from "@/components/PDFViewer";
 import type { ContactSubmission, ChatMessage, NewsletterSubscription, Document } from "@shared/schema";
 
 export default function Admin() {
   const [selectedSubmission, setSelectedSubmission] = useState<ContactSubmission | null>(null);
   const [selectedChatMessage, setSelectedChatMessage] = useState<ChatMessage | null>(null);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [documentBlob, setDocumentBlob] = useState<Blob | null>(null);
   const [documentBlobUrl, setDocumentBlobUrl] = useState<string>("");
   const [isReplying, setIsReplying] = useState(false);
   const [adminReplyMessage, setAdminReplyMessage] = useState("");
@@ -45,6 +47,7 @@ export default function Admin() {
         throw new Error("Failed to fetch document");
       }
       const blob = await response.blob();
+      setDocumentBlob(blob);
       
       // For images, convert blob to data URL
       if (doc.fileType.startsWith('image/')) {
@@ -54,7 +57,7 @@ export default function Admin() {
         };
         reader.readAsDataURL(blob);
       } else {
-        // For PDFs, just set a marker that we've loaded it
+        // For PDFs, the PDFViewer will handle it
         setDocumentBlobUrl("loaded");
       }
     } catch (error) {
@@ -655,23 +658,11 @@ export default function Admin() {
                 </div>
               ) : selectedDocument.fileType === 'application/pdf' ? (
                 <div className="bg-muted p-4 rounded-md">
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground mb-4">PDF files cannot be previewed in the dashboard.</p>
-                    <Button
-                      onClick={() => {
-                        const link = document.createElement('a');
-                        link.href = `/api/documents/${selectedDocument.id}/download`;
-                        link.download = selectedDocument.fileName;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                      }}
-                      data-testid={`button-download-pdf-from-dialog-${selectedDocument.id}`}
-                    >
-                      <Download className="w-4 h-4 mr-2" />
-                      Download PDF to View
-                    </Button>
-                  </div>
+                  {documentBlob ? (
+                    <PDFViewer fileData={documentBlob} fileName={selectedDocument.fileName} />
+                  ) : (
+                    <div className="text-center text-muted-foreground py-8">Loading PDF...</div>
+                  )}
                 </div>
               ) : (
                 <div className="bg-muted p-4 rounded-md text-center text-muted-foreground">
