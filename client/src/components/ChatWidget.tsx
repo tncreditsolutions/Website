@@ -146,41 +146,6 @@ export default function ChatWidget() {
     setIsNewVisitor(false);
   };
 
-  const handleResetChat = async () => {
-    try {
-      // Delete all messages for this visitor from backend
-      await apiRequest("DELETE", "/api/chat", { email });
-      
-      // Clear local storage
-      localStorage.removeItem(VISITOR_INFO_KEY);
-      localStorage.removeItem(ESCALATE_DISMISSED_KEY);
-      
-      // Reset all state
-      setName("");
-      setEmail("");
-      setMessage("");
-      setIsNewVisitor(true);
-      setIsEscalated(false);
-      setShouldShowEscalationButton(false);
-      setEscalationTime(null);
-      escalationMessageIdRef.current = null;
-      
-      // Refresh messages
-      queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
-      
-      toast({
-        title: "Chat reset",
-        description: "Your conversation has been cleared",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to reset chat",
-        variant: "destructive",
-      });
-    }
-  };
-
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) {
@@ -252,29 +217,15 @@ export default function ChatWidget() {
                 <p className="text-xs opacity-90">TN Credit Solutions</p>
               </div>
             </div>
-            <div className="flex gap-1">
-              {!isNewVisitor && email && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleResetChat}
-                  className="text-primary-foreground hover:bg-primary-foreground/20 rounded-full"
-                  data-testid="button-reset-chat"
-                  title="Reset chat"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsOpen(false)}
-                className="text-primary-foreground hover:bg-primary-foreground/20 rounded-full"
-                data-testid="button-close-chat"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsOpen(false)}
+              className="text-primary-foreground hover:bg-primary-foreground/20 rounded-full"
+              data-testid="button-close-chat"
+            >
+              <X className="w-4 h-4" />
+            </Button>
           </div>
 
           <div className="flex flex-col h-96">
