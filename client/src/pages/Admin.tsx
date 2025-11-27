@@ -22,7 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowLeft, Mail, Phone, Calendar, User, MessageSquare, X, MessageCircle, AlertCircle, FileText } from "lucide-react";
+import { ArrowLeft, Mail, Phone, Calendar, User, MessageSquare, X, MessageCircle, AlertCircle, FileText, Download } from "lucide-react";
 import { Link } from "wouter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { ContactSubmission, ChatMessage, NewsletterSubscription, Document } from "@shared/schema";
@@ -365,6 +365,22 @@ export default function Admin() {
                               </div>
                             )}
                           </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const link = document.createElement('a');
+                              link.href = `/api/documents/${doc.id}/download`;
+                              link.download = doc.fileName;
+                              document.body.appendChild(link);
+                              link.click();
+                              document.body.removeChild(link);
+                            }}
+                            data-testid={`button-download-document-${doc.id}`}
+                            className="ml-2 flex-shrink-0"
+                          >
+                            <Download className="w-4 h-4" />
+                          </Button>
                         </div>
                       </Card>
                     ))}
