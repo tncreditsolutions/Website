@@ -423,7 +423,16 @@ export default function ChatWidget() {
                 )}
 
                 {/* Message Input */}
-                <div className="p-5 border-t border-card-border bg-gradient-to-b from-background to-card/40 space-y-2">
+                <div className="p-5 border-t border-card-border bg-gradient-to-b from-background to-card/40 space-y-3">
+                  {uploadedFileName && (
+                    <div className="flex items-center gap-2 px-3 py-2 bg-primary/10 rounded-lg">
+                      <FileText className="w-4 h-4 text-primary" />
+                      <span className="text-sm text-primary flex-1 truncate">{uploadedFileName}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {uploadMutation.isPending ? "Analyzing..." : "Done"}
+                      </span>
+                    </div>
+                  )}
                   <form onSubmit={handleSend} className="flex gap-2.5">
                     <Input
                       placeholder="Type a message..."
@@ -432,6 +441,24 @@ export default function ChatWidget() {
                       className="text-sm rounded-lg border-2 focus:ring-2"
                       data-testid="input-chat-message"
                       disabled={isEscalated}
+                    />
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploadMutation.isPending || isEscalated}
+                      className="rounded-lg"
+                      data-testid="button-upload-document"
+                    >
+                      <Paperclip className="w-4 h-4" />
+                    </Button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".pdf,image/png,image/jpeg,image/jpg"
+                      onChange={handleFileSelect}
+                      className="hidden"
                     />
                     <Button
                       type="submit"

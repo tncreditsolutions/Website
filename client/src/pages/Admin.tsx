@@ -22,13 +22,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowLeft, Mail, Phone, Calendar, User, MessageSquare, X, MessageCircle, AlertCircle } from "lucide-react";
+import { ArrowLeft, Mail, Phone, Calendar, User, MessageSquare, X, MessageCircle, AlertCircle, FileText, Tabs, TabsContent, TabsList, TabsTrigger } from "lucide-react";
 import { Link } from "wouter";
-import type { ContactSubmission, ChatMessage, NewsletterSubscription } from "@shared/schema";
+import type { ContactSubmission, ChatMessage, NewsletterSubscription, Document } from "@shared/schema";
 
 export default function Admin() {
   const [selectedSubmission, setSelectedSubmission] = useState<ContactSubmission | null>(null);
   const [selectedChatMessage, setSelectedChatMessage] = useState<ChatMessage | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [isReplying, setIsReplying] = useState(false);
   const [adminReplyMessage, setAdminReplyMessage] = useState("");
   const { toast } = useToast();
@@ -44,6 +45,11 @@ export default function Admin() {
   
   const { data: newsletterSubscriptions, isLoading: newsletterLoading } = useQuery<NewsletterSubscription[]>({
     queryKey: ["/api/newsletter"],
+    refetchInterval: 5000,
+  });
+
+  const { data: documents, isLoading: documentsLoading } = useQuery<Document[]>({
+    queryKey: ["/api/documents"],
     refetchInterval: 5000,
   });
 
@@ -126,6 +132,15 @@ export default function Admin() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-8">
+        <Tabs defaultValue="submissions" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="submissions">Submissions</TabsTrigger>
+            <TabsTrigger value="chat">Live Chat</TabsTrigger>
+            <TabsTrigger value="documents">Documents</TabsTrigger>
+            <TabsTrigger value="newsletter">Newsletter</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="submissions" className="space-y-4">
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Contact Submissions</CardTitle>
