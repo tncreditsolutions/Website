@@ -17,7 +17,8 @@ console.log("[AI] OpenAI initialized:", !!openai, "API key available:", !!proces
 // Extract text from PDF using pdf-parse
 async function extractTextFromPDF(pdfBuffer: Buffer): Promise<string> {
   try {
-    const pdfParse = require("pdf-parse");
+    const pdfModule = require("pdf-parse");
+    const pdfParse = pdfModule.default || pdfModule;
     console.log("[PDF] Using pdf-parse for extraction");
     
     const data = await pdfParse(pdfBuffer);
