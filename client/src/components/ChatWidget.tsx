@@ -108,7 +108,13 @@ export default function ChatWidget() {
     if (!escalationDetectedAtRef.current) return false;
     
     const elapsedMs = Date.now() - escalationDetectedAtRef.current;
-    return elapsedMs >= 5000;
+    const shouldShow = elapsedMs >= 5000;
+    
+    if (shouldShow) {
+      console.log("✓ Button SHOWING - Elapsed time:", elapsedMs + "ms");
+    }
+    
+    return shouldShow;
   })();
 
   const handleInitialSubmit = async (e: React.FormEvent) => {
