@@ -315,30 +315,45 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
           });
           analysisText = response.choices[0].message.content || "No analysis available";
         } else if (isPdf) {
-          // For PDFs, send directly to OpenAI - gpt-4o supports PDF documents
-          const response = await openai.chat.completions.create({
-            model: "gpt-4o",
-            messages: [
-              {
-                role: "user",
-                content: [
-                  {
-                    type: "text",
-                    text: "Please analyze this credit report or financial document for a credit restoration or tax optimization case. Provide a brief summary of key information, any issues identified, and recommended next steps.",
-                  },
-                  {
-                    type: "document",
-                    document: {
-                      format: "pdf",
-                      data: base64Data,
+          // For PDFs, use OpenAI Files API
+          try {
+            const pdfBuffer = Buffer.from(base64Data, "base64");
+            const file = await openai.beta.files.upload({
+              file: new File([pdfBuffer], fileName, { type: "application/pdf" }),
+              purpose: "assistants",
+            });
+
+            const response = await openai.chat.completions.create({
+              model: "gpt-4o",
+              messages: [
+                {
+                  role: "user",
+                  content: [
+                    {
+                      type: "text",
+                      text: "Please analyze this credit report or financial document for a credit restoration or tax optimization case. Provide a brief summary of key information, any issues identified, and recommended next steps.",
                     },
-                  } as any,
-                ],
-              },
-            ],
-            max_tokens: 500,
-          });
-          analysisText = response.choices[0].message.content || "No analysis available";
+                    {
+                      type: "document",
+                      document: {
+                        type: "document",
+                        id: file.id,
+                      },
+                    } as any,
+                  ],
+                },
+              ],
+              max_tokens: 500,
+            });
+
+            analysisText = response.choices[0].message.content || "No analysis available";
+
+            // Clean up uploaded file
+            await openai.beta.files.delete(file.id);
+          } catch (uploadError) {
+            console.error("[AI] PDF upload/analysis error:", uploadError);
+            analysisText = "PDF document received. Our specialists will review it shortly.";
+          }
         } else {
           analysisText = "Unsupported file format. Please upload a PDF or image (PNG/JPG) and we'll analyze it.";
         }
@@ -369,6 +384,25 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         const documents = await storage.getAllDocuments();
         res.json(documents);
       }
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/documents/:id/download", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const document = await storage.getDocumentById(id);
+      if (!document) {
+        return res.status(404).json({ error: "Document not found" });
+      }
+
+      const filePath = path.join(import.meta.dirname, "..", "uploads", document.filePath);
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ error: "File not found on server" });
+      }
+
+      res.download(filePath, document.fileName);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
