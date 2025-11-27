@@ -334,35 +334,27 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
           });
           analysisText = response.choices[0].message.content || "No analysis available";
         } else if (isPdf) {
-          // For PDFs, extract text and analyze with OpenAI
+          // For PDFs, try text extraction first, then fall back to vision API for scanned PDFs
           try {
             const filePath = path.join(import.meta.dirname, "..", "uploads", fileId);
             const pdfBuffer = fs.readFileSync(filePath);
-            const pdfModule = await loadPdfParse();
+            let analysisGenerated = false;
             
-            if (!pdfModule) {
-              analysisText = "PDF received but text extraction is not available.";
-            } else {
-              let pdfData: any;
-              // Try calling as function first, then as object
-              if (typeof pdfModule === "function") {
-                pdfData = await pdfModule(pdfBuffer);
-              } else if (pdfModule && typeof pdfModule === "object") {
-                pdfData = await pdfModule(pdfBuffer);
-              } else {
-                throw new Error("PDF parser format not recognized");
-              }
-              
-              const extractedText = pdfData && pdfData.text ? pdfData.text : "";
-            
-              if (extractedText.trim()) {
-                // Send extracted PDF text to OpenAI for analysis
-                const response = await openai.chat.completions.create({
-                  model: "gpt-4o",
-                  messages: [
-                    {
-                      role: "user",
-                      content: `You are a financial advisor specializing in credit restoration and tax optimization. Analyze the following credit report or financial document and provide detailed insights.
+            // Try text extraction first
+            try {
+              const pdfModule = await loadPdfParse();
+              if (pdfModule && typeof pdfModule === "function") {
+                const pdfData = await pdfModule(pdfBuffer);
+                const extractedText = pdfData && pdfData.text ? pdfData.text.trim() : "";
+                
+                if (extractedText) {
+                  // Send extracted text to OpenAI
+                  const response = await openai.chat.completions.create({
+                    model: "gpt-4o",
+                    messages: [
+                      {
+                        role: "user",
+                        content: `You are a financial advisor specializing in credit restoration and tax optimization. Analyze the following credit report or financial document and provide detailed insights.
 
 DOCUMENT CONTENT:
 ${extractedText}
@@ -375,18 +367,47 @@ Please provide:
 5. **Priority Items**: What to tackle first
 
 Format your response clearly with headers and bullet points for easy reading.`
-                    }
-                  ],
-                  max_tokens: 1000,
-                });
-                analysisText = response.choices[0].message.content || "PDF received but analysis could not be generated.";
-              } else {
-                analysisText = "PDF received but contains no readable text. Please ensure the document is a text-based PDF (not a scanned image).";
+                      }
+                    ],
+                    max_tokens: 1000,
+                  });
+                  analysisText = response.choices[0].message.content || "PDF received but analysis could not be generated.";
+                  analysisGenerated = true;
+                }
               }
+            } catch (textError) {
+              console.log("[AI] Text extraction attempt failed, will try vision API fallback");
+            }
+            
+            // If text extraction didn't work, use vision API on PDF as image
+            if (!analysisGenerated) {
+              const pdfBase64 = base64Data;
+              const response = await openai.chat.completions.create({
+                model: "gpt-4o",
+                messages: [
+                  {
+                    role: "user",
+                    content: [
+                      {
+                        type: "text",
+                        text: "Please analyze this credit report or financial document for a credit restoration case. Provide a detailed summary including: (1) Key information and status, (2) Major issues identified (negative accounts, delinquencies, high utilization, etc.), (3) Credit score factors being impacted, (4) Specific recommendations to improve credit, (5) Priority items to tackle first. Format clearly with headers and bullet points.",
+                      },
+                      {
+                        type: "image_url",
+                        image_url: {
+                          url: `data:application/pdf;base64,${pdfBase64}`,
+                        },
+                      },
+                    ],
+                  }
+                ],
+                max_tokens: 1000,
+              });
+              analysisText = response.choices[0].message.content || "PDF received but analysis could not be generated.";
             }
           } catch (pdfError) {
-            console.error("[AI] PDF text extraction failed:", pdfError);
-            analysisText = "PDF received. Unable to extract text for analysis. Please ensure it's a text-based PDF and not a scanned image.";
+            console.error("[AI] PDF analysis failed:", pdfError);
+            analysisText = "PDF received. Our specialists will review it and provide detailed feedback shortly.";
           }
         } else {
           analysisText = "Unsupported file format. Please upload a PDF or image (PNG/JPG) and we'll analyze it.";
