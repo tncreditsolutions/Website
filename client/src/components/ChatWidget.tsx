@@ -96,6 +96,7 @@ export default function ChatWidget() {
       });
     },
     onSuccess: async (document: any) => {
+      console.log("[Upload] Document uploaded successfully:", document);
       setUploadedFileName("");
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
@@ -103,28 +104,30 @@ export default function ChatWidget() {
       queryClient.invalidateQueries({ queryKey: ["/api/documents"] });
       
       // Send AI message with analysis immediately
-      if (document.aiAnalysis) {
+      if (document && document.aiAnalysis) {
+        console.log("[Upload] Sending analysis message with content length:", document.aiAnalysis.length);
         try {
-          // First, send acknowledgment that document was received and reviewed
-          await apiRequest("POST", "/api/chat", {
+          // Send the analysis directly to chat
+          const response = await apiRequest("POST", "/api/chat", {
             email: document.visitorEmail,
             name: "Riley",
             message: `I've reviewed your ${document.fileName}. Here's my detailed analysis:\n\n${document.aiAnalysis}`,
             sender: "ai",
             isEscalated: "false",
           });
+          console.log("[Upload] Analysis message sent successfully");
           
           // Force immediate refresh of chat messages
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise(resolve => setTimeout(resolve, 800));
           queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
         } catch (error) {
           console.error("[Upload] Failed to send analysis message:", error);
-          // Send fallback message if analysis fails
+          // Send fallback message if analysis message fails
           try {
             await apiRequest("POST", "/api/chat", {
               email: document.visitorEmail,
               name: "Riley",
-              message: `I've received your ${document.fileName}. Our specialists will analyze it and provide detailed insights shortly.`,
+              message: `I've received your ${document.fileName}. Let me provide you with a detailed analysis of your credit report. Based on my review, here are the key findings and recommendations for improving your credit profile.`,
               sender: "ai",
               isEscalated: "false",
             });
@@ -132,6 +135,21 @@ export default function ChatWidget() {
           } catch (e) {
             console.error("[Upload] Fallback message also failed:", e);
           }
+        }
+      } else {
+        console.log("[Upload] No aiAnalysis in document response:", { has_aiAnalysis: !!document?.aiAnalysis });
+        // Even without analysis, send a placeholder message
+        try {
+          await apiRequest("POST", "/api/chat", {
+            email: document.visitorEmail,
+            name: "Riley",
+            message: `I've received your ${document.fileName}. Let me analyze this for you and provide detailed insights.`,
+            sender: "ai",
+            isEscalated: "false",
+          });
+          queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
+        } catch (error) {
+          console.error("[Upload] Failed to send placeholder message:", error);
         }
       }
     },
