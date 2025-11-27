@@ -22,8 +22,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowLeft, Mail, Phone, Calendar, User, MessageSquare, X, MessageCircle, AlertCircle, FileText, Tabs, TabsContent, TabsList, TabsTrigger } from "lucide-react";
+import { ArrowLeft, Mail, Phone, Calendar, User, MessageSquare, X, MessageCircle, AlertCircle, FileText } from "lucide-react";
 import { Link } from "wouter";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { ContactSubmission, ChatMessage, NewsletterSubscription, Document } from "@shared/schema";
 
 export default function Admin() {
@@ -141,52 +142,109 @@ export default function Admin() {
           </TabsList>
 
           <TabsContent value="submissions" className="space-y-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Contact Submissions</CardTitle>
-            <CardDescription>
-              {submissions?.length ? `${submissions.length} total submissions` : "No submissions yet"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {submissionsLoading ? (
-              <div className="text-center py-8 text-muted-foreground">Loading submissions...</div>
-            ) : !submissions || submissions.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No contact submissions yet. Share your website to start receiving leads!
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {/* Desktop Table View */}
-                <div className="hidden md:block overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Contact Info</TableHead>
-                        <TableHead>Service</TableHead>
-                        <TableHead>Referral</TableHead>
-                        <TableHead>Message</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-2xl">Contact Submissions</CardTitle>
+                <CardDescription>
+                  {submissions?.length ? `${submissions.length} total submissions` : "No submissions yet"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {submissionsLoading ? (
+                  <div className="text-center py-8 text-muted-foreground">Loading submissions...</div>
+                ) : !submissions || submissions.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No contact submissions yet. Share your website to start receiving leads!
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Date</TableHead>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Contact Info</TableHead>
+                            <TableHead>Service</TableHead>
+                            <TableHead>Referral</TableHead>
+                            <TableHead>Message</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {submissions.map((submission) => (
+                            <TableRow key={submission.id} data-testid={`row-submission-${submission.id}`}>
+                              <TableCell className="text-sm text-muted-foreground">
+                                <div className="flex items-center gap-2">
+                                  <Calendar className="w-4 h-4" />
+                                  {formatDate(submission.createdAt)}
+                                </div>
+                              </TableCell>
+                              <TableCell className="font-medium">
+                                <div className="flex items-center gap-2">
+                                  <User className="w-4 h-4 text-muted-foreground" />
+                                  {submission.name}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="space-y-1 text-sm">
+                                  <div className="flex items-center gap-2">
+                                    <Phone className="w-4 h-4 text-muted-foreground" />
+                                    <a href={`tel:${submission.phone}`} className="text-primary hover:underline">
+                                      {submission.phone}
+                                    </a>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Mail className="w-4 h-4 text-muted-foreground" />
+                                    <a href={`mailto:${submission.email}`} className="text-primary hover:underline">
+                                      {submission.email}
+                                    </a>
+                                  </div>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant={getServiceBadgeVariant(submission.service)}>
+                                  {getServiceLabel(submission.service)}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-sm">
+                                {submission.referral || <span className="text-muted-foreground">None</span>}
+                              </TableCell>
+                              <TableCell className="max-w-xs">
+                                {submission.message ? (
+                                  <button
+                                    onClick={() => setSelectedSubmission(submission)}
+                                    className="flex items-start gap-2 hover-elevate p-2 rounded-md text-left w-full"
+                                    data-testid={`button-view-message-${submission.id}`}
+                                  >
+                                    <MessageSquare className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                                    <p className="text-sm text-muted-foreground line-clamp-2">
+                                      {submission.message}
+                                    </p>
+                                  </button>
+                                ) : (
+                                  <span className="text-sm text-muted-foreground">No message</span>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    {/* Mobile Card View */}
+                    <div className="md:hidden space-y-4">
                       {submissions.map((submission) => (
-                        <TableRow key={submission.id} data-testid={`row-submission-${submission.id}`}>
-                          <TableCell className="text-sm text-muted-foreground">
-                            <div className="flex items-center gap-2">
-                              <Calendar className="w-4 h-4" />
-                              {formatDate(submission.createdAt)}
+                        <Card key={submission.id} data-testid={`card-submission-${submission.id}`}>
+                          <CardContent className="pt-6 space-y-3">
+                            <div className="flex items-start justify-between gap-2">
+                              <h3 className="font-semibold text-lg">{submission.name}</h3>
+                              <Badge variant={getServiceBadgeVariant(submission.service)}>
+                                {getServiceLabel(submission.service)}
+                              </Badge>
                             </div>
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            <div className="flex items-center gap-2">
-                              <User className="w-4 h-4 text-muted-foreground" />
-                              {submission.name}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="space-y-1 text-sm">
+                            
+                            <div className="space-y-2 text-sm">
                               <div className="flex items-center gap-2">
                                 <Phone className="w-4 h-4 text-muted-foreground" />
                                 <a href={`tel:${submission.phone}`} className="text-primary hover:underline">
@@ -199,93 +257,120 @@ export default function Admin() {
                                   {submission.email}
                                 </a>
                               </div>
+                              <div className="flex items-center gap-2">
+                                <Calendar className="w-4 h-4 text-muted-foreground" />
+                                <span className="text-muted-foreground">{formatDate(submission.createdAt)}</span>
+                              </div>
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={getServiceBadgeVariant(submission.service)}>
-                              {getServiceLabel(submission.service)}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-sm">
-                            {submission.referral || <span className="text-muted-foreground">None</span>}
-                          </TableCell>
-                          <TableCell className="max-w-xs">
-                            {submission.message ? (
-                              <button
-                                onClick={() => setSelectedSubmission(submission)}
-                                className="flex items-start gap-2 hover-elevate p-2 rounded-md text-left w-full"
-                                data-testid={`button-view-message-${submission.id}`}
-                              >
-                                <MessageSquare className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                                <p className="text-sm text-muted-foreground line-clamp-2">
-                                  {submission.message}
-                                </p>
-                              </button>
-                            ) : (
-                              <span className="text-sm text-muted-foreground">No message</span>
+
+                            {submission.referral && (
+                              <div className="pt-2 border-t">
+                                <span className="text-sm font-medium">Referred by: </span>
+                                <span className="text-sm">{submission.referral}</span>
+                              </div>
                             )}
-                          </TableCell>
-                        </TableRow>
+
+                            {submission.message && (
+                              <div className="pt-2 border-t">
+                                <div className="flex items-start gap-2">
+                                  <MessageSquare className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                                  <p className="text-sm text-muted-foreground">{submission.message}</p>
+                                </div>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
                       ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-                {/* Mobile Card View */}
-                <div className="md:hidden space-y-4">
-                  {submissions.map((submission) => (
-                    <Card key={submission.id} data-testid={`card-submission-${submission.id}`}>
-                      <CardContent className="pt-6 space-y-3">
-                        <div className="flex items-start justify-between gap-2">
-                          <h3 className="font-semibold text-lg">{submission.name}</h3>
-                          <Badge variant={getServiceBadgeVariant(submission.service)}>
-                            {getServiceLabel(submission.service)}
-                          </Badge>
+          <TabsContent value="chat">
+            <Card>
+              <CardHeader>
+                <CardTitle>Live Chat</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8 text-muted-foreground">Live chat conversations will appear here</div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="documents">
+            <Card>
+              <CardHeader>
+                <CardTitle>Uploaded Documents</CardTitle>
+                <CardDescription>
+                  {documents?.length ? `${documents.length} total documents` : "No documents yet"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {documentsLoading ? (
+                  <div className="text-center py-8 text-muted-foreground">Loading documents...</div>
+                ) : !documents || documents.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No documents uploaded yet. Visitors can upload PDFs or images in the chat.
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {documents.map((doc) => (
+                      <Card key={doc.id} className="p-4">
+                        <div className="flex items-start gap-3">
+                          <FileText className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm">{doc.fileName}</p>
+                            <p className="text-xs text-muted-foreground">{doc.visitorName} ({doc.visitorEmail})</p>
+                            <p className="text-xs text-muted-foreground mt-1">{formatDate(doc.createdAt)}</p>
+                            {doc.aiAnalysis && (
+                              <div className="mt-3 pt-3 border-t">
+                                <p className="text-xs font-semibold text-muted-foreground mb-1">AI Analysis:</p>
+                                <p className="text-sm text-muted-foreground line-clamp-3">{doc.aiAnalysis}</p>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        
-                        <div className="space-y-2 text-sm">
-                          <div className="flex items-center gap-2">
-                            <Phone className="w-4 h-4 text-muted-foreground" />
-                            <a href={`tel:${submission.phone}`} className="text-primary hover:underline">
-                              {submission.phone}
-                            </a>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Mail className="w-4 h-4 text-muted-foreground" />
-                            <a href={`mailto:${submission.email}`} className="text-primary hover:underline">
-                              {submission.email}
-                            </a>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">{formatDate(submission.createdAt)}</span>
-                          </div>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="newsletter">
+            <Card>
+              <CardHeader>
+                <CardTitle>Newsletter Subscriptions</CardTitle>
+                <CardDescription>
+                  {newsletterSubscriptions?.length ? `${newsletterSubscriptions.length} total subscribers` : "No subscribers yet"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {newsletterLoading ? (
+                  <div className="text-center py-8 text-muted-foreground">Loading subscriptions...</div>
+                ) : !newsletterSubscriptions || newsletterSubscriptions.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No newsletter subscribers yet.
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {newsletterSubscriptions.map((sub) => (
+                      <div key={sub.id} className="flex items-center justify-between p-3 bg-card border rounded-lg">
+                        <div>
+                          <p className="text-sm font-medium">{sub.email}</p>
+                          <p className="text-xs text-muted-foreground">{formatDate(sub.createdAt)}</p>
                         </div>
-
-                        {submission.referral && (
-                          <div className="pt-2 border-t">
-                            <span className="text-sm font-medium">Referred by: </span>
-                            <span className="text-sm">{submission.referral}</span>
-                          </div>
-                        )}
-
-                        {submission.message && (
-                          <div className="pt-2 border-t">
-                            <div className="flex items-start gap-2">
-                              <MessageSquare className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                              <p className="text-sm text-muted-foreground">{submission.message}</p>
-                            </div>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
       {/* Full Message Dialog */}
       <Dialog open={!!selectedSubmission} onOpenChange={() => setSelectedSubmission(null)}>
@@ -557,53 +642,7 @@ export default function Admin() {
         </DialogContent>
       </Dialog>
 
-      {/* Newsletter Subscriptions Section */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-8">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Newsletter Subscriptions</CardTitle>
-            <CardDescription>
-              {newsletterSubscriptions?.length ? `${newsletterSubscriptions.length} total subscribers` : "No subscribers yet"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {newsletterLoading ? (
-              <div className="text-center py-8 text-muted-foreground">Loading subscribers...</div>
-            ) : !newsletterSubscriptions || newsletterSubscriptions.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No newsletter subscribers yet. Promote your newsletter to start building your list!
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Subscribed</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {[...newsletterSubscriptions].reverse().map((sub) => (
-                      <TableRow key={sub.id} data-testid={`row-newsletter-${sub.id}`}>
-                        <TableCell>
-                          <a href={`mailto:${sub.email}`} className="text-primary hover:underline text-sm">
-                            {sub.email}
-                          </a>
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="w-4 h-4" />
-                            {formatDate(sub.createdAt)}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        </Tabs>
       </div>
     </div>
   );
