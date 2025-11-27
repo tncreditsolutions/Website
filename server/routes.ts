@@ -406,16 +406,21 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
               console.log("[AI] PDF module loaded:", !!pdfModule);
               
               if (pdfModule && typeof pdfModule === "function") {
-                // PDFParse is a class, so we need to instantiate it with 'new' and then call parse
+                // PDFParse can be called as function or used as class constructor
                 let pdfData;
                 try {
-                  // Try calling as function first
+                  // Try calling as function first (pdf-parse main export)
                   pdfData = await pdfModule(pdfBuffer);
                 } catch (e) {
-                  // If that fails, try as a class constructor
-                  console.log("[AI] Trying PDFParse as class constructor");
-                  const instance = new pdfModule();
-                  pdfData = await instance.parse(pdfBuffer);
+                  // If that fails, try as a class constructor with options
+                  console.log("[AI] Trying PDFParse as class constructor with options");
+                  try {
+                    const instance = new pdfModule({});
+                    pdfData = await instance.parse(pdfBuffer);
+                  } catch (classError) {
+                    console.error("[AI] Class constructor also failed:", classError instanceof Error ? classError.message : String(classError));
+                    throw classError;
+                  }
                 }
                 const extractedText = pdfData && pdfData.text ? pdfData.text.trim() : "";
                 console.log("[AI] Extracted text length:", extractedText.length, "characters");
