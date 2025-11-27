@@ -288,13 +288,41 @@ export default function Admin() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="chat">
+          <TabsContent value="chat" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Live Chat</CardTitle>
+                <CardTitle className="text-2xl">Live Chat Messages</CardTitle>
+                <CardDescription>
+                  {chatMessages?.length ? `${chatMessages.length} total messages` : "No messages yet"}
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-muted-foreground">Live chat conversations will appear here</div>
+                {chatLoading ? (
+                  <div className="text-center py-8 text-muted-foreground">Loading chat messages...</div>
+                ) : !chatMessages || chatMessages.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No chat messages yet. Visitors will appear here when they start chatting.
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {[...chatMessages].reverse().map((msg) => (
+                      <Card key={msg.id} className="p-4 hover-elevate cursor-pointer" onClick={() => {
+                        setSelectedChatMessage(msg);
+                      }} data-testid={`card-chat-message-${msg.id}`}>
+                        <div className="space-y-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <p className="font-medium text-sm">{msg.name || "Unknown"}</p>
+                              <p className="text-xs text-muted-foreground">{msg.email}</p>
+                            </div>
+                            <p className="text-xs text-muted-foreground flex-shrink-0">{formatDate(msg.createdAt)}</p>
+                          </div>
+                          <p className="text-sm text-muted-foreground line-clamp-2">{msg.message.replace(/\s*\[ESCALATE:(YES|NO)\]\s*$/, "")}</p>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -642,46 +670,6 @@ export default function Admin() {
           )}
         </DialogContent>
       </Dialog>
-
-      {/* Chat Messages Section */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-8">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Live Chat Messages</CardTitle>
-            <CardDescription>
-              {chatMessages?.length ? `${chatMessages.length} total messages` : "No messages yet"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {chatLoading ? (
-              <div className="text-center py-8 text-muted-foreground">Loading chat messages...</div>
-            ) : !chatMessages || chatMessages.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No chat messages yet. Visitors will appear here when they start chatting.
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {[...chatMessages].reverse().map((msg) => (
-                  <Card key={msg.id} className="p-4 hover-elevate cursor-pointer" onClick={() => {
-                    setSelectedChatMessage(msg);
-                  }} data-testid={`card-chat-message-${msg.id}`}>
-                    <div className="space-y-2">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <p className="font-medium text-sm">{msg.name || "Unknown"}</p>
-                          <p className="text-xs text-muted-foreground">{msg.email}</p>
-                        </div>
-                        <p className="text-xs text-muted-foreground flex-shrink-0">{formatDate(msg.createdAt)}</p>
-                      </div>
-                      <p className="text-sm text-muted-foreground line-clamp-2">{msg.message.replace(/\s*\[ESCALATE:(YES|NO)\]\s*$/, "")}</p>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
 
       {/* Full Chat Dialog */}
       <Dialog open={!!selectedChatMessage && !isReplying} onOpenChange={() => setSelectedChatMessage(null)}>
