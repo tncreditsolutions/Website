@@ -271,6 +271,13 @@ export default function ChatWidget() {
     const messageToSend = message.trim();
     setMessage("");
     
+    // If user continues the conversation, allow new escalations to show
+    // (clear the dismissed tracking so fresh escalation reasons can appear)
+    if (dismissedEscalationIdRef.current !== null) {
+      console.log("User continuing conversation after dismissing escalation. Allowing new escalations.");
+      dismissedEscalationIdRef.current = null;
+    }
+    
     sendMutation.mutate({
       name: name.trim(),
       email: email.trim(),
