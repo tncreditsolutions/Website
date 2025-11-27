@@ -18,32 +18,12 @@ console.log("[AI] OpenAI initialized:", !!openai, "API key available:", !!proces
 function loadPdfParseSync() {
   if (!pdfParse) {
     try {
-      const module = require("pdf-parse");
-      // pdf-parse exports the function as default or as the module itself
-      pdfParse = module.default || module;
-      
-      // If it's an object, try to find the parse function
-      if (typeof pdfParse !== "function") {
-        console.log("[PDF] Module is object, checking for parse function");
-        // Look for a parse or similar function in the object
-        for (const key in module) {
-          if (typeof module[key] === "function" && (key === "parse" || key === "default" || key.toLowerCase().includes("parse"))) {
-            pdfParse = module[key];
-            console.log("[PDF] Found parse function at key:", key);
-            break;
-          }
-        }
-      }
-      
-      // Last resort - if module itself is callable
-      if (typeof pdfParse !== "function" && typeof module === "function") {
-        pdfParse = module;
-      }
-      
+      // pdf-parse is the parse function itself
+      pdfParse = require("pdf-parse");
       if (typeof pdfParse === "function") {
         console.log("[PDF] PDF parse module loaded successfully");
       } else {
-        console.error("[PDF] Could not load pdf-parse as function. Module keys:", Object.keys(module).slice(0, 10));
+        console.error("[PDF] pdf-parse is not a function, type:", typeof pdfParse);
         pdfParse = null;
       }
     } catch (e) {
@@ -406,22 +386,8 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
               console.log("[AI] PDF module loaded:", !!pdfModule);
               
               if (pdfModule && typeof pdfModule === "function") {
-                // PDFParse can be called as function or used as class constructor
-                let pdfData;
-                try {
-                  // Try calling as function first (pdf-parse main export)
-                  pdfData = await pdfModule(pdfBuffer);
-                } catch (e) {
-                  // If that fails, try as a class constructor with options
-                  console.log("[AI] Trying PDFParse as class constructor with options");
-                  try {
-                    const instance = new pdfModule({});
-                    pdfData = await instance.parse(pdfBuffer);
-                  } catch (classError) {
-                    console.error("[AI] Class constructor also failed:", classError instanceof Error ? classError.message : String(classError));
-                    throw classError;
-                  }
-                }
+                // Call pdf-parse directly as a function
+                const pdfData = await pdfModule(pdfBuffer);
                 const extractedText = pdfData && pdfData.text ? pdfData.text.trim() : "";
                 console.log("[AI] Extracted text length:", extractedText.length, "characters");
                 
