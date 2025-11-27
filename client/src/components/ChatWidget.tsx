@@ -181,6 +181,9 @@ export default function ChatWidget() {
         isEscalated: "true",
       });
       
+      // Reset escalation tracking
+      escalationDetectedAtRef.current = null;
+      escalationMessageIdRef.current = null;
       setIsEscalated(true);
       queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
     } catch (error) {
@@ -310,6 +313,8 @@ export default function ChatWidget() {
                       <button
                         onClick={() => {
                           escalationDetectedAtRef.current = null;
+                          escalationMessageIdRef.current = null;
+                          setRenderTrigger(t => t + 1);
                           localStorage.setItem(ESCALATE_DISMISSED_KEY, "true");
                         }}
                         className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 mt-0.5"
