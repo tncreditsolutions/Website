@@ -503,121 +503,161 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
       const doc = new PDFDocument({ margin: 0, size: "A4" });
       doc.pipe(res);
 
-      const PAGE_HEIGHT = 792; // A4 height in points
-      const FOOTER_HEIGHT = 60;
-      const MAX_CONTENT_Y = PAGE_HEIGHT - FOOTER_HEIGHT;
+      // Color scheme matching website design
+      const PRIMARY_BLUE = "#2c5aa0"; // HSL 217 91% 45% converted to hex
+      const LIGHT_BG = "#f8f9fc";
+      const TEXT_DARK = "#1a1f35";
+      const TEXT_LIGHT = "#6b7280";
+      const ACCENT_GRAY = "#e5e7eb";
+      const CARD_BG = "#ffffff";
 
-      // ===== PREMIUM HEADER SECTION =====
-      doc.rect(0, 0, 612, 145).fill("#0f2d6e");
-      doc.rect(0, 0, 612, 6).fill("#fbbf24");
-      doc.rect(0, 139, 612, 6).fill("#fbbf24");
+      const PAGE_WIDTH = 612;
+      const PAGE_HEIGHT = 792;
+      const MARGIN = 40;
+      const FOOTER_HEIGHT = 50;
+      const MAX_CONTENT_Y = PAGE_HEIGHT - FOOTER_HEIGHT - MARGIN;
 
-      doc.fontSize(32).font("Helvetica-Bold").fillColor("#ffffff");
-      doc.text("TN CREDIT SOLUTIONS", 50, 28);
+      // ===== ELEGANT HEADER SECTION =====
+      doc.rect(0, 0, PAGE_WIDTH, 120).fill(LIGHT_BG);
+      doc.rect(0, 0, PAGE_WIDTH, 4).fill(PRIMARY_BLUE);
       
-      doc.fontSize(10).font("Helvetica").fillColor("#c5d3ff");
-      doc.text("Professional Credit Restoration & Tax Optimization Services", 50, 65);
-
-      doc.fontSize(14).font("Helvetica-Bold").fillColor("#fbbf24");
-      doc.text("CREDIT ANALYSIS REPORT", 50, 85);
-
-      doc.fontSize(9).font("Helvetica").fillColor("#e0e7ff");
-      doc.text(`Client: ${document.visitorName}  •  Date: ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}`, 50, 108);
-
-      doc.moveTo(0, 145).lineTo(612, 145).strokeColor("#f3f4f6").lineWidth(0.75).stroke();
+      doc.fontSize(28).font("Helvetica-Bold").fillColor(PRIMARY_BLUE);
+      doc.text("CREDIT ANALYSIS REPORT", MARGIN, 20);
       
-      let yPosition = 160;
-      const lines = document.aiAnalysis.split("\n");
-      let isFirstSection = true;
+      doc.fontSize(10).font("Helvetica").fillColor(TEXT_LIGHT);
+      doc.text("TN Credit Solutions • Professional Financial Analysis", MARGIN, 52);
       
-      for (const line of lines) {
-        // Check if we need a new page
+      doc.fontSize(9).font("Helvetica").fillColor(TEXT_DARK);
+      doc.text(`Client: ${document.visitorName}`, MARGIN, 70);
+      doc.text(`Generated: ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`, MARGIN, 85);
+      
+      // Subtle divider
+      doc.moveTo(MARGIN, 110).lineTo(PAGE_WIDTH - MARGIN, 110).strokeColor(ACCENT_GRAY).lineWidth(1).stroke();
+      
+      let yPosition = 130;
+
+      // Parse and intelligently format the analysis
+      const analysisText = document.aiAnalysis;
+      
+      // Extract sections
+      const mainFindingsMatch = analysisText.match(/#### Main Findings([\s\S]*?)(?=#### |$)/);
+      const keyMetricsMatch = analysisText.match(/#### Key Metrics([\s\S]*?)(?=#### |$)/);
+      const areasOfConcernMatch = analysisText.match(/#### Areas of Concern([\s\S]*?)(?=#### |$)/);
+      const recommendedStepsMatch = analysisText.match(/#### Recommended Next Steps([\s\S]*?)(?=#### |$)/);
+
+      // Helper function to add section header
+      const addSectionHeader = (title: string) => {
+        if (yPosition > MAX_CONTENT_Y - 30) {
+          doc.addPage();
+          yPosition = MARGIN;
+        }
+        doc.rect(MARGIN, yPosition - 2, PAGE_WIDTH - MARGIN * 2, 3).fill(PRIMARY_BLUE);
+        doc.fontSize(13).font("Helvetica-Bold").fillColor(PRIMARY_BLUE);
+        doc.text(title, MARGIN, yPosition + 8);
+        yPosition += 32;
+      };
+
+      // Helper function to add bullet point
+      const addBulletPoint = (text: string) => {
         if (yPosition > MAX_CONTENT_Y - 20) {
           doc.addPage();
-          yPosition = 40;
+          yPosition = MARGIN;
         }
+        const cleanText = text.replace(/^[\s•▪\-*]+/, "").trim();
+        if (!cleanText) return;
+        
+        doc.fontSize(9).fillColor(PRIMARY_BLUE);
+        doc.text("•", MARGIN + 5, yPosition, { width: 15 });
+        
+        doc.fontSize(9.5).fillColor(TEXT_DARK).font("Helvetica");
+        const wrappedHeight = doc.heightOfString(cleanText, { width: PAGE_WIDTH - MARGIN * 2 - 25 });
+        doc.text(cleanText, MARGIN + 25, yPosition, { width: PAGE_WIDTH - MARGIN * 2 - 25 });
+        yPosition += wrappedHeight + 8;
+      };
 
-        if (line.includes("CREDIT ANALYSIS SUMMARY") || line.includes("═") || line.includes("━") || line.includes("Summary Analysis") || line.includes("**Summary")) {
-          continue;
+      // Helper function to add metric row
+      const addMetricRow = (label: string, value: string) => {
+        if (yPosition > MAX_CONTENT_Y - 20) {
+          doc.addPage();
+          yPosition = MARGIN;
         }
+        doc.fontSize(9).font("Helvetica-Bold").fillColor(TEXT_DARK);
+        doc.text(label, MARGIN + 15, yPosition);
         
-        // Detect key metrics lines (contain colons and values)
-        const isMetricLine = /^[^:]+:\s*[\$\d%]/.test(line);
+        doc.fontSize(9).font("Helvetica").fillColor(PRIMARY_BLUE);
+        doc.text(value, PAGE_WIDTH / 2 + 20, yPosition);
         
-        if (line.match(/^\*\*[A-Z\s:]+\*\*$/)) {
-          // Section header with premium design
-          if (!isFirstSection) {
-            yPosition += 6;
+        yPosition += 14;
+      };
+
+      // ===== MAIN FINDINGS SECTION =====
+      if (mainFindingsMatch) {
+        addSectionHeader("Main Findings");
+        const findingsText = mainFindingsMatch[1];
+        const findingsLines = findingsText.split("\n").filter(l => l.trim().length > 0);
+        for (const line of findingsLines) {
+          if (line.match(/^-\s+/)) {
+            addBulletPoint(line);
           }
+        }
+        yPosition += 6;
+      }
+
+      // ===== KEY METRICS SECTION =====
+      if (keyMetricsMatch) {
+        addSectionHeader("Key Metrics");
+        const metricsText = keyMetricsMatch[1];
+        const metricsLines = metricsText.split("\n").filter(l => l.trim().length > 0);
+        
+        for (const line of metricsLines) {
+          const cleanLine = line.replace(/^\s*-\s*/, "").replace(/\*\*/g, "").trim();
+          if (cleanLine.length === 0) continue;
           
-          const sectionTitle = line.replace(/\*\*/g, "").trim();
-          
-          // Gold vertical accent bar
-          doc.rect(40, yPosition, 4, 18).fill("#fbbf24");
-          
-          // Section title with dark blue
-          doc.fontSize(12).font("Helvetica-Bold").fillColor("#0f2d6e");
-          doc.text(sectionTitle, 50, yPosition + 1);
-          
-          // Elegant underline
-          doc.moveTo(50, yPosition + 17).lineTo(560, yPosition + 17).strokeColor("#e5e7eb").lineWidth(1).stroke();
-          
-          yPosition += 28;
-          isFirstSection = false;
-        } else if (isMetricLine && line.includes("**")) {
-          // Key metrics with bold labels - style as key-value
-          const cleanLine = line.replace(/\*\*/g, "");
-          const parts = cleanLine.split(":");
-          
-          if (parts.length === 2) {
-            doc.fontSize(9).font("Helvetica-Bold").fillColor("#0f2d6e");
-            doc.text(parts[0] + ":", 55, yPosition);
-            
-            doc.fontSize(9).font("Helvetica").fillColor("#1e40af");
-            doc.text(parts[1].trim(), 320, yPosition);
-            
-            yPosition += 14;
-          } else {
-            doc.fontSize(9.5).fillColor("#4b5563").font("Helvetica");
-            const wrappedHeight = doc.heightOfString(cleanLine, { width: 510 });
-            doc.text(cleanLine, 50, yPosition, { width: 510 });
-            yPosition += wrappedHeight + 5;
+          if (cleanLine.includes(":")) {
+            const [label, value] = cleanLine.split(":").map(s => s.trim());
+            addMetricRow(label, value);
+          } else if (cleanLine.match(/^[A-Z]/)) {
+            addBulletPoint(cleanLine);
           }
-        } else if (line.includes("▪") || line.match(/^\d+\./)) {
-          // Bullet points
-          const cleanContent = line.replace(/^[\d•▪\.\s]+/, "").trim();
-          
-          doc.fontSize(9).fillColor("#fbbf24").font("Helvetica-Bold");
-          doc.text("▪", 48, yPosition);
-          
-          doc.fontSize(9.5).fillColor("#374151").font("Helvetica");
-          const wrappedHeight = doc.heightOfString(cleanContent, { width: 495 });
-          doc.text(cleanContent, 62, yPosition, { width: 495 });
-          
-          yPosition += wrappedHeight + 5;
-        } else if (line.trim().length > 0) {
-          // Regular paragraphs
-          doc.fontSize(9.5).fillColor("#4b5563").font("Helvetica");
-          const wrappedHeight = doc.heightOfString(line, { width: 510 });
-          doc.text(line, 50, yPosition, { width: 510 });
-          
-          yPosition += wrappedHeight + 4;
-        } else {
-          yPosition += 2;
+        }
+        yPosition += 6;
+      }
+
+      // ===== AREAS OF CONCERN SECTION =====
+      if (areasOfConcernMatch) {
+        addSectionHeader("Areas of Concern");
+        const concernText = areasOfConcernMatch[1];
+        const concernLines = concernText.split("\n").filter(l => l.trim().length > 0);
+        for (const line of concernLines) {
+          if (line.match(/^-\s+/)) {
+            addBulletPoint(line);
+          }
+        }
+        yPosition += 6;
+      }
+
+      // ===== RECOMMENDED NEXT STEPS SECTION =====
+      if (recommendedStepsMatch) {
+        addSectionHeader("Recommended Next Steps");
+        const stepsText = recommendedStepsMatch[1];
+        const stepsLines = stepsText.split("\n").filter(l => l.trim().length > 0);
+        for (const line of stepsLines) {
+          if (line.match(/^-\s+/) || line.match(/^\*\*/)) {
+            addBulletPoint(line);
+          }
         }
       }
 
-      // ===== DYNAMIC FOOTER SECTION =====
-      const footerY = Math.max(yPosition + 15, PAGE_HEIGHT - FOOTER_HEIGHT);
+      // ===== FOOTER SECTION =====
+      const footerY = PAGE_HEIGHT - FOOTER_HEIGHT;
+      doc.moveTo(MARGIN, footerY).lineTo(PAGE_WIDTH - MARGIN, footerY).strokeColor(ACCENT_GRAY).lineWidth(1).stroke();
       
-      doc.moveTo(0, footerY).lineTo(612, footerY).strokeColor("#d1d5db").lineWidth(1).stroke();
-      doc.rect(0, PAGE_HEIGHT - 6, 612, 6).fill("#fbbf24");
+      doc.fontSize(8).fillColor(TEXT_LIGHT).font("Helvetica");
+      doc.text("This analysis is confidential and for personal use only. For professional financial advice, consult a qualified advisor.", 
+               MARGIN, footerY + 10, { width: PAGE_WIDTH - MARGIN * 2, align: "center" });
       
-      doc.fontSize(8).fillColor("#6b7280").font("Helvetica");
-      doc.text("Confidential & For Personal Use Only", 50, footerY + 8, { align: "center" });
-      
-      doc.fontSize(7).fillColor("#9ca3af").font("Helvetica");
-      doc.text("© 2025 TN Credit Solutions | Professional Credit & Tax Services", 50, footerY + 20, { align: "center" });
+      doc.fontSize(7).fillColor(TEXT_LIGHT);
+      doc.text("© 2025 TN Credit Solutions", MARGIN, footerY + 30, { align: "center" });
 
       doc.end();
     } catch (error: any) {
