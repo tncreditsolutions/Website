@@ -18,8 +18,7 @@ export default function ChatWidget() {
   const [message, setMessage] = useState("");
   const [isNewVisitor, setIsNewVisitor] = useState(true);
   const [isEscalated, setIsEscalated] = useState(false);
-  const [renderTrigger, setRenderTrigger] = useState(0); // Force re-render after 5 seconds
-  const escalationDetectedAtRef = useRef<number | null>(null);
+  const [escalationTime, setEscalationTime] = useState<number | null>(null);
   const escalationMessageIdRef = useRef<string | null>(null);
   const { toast } = useToast();
 
@@ -83,38 +82,32 @@ export default function ChatWidget() {
     }
     
     if (escalatedMessage && escalationMessageIdRef.current !== escalatedMessage.id) {
-      // NEW escalation detected
+      // NEW escalation detected - record the time
       console.log("New escalation detected, ID:", escalatedMessage.id);
       escalationMessageIdRef.current = escalatedMessage.id;
-      escalationDetectedAtRef.current = Date.now();
+      setEscalationTime(Date.now());
       
-      // Schedule timer to trigger re-render after 5 seconds
+      // Schedule timer to show button after 5 seconds
       const timeoutId = setTimeout(() => {
-        console.log("5 seconds passed, triggering re-render");
-        setRenderTrigger(t => t + 1);
+        console.log("5 seconds passed, showing button now");
+        setEscalationTime(prev => prev); // Force re-render by updating state
       }, 5000);
       
       return () => clearTimeout(timeoutId);
     } else if (!escalatedMessage) {
       // No escalation - reset
       escalationMessageIdRef.current = null;
-      escalationDetectedAtRef.current = null;
+      setEscalationTime(null);
     }
   }, [allMessages]);
   
   // Compute whether to show button based on timestamp (5+ seconds passed)
   const showButton = (() => {
     if (isEscalated) return false;
-    if (!escalationDetectedAtRef.current) return false;
+    if (!escalationTime) return false;
     
-    const elapsedMs = Date.now() - escalationDetectedAtRef.current;
-    const shouldShow = elapsedMs >= 5000;
-    
-    if (shouldShow) {
-      console.log("✓ Button SHOWING - Elapsed time:", elapsedMs + "ms");
-    }
-    
-    return shouldShow;
+    const elapsedMs = Date.now() - escalationTime;
+    return elapsedMs >= 5000;
   })();
 
   const handleInitialSubmit = async (e: React.FormEvent) => {
@@ -182,8 +175,8 @@ export default function ChatWidget() {
       });
       
       // Reset escalation tracking
-      escalationDetectedAtRef.current = null;
       escalationMessageIdRef.current = null;
+      setEscalationTime(null);
       setIsEscalated(true);
       queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
     } catch (error) {
@@ -312,9 +305,8 @@ export default function ChatWidget() {
                       </div>
                       <button
                         onClick={() => {
-                          escalationDetectedAtRef.current = null;
                           escalationMessageIdRef.current = null;
-                          setRenderTrigger(t => t + 1);
+                          setEscalationTime(null);
                           localStorage.setItem(ESCALATE_DISMISSED_KEY, "true");
                         }}
                         className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 mt-0.5"
