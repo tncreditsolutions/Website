@@ -100,11 +100,11 @@ export default function ChatWidget() {
       }
       queryClient.invalidateQueries({ queryKey: ["/api/documents"] });
       
-      // Send AI message with analysis
+      // Send AI message with analysis - use document's visitorEmail
       if (document.aiAnalysis) {
         try {
           await apiRequest("POST", "/api/chat", {
-            email,
+            email: document.visitorEmail,
             name: "Riley",
             message: `I've analyzed your ${document.fileName}:\n\n${document.aiAnalysis}`,
             sender: "ai",
