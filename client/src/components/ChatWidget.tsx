@@ -77,14 +77,15 @@ export default function ChatWidget() {
       return new Promise((resolve, reject) => {
         reader.onload = async () => {
           try {
-            const result = await apiRequest("POST", "/api/documents", {
+            const response = await apiRequest("POST", "/api/documents", {
               visitorEmail: email,
               visitorName: name,
               fileName: file.name,
               fileType: file.type,
               fileContent: reader.result as string,
             });
-            resolve(result);
+            const document = await response.json();
+            resolve(document);
           } catch (error) {
             reject(error);
           }
