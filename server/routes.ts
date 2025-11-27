@@ -529,16 +529,19 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         if (line.match(/^\*\*[A-Z\s]+\*\*$/)) {
           // Section header
           doc.fontSize(13).font("Helvetica-Bold").fillColor("#1e40af");
-          doc.text(line.replace(/\*\*/g, ""), { marginBottom: 8 });
+          doc.text(line.replace(/\*\*/g, ""));
+          doc.moveDown(0.5);
           doc.fontSize(11).font("Helvetica").fillColor("#333");
         } else if (line.includes("▪") || line.match(/^\d+\./)) {
           // Bullet point or numbered list
           doc.fontSize(10).fillColor("#555");
-          doc.text(line, { marginBottom: 6 });
+          doc.text(line);
+          doc.moveDown(0.3);
         } else if (line.trim().length > 0) {
           // Regular text
           doc.fontSize(10).fillColor("#555");
-          doc.text(line, { marginBottom: 4 });
+          doc.text(line);
+          doc.moveDown(0.2);
         } else {
           // Empty line for spacing
           doc.moveDown(0.3);
