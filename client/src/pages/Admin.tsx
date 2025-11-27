@@ -31,10 +31,31 @@ export default function Admin() {
   const [selectedSubmission, setSelectedSubmission] = useState<ContactSubmission | null>(null);
   const [selectedChatMessage, setSelectedChatMessage] = useState<ChatMessage | null>(null);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [documentBlobUrl, setDocumentBlobUrl] = useState<string>("");
   const [isReplying, setIsReplying] = useState(false);
   const [adminReplyMessage, setAdminReplyMessage] = useState("");
   const [activeTab, setActiveTab] = useState("submissions");
   const { toast } = useToast();
+
+  const handleViewDocument = async (doc: Document) => {
+    setSelectedDocument(doc);
+    try {
+      const response = await fetch(`/api/documents/${doc.id}/view`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch document");
+      }
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      setDocumentBlobUrl(blobUrl);
+    } catch (error) {
+      console.error("Error loading document:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load document preview",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Reset chat state when switching tabs
   const handleTabChange = (value: string) => {
@@ -369,7 +390,7 @@ export default function Admin() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => setSelectedDocument(doc)}
+                              onClick={() => handleViewDocument(doc)}
                               data-testid={`button-view-document-${doc.id}`}
                             >
                               <Eye className="w-4 h-4" />
@@ -596,7 +617,11 @@ export default function Admin() {
       </Dialog>
 
       {/* Document Viewer Dialog */}
-      <Dialog open={!!selectedDocument} onOpenChange={() => setSelectedDocument(null)}>
+      <Dialog open={!!selectedDocument} onOpenChange={() => {
+        setSelectedDocument(null);
+        if (documentBlobUrl) URL.revokeObjectURL(documentBlobUrl);
+        setDocumentBlobUrl("");
+      }}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto" data-testid="dialog-view-document">
           <DialogHeader>
             <DialogTitle>View Document</DialogTitle>
@@ -608,19 +633,27 @@ export default function Admin() {
             <div className="space-y-4">
               {selectedDocument.fileType.startsWith('image/') ? (
                 <div className="flex justify-center bg-muted p-4 rounded-md">
-                  <img 
-                    src={`/api/documents/${selectedDocument.id}/view`} 
-                    alt={selectedDocument.fileName}
-                    className="max-w-full max-h-96 rounded"
-                  />
+                  {documentBlobUrl ? (
+                    <img 
+                      src={documentBlobUrl} 
+                      alt={selectedDocument.fileName}
+                      className="max-w-full max-h-96 rounded"
+                    />
+                  ) : (
+                    <div className="text-muted-foreground">Loading image...</div>
+                  )}
                 </div>
               ) : selectedDocument.fileType === 'application/pdf' ? (
                 <div className="bg-muted p-4 rounded-md">
-                  <iframe
-                    src={`/api/documents/${selectedDocument.id}/view`}
-                    className="w-full h-96 border rounded"
-                    title={selectedDocument.fileName}
-                  />
+                  {documentBlobUrl ? (
+                    <iframe
+                      src={documentBlobUrl}
+                      className="w-full h-96 border rounded"
+                      title={selectedDocument.fileName}
+                    />
+                  ) : (
+                    <div className="text-center text-muted-foreground py-8">Loading PDF...</div>
+                  )}
                 </div>
               ) : (
                 <div className="bg-muted p-4 rounded-md text-center text-muted-foreground">
