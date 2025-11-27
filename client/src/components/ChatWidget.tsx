@@ -95,21 +95,14 @@ export default function ChatWidget() {
       });
     },
     onSuccess: async (document: any) => {
-      console.log("[Upload] Full document response:", document);
-      console.log("[Upload] Document keys:", Object.keys(document));
-      console.log("[Upload] Document.aiAnalysis:", document.aiAnalysis);
-      console.log("[Upload] Document.aiAnalysis type:", typeof document.aiAnalysis);
-      console.log("[Upload] Has aiAnalysis field:", "aiAnalysis" in document);
-      
       setUploadedFileName("");
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
       queryClient.invalidateQueries({ queryKey: ["/api/documents"] });
       
-      // Send AI message with analysis - use document's visitorEmail
+      // Send AI message with analysis
       if (document.aiAnalysis) {
-        console.log("[Upload] Sending AI message about analysis");
         try {
           await apiRequest("POST", "/api/chat", {
             email: document.visitorEmail,
@@ -118,12 +111,9 @@ export default function ChatWidget() {
             sender: "ai",
           });
           queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
-          console.log("[Upload] AI message sent successfully");
         } catch (error) {
           console.error("[Upload] Failed to send analysis message:", error);
         }
-      } else {
-        console.log("[Upload] No aiAnalysis in document response, skipping AI message");
       }
     },
     onError: (error: any) => {

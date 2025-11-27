@@ -326,18 +326,16 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
       }
 
       // Update storage with analysis
-      console.log("[API] About to update analysis:", { docId: document.id, analysisText: analysisText.substring(0, 50) });
       await storage.updateDocumentAnalysis(document.id, analysisText);
       
       // Fetch the updated document from storage to ensure aiAnalysis is included
       const updatedDoc = await storage.getDocumentById(document.id);
-      console.log("[API] Document after update:", { id: updatedDoc?.id, hasAnalysis: !!updatedDoc?.aiAnalysis, analysis: updatedDoc?.aiAnalysis?.substring(0, 50) });
       
       if (!updatedDoc) {
         return res.status(500).json({ error: "Failed to retrieve updated document" });
       }
       
-      // Explicitly construct response with all fields
+      // Construct response with all fields, converting Date to ISO string
       const responseBody = {
         id: updatedDoc.id,
         visitorEmail: updatedDoc.visitorEmail,
@@ -351,7 +349,6 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         createdAt: updatedDoc.createdAt instanceof Date ? updatedDoc.createdAt.toISOString() : updatedDoc.createdAt,
       };
       
-      console.log("[API] Sending response:", { hasAnalysis: !!responseBody.aiAnalysis, fields: Object.keys(responseBody) });
       res.json(responseBody);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
