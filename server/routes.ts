@@ -16,23 +16,24 @@ console.log("[AI] OpenAI initialized:", !!openai, "API key available:", !!proces
 async function loadPdfParse() {
   if (!pdfParse) {
     try {
-      // Try direct default export first
+      // pdf-parse default export is the parse function
       const module = await import("pdf-parse");
-      // pdf-parse exports a function as default
-      pdfParse = module.default || module;
+      pdfParse = module.default;
+      
       if (typeof pdfParse !== "function") {
-        console.error("[PDF] Module is not a function, trying alternative export");
-        // Try to find the actual parse function
-        for (const key in module) {
-          if (typeof module[key] === "function") {
-            pdfParse = module[key];
-            console.log("[PDF] Found function at key:", key);
-            break;
-          }
+        console.error("[PDF] Module.default is not a function, it is:", typeof pdfParse);
+        // Try the module itself as fallback
+        if (typeof module === "function") {
+          pdfParse = module;
+        } else {
+          console.error("[PDF] Could not find pdf-parse function");
+          return null;
         }
       }
+      console.log("[PDF] PDF parse module loaded successfully");
     } catch (e) {
       console.error("[PDF] Failed to load pdf-parse:", e);
+      return null;
     }
   }
   return pdfParse;
