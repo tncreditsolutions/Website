@@ -21,6 +21,7 @@ export default function ChatWidget() {
   const [escalationTime, setEscalationTime] = useState<number | null>(null);
   const [shouldShowEscalationButton, setShouldShowEscalationButton] = useState(false);
   const escalationMessageIdRef = useRef<string | null>(null);
+  const escalationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
   // Load visitor info from localStorage on mount
@@ -89,6 +90,10 @@ export default function ChatWidget() {
         console.log("No escalated message found, resetting timer");
         escalationMessageIdRef.current = null;
         setShouldShowEscalationButton(false);
+        if (escalationTimeoutRef.current) {
+          clearTimeout(escalationTimeoutRef.current);
+          escalationTimeoutRef.current = null;
+        }
       }
       return;
     }
@@ -96,20 +101,29 @@ export default function ChatWidget() {
     // Check if this is a NEW escalation we haven't seen before
     if (escalationMessageIdRef.current !== latestEscalatedMessage.id) {
       console.log("NEW escalation detected!", latestEscalatedMessage.id, "Starting timer at", new Date().toLocaleTimeString());
+      
+      // Clear any previous timeout
+      if (escalationTimeoutRef.current) {
+        clearTimeout(escalationTimeoutRef.current);
+      }
+      
       escalationMessageIdRef.current = latestEscalatedMessage.id;
       setShouldShowEscalationButton(false); // Hide button initially
       setEscalationTime(Date.now());
       
       // Set timeout for exactly 5 seconds from now
-      const timer = setTimeout(() => {
+      escalationTimeoutRef.current = setTimeout(() => {
         console.log("5 SECOND TIMER FIRED at", new Date().toLocaleTimeString() + " - showing button now");
         setShouldShowEscalationButton(true);
       }, 5000);
-      
-      return () => {
-        clearTimeout(timer);
-      };
     }
+    
+    // Cleanup: clear timeout on unmount
+    return () => {
+      if (escalationTimeoutRef.current) {
+        clearTimeout(escalationTimeoutRef.current);
+      }
+    };
   }, [messages]);
   
   // Show button if escalation detected AND 5 seconds have passed
