@@ -14,47 +14,9 @@ const require = createRequire(import.meta.url);
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
 console.log("[AI] OpenAI initialized:", !!openai, "API key available:", !!process.env.OPENAI_API_KEY);
 
-// Extract text from PDF using pdfjs-dist with proper Node.js setup
-async function extractTextFromPDF(pdfBuffer: Buffer): Promise<string> {
-  try {
-    // Load pdfjs-dist with proper Node.js worker configuration
-    const pdfjs = require("pdfjs-dist");
-    const pdfjsWorker = require("pdfjs-dist/build/pdf.worker");
-    
-    console.log("[PDF] Using pdfjs-dist with Node.js worker");
-    
-    // Set up worker for Node.js environment
-    if (typeof window === "undefined") {
-      pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
-    }
-    
-    const pdf = await pdfjs.getDocument({ data: new Uint8Array(pdfBuffer) }).promise;
-    console.log("[PDF] Loaded PDF with", pdf.numPages, "pages");
-    
-    let fullText = "";
-    const maxPages = Math.min(pdf.numPages, 15); // Limit to first 15 pages
-    
-    for (let pageNum = 1; pageNum <= maxPages; pageNum++) {
-      try {
-        const page = await pdf.getPage(pageNum);
-        const textContent = await page.getTextContent();
-        const pageText = textContent.items
-          .map((item: any) => (item as any).str || "")
-          .join(" ");
-        if (pageText.trim()) {
-          fullText += pageText + "\n\n";
-        }
-      } catch (pageErr) {
-        console.log("[PDF] Could not extract text from page", pageNum);
-      }
-    }
-    
-    console.log("[PDF] Total extracted:", fullText.length, "characters");
-    return fullText;
-  } catch (e) {
-    console.error("[PDF] pdfjs extraction failed:", e instanceof Error ? e.message : String(e));
-    throw e;
-  }
+// Convert PDF to base64 for OpenAI vision analysis
+function encodeToBase64(buffer: Buffer): string {
+  return buffer.toString("base64");
 }
 
 const SYSTEM_PROMPT = `You are Riley, a smart customer support agent for TN Credit Solutions. You provide personalized guidance on credit restoration and tax optimization.
