@@ -5,7 +5,7 @@ import { insertContactSubmissionSchema, insertChatMessageSchema, insertNewslette
 import OpenAI from "openai";
 import fs from "fs";
 import path from "path";
-import pdfParse from "pdf-parse/legacy/build/pdf.js";
+import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.js";
 
 // Using gpt-4o (most recent stable model)
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
@@ -318,8 +318,14 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         } else if (isPdf) {
           // For PDFs, extract text and analyze
           const pdfBuffer = Buffer.from(base64Data, "base64");
-          const pdfData = await pdfParse(pdfBuffer);
-          const pdfText = pdfData.text;
+          const pdf = await pdfjsLib.getDocument({ data: pdfBuffer }).promise;
+          let pdfText = "";
+          
+          for (let i = 0; i < pdf.numPages; i++) {
+            const page = await pdf.getPage(i + 1);
+            const textContent = await page.getTextContent();
+            pdfText += textContent.items.map((item: any) => item.str).join(" ") + "\n";
+          }
           
           if (pdfText && pdfText.trim()) {
             const response = await openai.chat.completions.create({
