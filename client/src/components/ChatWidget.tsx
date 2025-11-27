@@ -278,7 +278,7 @@ export default function ChatWidget() {
                                 ? "bg-primary text-primary-foreground rounded-br-none shadow-md"
                                 : "bg-card border border-card-border rounded-bl-none shadow-sm"
                             }`}>
-                              {msg.message}
+                              {msg.message.replace(/\s*\[ESCALATE:(YES|NO)\]\s*$/, "")}
                             </div>
                             <div className="text-xs text-muted-foreground mt-1.5 px-1">
                               {new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
