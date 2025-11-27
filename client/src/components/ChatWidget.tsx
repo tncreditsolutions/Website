@@ -45,36 +45,26 @@ export default function ChatWidget() {
 
   // Filter messages to only show this visitor's conversation
   const messages = allMessages.filter(msg => {
-    if (!email) {
-      // Before email is set, no messages to show
-      return false;
-    }
+    if (!email) return false;
     
-    // Show messages from this visitor
+    // Always show this visitor's own messages
     if (msg.email === email) return true;
     
-    // Show AI messages only if they're part of this visitor's conversation
+    // For AI messages: only show if they come AFTER this visitor's first message
+    // (including the greeting which comes right before)
     if (msg.sender === "ai") {
-      const aiMsgTime = new Date(msg.createdAt);
+      const visitorMsgs = allMessages.filter(m => m.email === email && m.sender === "visitor");
       
-      // Get this visitor's messages
-      const thisVisitorMsgs = allMessages.filter(m => m.email === email);
-      const visitorFirstMsgTime = thisVisitorMsgs.length > 0 
-        ? new Date(Math.min(...thisVisitorMsgs.map(m => new Date(m.createdAt).getTime())))
-        : null;
+      // If visitor hasn't sent a message yet, don't show any AI messages yet
+      // (the greeting will appear once they send their first message)
+      if (visitorMsgs.length === 0) return false;
       
-      // Show greeting (AI message that comes right before or at same time as visitor joining)
-      const isGreeting = !visitorFirstMsgTime || aiMsgTime <= visitorFirstMsgTime;
+      const visitorFirstTime = Math.min(...visitorMsgs.map(m => new Date(m.createdAt).getTime()));
+      const aiTime = new Date(msg.createdAt).getTime();
       
-      // Check if another visitor has sent a message before this AI message
-      const anotherVisitorStarted = allMessages.some(m => 
-        m.sender === "visitor" && 
-        m.email !== email && 
-        new Date(m.createdAt) < aiMsgTime
-      );
-      
-      // Show AI message if it's the greeting OR if no other visitor started before it
-      return isGreeting || !anotherVisitorStarted;
+      // Only show AI messages that come after visitor's first message
+      // This isolates conversations and prevents message leakage
+      return aiTime >= visitorFirstTime;
     }
     
     return false;
