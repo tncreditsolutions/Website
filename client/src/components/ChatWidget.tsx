@@ -51,8 +51,29 @@ export default function ChatWidget() {
     }
     // Show messages from this visitor
     if (msg.email === email) return true;
-    // Show AI/Riley messages (greeting and responses)
-    if (msg.sender === "ai" && msg.email === "support@tncreditsolutions.com") return true;
+    
+    // Show AI messages only if they're part of this visitor's conversation
+    // (after visitor starts chatting and before another visitor starts)
+    if (msg.sender === "ai") {
+      const visitorMsgs = allMessages.filter(m => m.email === email);
+      if (visitorMsgs.length === 0) return false;
+      
+      const visitorFirstMsgTime = new Date(Math.min(...visitorMsgs.map(m => new Date(m.createdAt).getTime())));
+      const aiMsgTime = new Date(msg.createdAt);
+      
+      // Only show AI message if it comes after this visitor's first message
+      if (aiMsgTime < visitorFirstMsgTime) return false;
+      
+      // Also check that no other visitor has started before this AI message
+      const otherVisitorStarted = allMessages.some(m => 
+        m.sender === "visitor" && 
+        m.email !== email && 
+        new Date(m.createdAt) < aiMsgTime
+      );
+      
+      return !otherVisitorStarted;
+    }
+    
     return false;
   });
 
