@@ -105,53 +105,25 @@ export default function ChatWidget() {
       }
       queryClient.invalidateQueries({ queryKey: ["/api/documents"] });
       
-      // Send AI message with analysis immediately
+      // Send AI message directing to download PDF
       if (document && document.aiAnalysis) {
-        console.log("[Upload] Sending analysis message with content length:", document.aiAnalysis.length);
+        console.log("[Upload] Analysis complete, directing to PDF download");
         try {
-          // Send the analysis directly to chat
+          // Send message directing user to download the PDF
           const response = await apiRequest("POST", "/api/chat", {
             email: document.visitorEmail,
             name: "Riley",
-            message: `I've reviewed your ${document.fileName}. Here's my detailed analysis:\n\n${document.aiAnalysis}`,
+            message: `I've completed my analysis of your ${document.fileName}. Your detailed credit analysis report is ready for download. Click the download button below to view your professional report with all findings, metrics, and personalized recommendations.`,
             sender: "ai",
             isEscalated: "false",
           });
-          console.log("[Upload] Analysis message sent successfully");
+          console.log("[Upload] Download message sent successfully");
           
           // Force immediate refresh of chat messages
           await new Promise(resolve => setTimeout(resolve, 800));
           queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
         } catch (error) {
-          console.error("[Upload] Failed to send analysis message:", error);
-          // Send fallback message if analysis message fails
-          try {
-            await apiRequest("POST", "/api/chat", {
-              email: document.visitorEmail,
-              name: "Riley",
-              message: `I've received your ${document.fileName}. Let me provide you with a detailed analysis of your credit report. Based on my review, here are the key findings and recommendations for improving your credit profile.`,
-              sender: "ai",
-              isEscalated: "false",
-            });
-            queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
-          } catch (e) {
-            console.error("[Upload] Fallback message also failed:", e);
-          }
-        }
-      } else {
-        console.log("[Upload] No aiAnalysis in document response:", { has_aiAnalysis: !!document?.aiAnalysis });
-        // Even without analysis, send a placeholder message
-        try {
-          await apiRequest("POST", "/api/chat", {
-            email: document.visitorEmail,
-            name: "Riley",
-            message: `I've received your ${document.fileName}. Let me analyze this for you and provide detailed insights.`,
-            sender: "ai",
-            isEscalated: "false",
-          });
-          queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
-        } catch (error) {
-          console.error("[Upload] Failed to send placeholder message:", error);
+          console.error("[Upload] Failed to send download message:", error);
         }
       }
     },
