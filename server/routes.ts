@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { createRequire } from "module";
 import { storage } from "./storage";
 import { insertContactSubmissionSchema, insertChatMessageSchema, insertNewsletterSubscriptionSchema, insertDocumentSchema } from "@shared/schema";
 import OpenAI from "openai";
@@ -7,29 +8,31 @@ import fs from "fs";
 import path from "path";
 
 let pdfParse: any = null;
+const require = createRequire(import.meta.url);
 
 // Using gpt-4o (most recent stable model)
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
 console.log("[AI] OpenAI initialized:", !!openai, "API key available:", !!process.env.OPENAI_API_KEY);
 
-// Load pdf-parse lazily
-async function loadPdfParse() {
+// Load pdf-parse using CommonJS require
+function loadPdfParseSync() {
   if (!pdfParse) {
     try {
-      // Dynamic require for CommonJS module
-      const parsePdf = await import("pdf-parse/lib/pdf-parse.js").then(m => m.default).catch(async () => {
-        // Fallback: use standard import
-        return (await import("pdf-parse")).default;
-      });
-      pdfParse = parsePdf;
+      pdfParse = require("pdf-parse/lib/pdf-parse.js");
       if (typeof pdfParse !== "function") {
-        console.error("[PDF] pdf-parse is not a function");
-        return null;
+        console.error("[PDF] pdf-parse is not a function, trying alternative");
+        const parsed = require("pdf-parse");
+        pdfParse = parsed.default || parsed;
       }
-      console.log("[PDF] PDF parse module loaded successfully");
+      if (typeof pdfParse === "function") {
+        console.log("[PDF] PDF parse module loaded successfully");
+      } else {
+        console.error("[PDF] Could not load pdf-parse as function");
+        pdfParse = null;
+      }
     } catch (e) {
       console.error("[PDF] Failed to load pdf-parse:", e);
-      return null;
+      pdfParse = null;
     }
   }
   return pdfParse;
@@ -383,13 +386,13 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
             console.log("[AI] PDF buffer size:", pdfBuffer.length);
             
             try {
-              const pdfModule = await loadPdfParse();
+              const pdfModule = loadPdfParseSync();
               console.log("[AI] PDF module loaded:", !!pdfModule);
               
               if (pdfModule && typeof pdfModule === "function") {
                 const pdfData = await pdfModule(pdfBuffer);
                 const extractedText = pdfData && pdfData.text ? pdfData.text.trim() : "";
-                console.log("[AI] Extracted text length:", extractedText.length);
+                console.log("[AI] Extracted text length:", extractedText.length, "characters");
                 
                 if (extractedText && extractedText.length > 10) {
                   console.log("[AI] Text extraction successful, sending to OpenAI");
