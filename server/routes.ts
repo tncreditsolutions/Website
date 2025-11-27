@@ -322,19 +322,16 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         }
         
         await storage.updateDocumentAnalysis(document.id, analysisText);
-        document.aiAnalysis = analysisText;
-        console.log("[AI] Document analysis complete:", { id: document.id, analysis: analysisText.substring(0, 50) });
       } catch (aiError) {
         console.error("[AI] Document analysis failed:", aiError);
         // Set a fallback message on error
         const fallbackMessage = "Document received. Our specialists will review it shortly.";
         await storage.updateDocumentAnalysis(document.id, fallbackMessage);
-        document.aiAnalysis = fallbackMessage;
-        console.log("[AI] Document set to fallback:", { id: document.id });
       }
 
-      console.log("[API] Returning document from POST /api/documents:", { id: document.id, hasAnalysis: !!document.aiAnalysis });
-      res.json(document);
+      // Fetch the updated document from storage to ensure aiAnalysis is included
+      const updatedDocument = await storage.getDocumentById(document.id);
+      res.json(updatedDocument);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
