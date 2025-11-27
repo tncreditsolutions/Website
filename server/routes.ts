@@ -328,13 +328,9 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
       // Update storage with analysis
       await storage.updateDocumentAnalysis(document.id, analysisText);
       
-      // Create response object with aiAnalysis included
-      const response = {
-        ...document,
-        aiAnalysis: analysisText,
-      };
-      
-      res.json(response);
+      // Fetch the updated document from storage to ensure aiAnalysis is included
+      const updatedDoc = await storage.getDocumentById(document.id);
+      res.json(updatedDoc);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
