@@ -45,7 +45,8 @@ export default function ChatWidget() {
 
   // Filter messages to only show this visitor's conversation
   const messages = allMessages.filter(msg => {
-    if (!email) return false;
+    // If no email set yet, still show AI messages for escalation detection
+    if (!email) return msg.sender === "ai";
     // Show visitor's own messages OR admin/AI replies
     return msg.email === email || msg.sender === "admin" || msg.sender === "ai" || msg.email === "support@tncreditsolutions.com";
   });
@@ -68,17 +69,27 @@ export default function ChatWidget() {
     },
   });
 
-  // Detect escalation and schedule 5-second delay - only check THIS visitor's messages
+  // Detect escalation and schedule 5-second delay
   useEffect(() => {
-    // Only look at AI messages from THIS visitor's conversation (not all messages)
+    console.log("Escalation effect running. Email:", email, "Messages count:", messages.length);
+    
+    // If no email yet (visitor hasn't started chat), don't check for escalation
+    if (!email) {
+      console.log("No email set yet, skipping escalation check");
+      return;
+    }
+    
+    // Find all AI messages in this conversation
     const visitorAiMessages = messages.filter(msg => msg.sender === "ai");
+    console.log("Visitor AI messages count:", visitorAiMessages.length);
     
     // Find the MOST RECENT AI message with escalation tag
     let latestEscalatedMessage = null;
     for (let i = visitorAiMessages.length - 1; i >= 0; i--) {
+      console.log("Checking message", i, "isEscalated:", visitorAiMessages[i].isEscalated);
       if (visitorAiMessages[i].isEscalated === "true") {
         latestEscalatedMessage = visitorAiMessages[i];
-        console.log("Found escalated message:", latestEscalatedMessage.id);
+        console.log("Found escalated message:", latestEscalatedMessage.id, "Content:", latestEscalatedMessage.message.substring(0, 50));
         break;
       }
     }
@@ -110,7 +121,7 @@ export default function ChatWidget() {
         clearTimeout(timer);
       };
     }
-  }, [messages]);
+  }, [messages, email]);
   
   // Show button if escalation detected AND 5 seconds have passed
   const showButton = shouldShowEscalationButton && !isEscalated;
