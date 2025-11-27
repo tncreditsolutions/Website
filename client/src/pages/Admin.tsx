@@ -33,7 +33,15 @@ export default function Admin() {
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [isReplying, setIsReplying] = useState(false);
   const [adminReplyMessage, setAdminReplyMessage] = useState("");
+  const [activeTab, setActiveTab] = useState("submissions");
   const { toast } = useToast();
+
+  // Reset chat state when switching tabs
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    setSelectedChatMessage(null);
+    setIsReplying(false);
+  };
   
   const { data: submissions, isLoading: submissionsLoading } = useQuery<ContactSubmission[]>({
     queryKey: ["/api/contact"],
@@ -133,7 +141,7 @@ export default function Admin() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-8">
-        <Tabs defaultValue="submissions" className="space-y-4">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
           <TabsList>
             <TabsTrigger value="submissions">Submissions</TabsTrigger>
             <TabsTrigger value="chat">Live Chat</TabsTrigger>
