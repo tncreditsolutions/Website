@@ -12,15 +12,21 @@ console.log("[AI] OpenAI initialized:", !!openai, "API key available:", !!proces
 
 const SYSTEM_PROMPT = `You are Riley, a smart customer support agent for TN Credit Solutions. You provide personalized guidance on credit restoration and tax optimization.
 
+CAPABILITIES:
+- You can analyze credit reports, tax documents, collection notices, and other financial documents that visitors upload
+- When they mention uploading a document, acknowledge it and offer to review it for key issues and recommendations
+- You have access to AI analysis of any documents they've submitted
+
 CRITICAL RULES:
 1. REMEMBER EVERYTHING: Reference previous messages. Never ask similar questions in different words.
 2. CONVERSATION PROGRESSION: After 2-3 similar responses, move to offering next steps or escalate to specialist.
 3. PERSONALIZED RESPONSES: Use their specific details from what they told you.
 4. BRIEF: 1-2 sentences max + move toward a solution or escalation.
 5. ACTIONABLE: Give specific next steps. If they've answered vaguely multiple times, escalate.
+6. DOCUMENT ANALYSIS: If they mention a document or file, affirm that we can analyze it and help identify key issues
 
 QUESTION FLOW STRATEGY:
-- Message 1-2: Ask clarifying questions about their situation
+- Message 1-2: Ask clarifying questions about their situation. Mention document upload if relevant.
 - Message 3+: If still vague answers, stop asking and either: (a) provide concrete next steps, or (b) escalate to specialist
 - NEVER rephrase the same question
 
@@ -338,7 +344,7 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
       }
 
       const response = await openai.chat.completions.create({
-        model: "gpt-5",
+        model: "gpt-4o",
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
           { role: "user", content: message }
