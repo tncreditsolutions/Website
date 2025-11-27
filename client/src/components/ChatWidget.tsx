@@ -52,26 +52,19 @@ export default function ChatWidget() {
     // Show messages from this visitor
     if (msg.email === email) return true;
     
-    // Show AI messages only if they're part of this visitor's conversation
-    // (after visitor starts chatting and before another visitor starts)
+    // Show AI messages only if no other visitor has interacted before this message
     if (msg.sender === "ai") {
-      const visitorMsgs = allMessages.filter(m => m.email === email);
-      if (visitorMsgs.length === 0) return false;
-      
-      const visitorFirstMsgTime = new Date(Math.min(...visitorMsgs.map(m => new Date(m.createdAt).getTime())));
       const aiMsgTime = new Date(msg.createdAt);
       
-      // Only show AI message if it comes after this visitor's first message
-      if (aiMsgTime < visitorFirstMsgTime) return false;
-      
-      // Also check that no other visitor has started before this AI message
-      const otherVisitorStarted = allMessages.some(m => 
+      // Check if another visitor has sent a message before this AI message
+      const otherVisitorBefore = allMessages.some(m => 
         m.sender === "visitor" && 
         m.email !== email && 
         new Date(m.createdAt) < aiMsgTime
       );
       
-      return !otherVisitorStarted;
+      // If no other visitor has messaged before this AI message, show it (includes greeting)
+      return !otherVisitorBefore;
     }
     
     return false;
