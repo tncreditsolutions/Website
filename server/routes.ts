@@ -382,28 +382,65 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
                 const extractedText = pdfData && pdfData.text ? pdfData.text.trim() : "";
                 
                 if (extractedText) {
-                  // Send extracted text to OpenAI for analysis
+                  // Send extracted text to OpenAI for analysis using the visual summary template
                   const response = await openai.chat.completions.create({
                     model: "gpt-4o",
                     messages: [
                       {
                         role: "user",
-                        content: `You are a financial advisor specializing in credit restoration and tax optimization. Analyze the following credit report or financial document and provide detailed insights.
+                        content: `You are a professional financial advisor specializing in credit restoration and tax optimization. Analyze this credit report and provide a detailed professional visual summary.
 
 DOCUMENT CONTENT:
 ${extractedText}
 
-Please provide:
-1. **Summary**: Brief overview of the document
-2. **Key Issues**: Major problems identified (negative accounts, high utilization, delinquencies, etc.)
-3. **Credit Score Factors**: What's impacting the score
-4. **Recommendations**: Specific actionable steps to improve credit
-5. **Priority Items**: What to tackle first
+MUST USE THIS EXACT TEMPLATE FORMAT:
+---
+**CREDIT ANALYSIS SUMMARY**
 
-Format your response clearly with headers and bullet points for easy reading.`
+**Current Status**
+• Credit Score: [specific score] ([rating like Fair/Good/Excellent])
+• Overall Risk Level: [high/medium/low]
+• Key Concern: [main issue identified]
+
+**Top Priority Issues** (Address First)
+1. [Most critical issue] - Impact: [specific score impact]
+2. [Second priority issue] - Impact: [specific details]
+3. [Third priority issue] - Impact: [specific details]
+
+**Detailed Breakdown**
+
+**Payment History** 
+• Late Payments: [count with timeline]
+• On-Time: [count]
+• Status: [brief assessment]
+
+**Credit Utilization**
+• Current Rate: [exact %]
+• Recommended: [target %]
+• Action: [specific steps to reduce]
+
+**Collections & Delinquencies**
+• Active Collections: [count]
+• Derogatory Marks: [details]
+• Timeline: [when they fall off]
+
+**Immediate Action Plan** (Next 30 Days)
+1. [Specific action with timeline]
+2. [Specific action with timeline]
+3. [Specific action with timeline]
+
+**90-Day Strategy**
+• [Focus area 1 with expected improvement]
+• [Focus area 2 with expected improvement]
+• [Expected score improvement range]
+
+**Questions?** Feel free to ask about any section!
+---
+
+Be specific with numbers, percentages, and actionable steps. Make it professional and structured.`
                       }
                     ],
-                    max_tokens: 1000,
+                    max_tokens: 1500,
                   });
                   analysisText = response.choices[0].message.content || "PDF received. Our specialists will review it and provide detailed feedback shortly.";
                 } else {
