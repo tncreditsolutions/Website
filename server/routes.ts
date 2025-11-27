@@ -359,15 +359,31 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
           });
           analysisText = response.choices[0].message.content || "No analysis available";
         } else if (isPdf) {
-          // For PDFs, convert to base64 and send to OpenAI for analysis
+          // For PDFs, convert first page to PNG image and send to OpenAI for analysis
           try {
             const filePath = path.join(import.meta.dirname, "..", "uploads", fileId);
             console.log("[AI] PDF file path:", filePath);
-            const pdfBuffer = fs.readFileSync(filePath);
-            const pdfBase64 = encodeToBase64(pdfBuffer);
-            console.log("[AI] PDF converted to base64, size:", pdfBase64.length);
             
-            // Send PDF to OpenAI for analysis via vision API
+            // Convert PDF to PNG using ImageMagick
+            const { exec } = require("child_process");
+            const pngPath = filePath + "-page0.png";
+            
+            await new Promise<void>((resolve, reject) => {
+              exec(`convert "${filePath}[0]" "${pngPath}"`, (error: any) => {
+                if (error) {
+                  console.log("[AI] ImageMagick convert not available, trying alternative method");
+                  reject(error);
+                } else {
+                  resolve();
+                }
+              });
+            });
+            
+            const pngBuffer = fs.readFileSync(pngPath);
+            const pngBase64 = encodeToBase64(pngBuffer);
+            console.log("[AI] PDF converted to PNG, size:", pngBase64.length);
+            
+            // Send PNG image to OpenAI for analysis via vision API
             const response = await openai.chat.completions.create({
               model: "gpt-4o",
               messages: [
@@ -376,12 +392,12 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
                   content: [
                     {
                       type: "text",
-                      text: "You are a professional financial advisor. Analyze this credit report PDF and provide a detailed professional visual summary. Use this exact format:\n\n---\n**CREDIT ANALYSIS SUMMARY**\n\n**Current Status**\n• Credit Score: [specific score] ([rating])\n• Overall Risk Level: [high/medium/low]\n• Key Concern: [main issue]\n\n**Top Priority Issues** (Address First)\n1. [Most critical issue] - Impact: [details]\n2. [Second priority] - Impact: [details]\n3. [Third priority] - Impact: [details]\n\n**Payment History**\n• Late Payments: [count]\n• On-Time: [count]\n• Status: [assessment]\n\n**Credit Utilization**\n• Current Rate: [%]\n• Recommended: [%]\n• Action: [steps]\n\n**Collections & Delinquencies**\n• Active Collections: [count]\n• Derogatory Marks: [details]\n• Timeline: [info]\n\n**Immediate Action Plan** (Next 30 Days)\n1. [Action with timeline]\n2. [Action with timeline]\n3. [Action with timeline]\n\n**90-Day Strategy**\n• [Focus area 1]\n• [Focus area 2]\n• [Expected improvement]\n\n**Questions?** Feel free to ask!\n---",
+                      text: "You are a professional financial advisor. Analyze this credit report and provide a detailed professional visual summary. Use this exact format:\n\n---\n**CREDIT ANALYSIS SUMMARY**\n\n**Current Status**\n• Credit Score: [specific score] ([rating])\n• Overall Risk Level: [high/medium/low]\n• Key Concern: [main issue]\n\n**Top Priority Issues** (Address First)\n1. [Most critical issue] - Impact: [details]\n2. [Second priority] - Impact: [details]\n3. [Third priority] - Impact: [details]\n\n**Payment History**\n• Late Payments: [count]\n• On-Time: [count]\n• Status: [assessment]\n\n**Credit Utilization**\n• Current Rate: [%]\n• Recommended: [%]\n• Action: [steps]\n\n**Collections & Delinquencies**\n• Active Collections: [count]\n• Derogatory Marks: [details]\n• Timeline: [info]\n\n**Immediate Action Plan** (Next 30 Days)\n1. [Action with timeline]\n2. [Action with timeline]\n3. [Action with timeline]\n\n**90-Day Strategy**\n• [Focus area 1]\n• [Focus area 2]\n• [Expected improvement]\n\n**Questions?** Feel free to ask!\n---",
                     },
                     {
                       type: "image_url",
                       image_url: {
-                        url: `data:application/pdf;base64,${pdfBase64}`,
+                        url: `data:image/png;base64,${pngBase64}`,
                       },
                     },
                   ],
@@ -389,6 +405,14 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
               ],
               max_tokens: 1500,
             });
+            
+            // Clean up PNG file
+            try {
+              fs.unlinkSync(pngPath);
+            } catch (e) {
+              console.log("[AI] Could not delete temporary PNG");
+            }
+            
             analysisText = response.choices[0].message.content || "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
             console.log("[AI] PDF analysis received, length:", analysisText.length);
           } catch (pdfError) {
