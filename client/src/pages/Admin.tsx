@@ -371,6 +371,7 @@ export default function Admin() {
             </Card>
           </TabsContent>
         </Tabs>
+      </div>
 
       {/* Full Message Dialog */}
       <Dialog open={!!selectedSubmission} onOpenChange={() => setSelectedSubmission(null)}>
@@ -642,8 +643,101 @@ export default function Admin() {
         </DialogContent>
       </Dialog>
 
-        </Tabs>
+      {/* Chat Messages Section */}
+      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-8">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Live Chat Messages</CardTitle>
+            <CardDescription>
+              {chatMessages?.length ? `${chatMessages.length} total messages` : "No messages yet"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {chatLoading ? (
+              <div className="text-center py-8 text-muted-foreground">Loading chat messages...</div>
+            ) : !chatMessages || chatMessages.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No chat messages yet. Visitors will appear here when they start chatting.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {[...chatMessages].reverse().map((msg) => (
+                  <Card key={msg.id} className="p-4 hover-elevate cursor-pointer" onClick={() => {
+                    setSelectedChatMessage(msg);
+                  }} data-testid={`card-chat-message-${msg.id}`}>
+                    <div className="space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="font-medium text-sm">{msg.name || "Unknown"}</p>
+                          <p className="text-xs text-muted-foreground">{msg.email}</p>
+                        </div>
+                        <p className="text-xs text-muted-foreground flex-shrink-0">{formatDate(msg.createdAt)}</p>
+                      </div>
+                      <p className="text-sm text-muted-foreground line-clamp-2">{msg.message.replace(/\s*\[ESCALATE:(YES|NO)\]\s*$/, "")}</p>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Full Chat Dialog */}
+      <Dialog open={!!selectedChatMessage && !isReplying} onOpenChange={() => setSelectedChatMessage(null)}>
+        <DialogContent className="max-w-2xl max-h-96 overflow-y-auto" data-testid="dialog-full-chat">
+          <DialogHeader>
+            <DialogTitle>Chat Conversation</DialogTitle>
+            <DialogDescription>
+              {selectedChatMessage?.name} ({selectedChatMessage?.email})
+            </DialogDescription>
+          </DialogHeader>
+          {selectedChatMessage && (
+            <div className="space-y-4">
+              {/* Full conversation thread */}
+              <div className="space-y-3 max-h-96 overflow-y-auto border rounded-md p-4 bg-muted/30">
+                {chatMessages
+                  ?.filter(msg => msg.email === selectedChatMessage.email || msg.sender === "admin" || msg.sender === "ai" || msg.email === "support@tncreditsolutions.com")
+                  .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+                  .map((msg) => {
+                    const isAdmin = msg.sender === "admin" || msg.email === "support@tncreditsolutions.com";
+                    return (
+                      <div key={msg.id} className={`flex ${isAdmin ? "justify-end" : "justify-start"}`}>
+                        <div className={`max-w-xs ${isAdmin ? "text-right" : ""}`}>
+                          <div className={`p-3 rounded text-sm break-words ${
+                            isAdmin
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-background border"
+                          }`}>
+                            {msg.message}
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            {formatDate(msg.createdAt)}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+
+              {(selectedChatMessage.sender === "visitor" || !selectedChatMessage.sender) && (
+                <div className="border-t pt-4">
+                  <Button 
+                    onClick={() => {
+                      setIsReplying(true);
+                    }}
+                    data-testid="button-open-reply-form"
+                    className="w-full"
+                  >
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    Reply to This Conversation
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
