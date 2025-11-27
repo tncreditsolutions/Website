@@ -14,35 +14,45 @@ const require = createRequire(import.meta.url);
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
 console.log("[AI] OpenAI initialized:", !!openai, "API key available:", !!process.env.OPENAI_API_KEY);
 
-// Extract text from PDF using pdf-parse
+// Extract text from PDF using pdfjs-dist with proper Node.js setup
 async function extractTextFromPDF(pdfBuffer: Buffer): Promise<string> {
   try {
-    const { PDFParse } = require("pdf-parse");
-    console.log("[PDF] Using PDFParse class for extraction");
+    // Load pdfjs-dist with proper Node.js worker configuration
+    const pdfjs = require("pdfjs-dist");
+    const pdfjsWorker = require("pdfjs-dist/build/pdf.worker");
     
-    const parser = new PDFParse({ verbosity: 0 });
-    await parser.load(pdfBuffer);
+    console.log("[PDF] Using pdfjs-dist with Node.js worker");
+    
+    // Set up worker for Node.js environment
+    if (typeof window === "undefined") {
+      pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+    }
+    
+    const pdf = await pdfjs.getDocument({ data: new Uint8Array(pdfBuffer) }).promise;
+    console.log("[PDF] Loaded PDF with", pdf.numPages, "pages");
     
     let fullText = "";
-    const pageCount = parser.getInfo()?.pages || 0;
-    console.log("[PDF] Document has", pageCount, "pages");
+    const maxPages = Math.min(pdf.numPages, 15); // Limit to first 15 pages
     
-    // Extract text from all pages
-    for (let i = 1; i <= pageCount; i++) {
+    for (let pageNum = 1; pageNum <= maxPages; pageNum++) {
       try {
-        const pageText = await parser.getPageText(i);
-        if (pageText) {
-          fullText += pageText + "\n";
+        const page = await pdf.getPage(pageNum);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items
+          .map((item: any) => (item as any).str || "")
+          .join(" ");
+        if (pageText.trim()) {
+          fullText += pageText + "\n\n";
         }
-      } catch (e) {
-        console.log("[PDF] Could not extract page", i);
+      } catch (pageErr) {
+        console.log("[PDF] Could not extract text from page", pageNum);
       }
     }
     
     console.log("[PDF] Total extracted:", fullText.length, "characters");
     return fullText;
   } catch (e) {
-    console.error("[PDF] pdf-parse extraction failed:", e instanceof Error ? e.message : String(e));
+    console.error("[PDF] pdfjs extraction failed:", e instanceof Error ? e.message : String(e));
     throw e;
   }
 }
