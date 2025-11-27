@@ -23,12 +23,14 @@ export class MemStorage implements IStorage {
   private contactSubmissions: Map<string, ContactSubmission>;
   private chatMessages: Map<string, ChatMessage>;
   private newsletterSubscriptions: Set<string>;
+  private documents: Map<string, Document>;
 
   constructor() {
     this.users = new Map();
     this.contactSubmissions = new Map();
     this.chatMessages = new Map();
     this.newsletterSubscriptions = new Set();
+    this.documents = new Map();
   }
 
   async getUser(id: string): Promise<User | undefined> {
@@ -104,6 +106,46 @@ export class MemStorage implements IStorage {
       email,
       createdAt: new Date(),
     }));
+  }
+
+  async createDocument(insertDocument: InsertDocument): Promise<Document> {
+    const id = randomUUID();
+    const document: Document = {
+      ...insertDocument,
+      id,
+      aiAnalysis: null,
+      adminReview: null,
+      status: "pending",
+      createdAt: new Date(),
+    };
+    this.documents.set(id, document);
+    return document;
+  }
+
+  async getAllDocuments(): Promise<Document[]> {
+    return Array.from(this.documents.values()).sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+    );
+  }
+
+  async getDocumentsByEmail(email: string): Promise<Document[]> {
+    return Array.from(this.documents.values())
+      .filter(doc => doc.visitorEmail === email)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+
+  async updateDocumentAnalysis(id: string, analysis: string): Promise<void> {
+    const doc = this.documents.get(id);
+    if (doc) {
+      doc.aiAnalysis = analysis;
+    }
+  }
+
+  async updateDocumentStatus(id: string, status: string): Promise<void> {
+    const doc = this.documents.get(id);
+    if (doc) {
+      doc.status = status;
+    }
   }
 }
 
