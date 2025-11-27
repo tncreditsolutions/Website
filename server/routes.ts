@@ -284,11 +284,10 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
       });
 
       // Analyze document with OpenAI
+      let analysisText = "No analysis available";
       try {
         const isImage = ["image/png", "image/jpeg", "image/jpg"].includes(fileType);
         const isPdf = fileType === "application/pdf";
-        
-        let analysisText = "No analysis available";
         
         if (isImage) {
           // For images, use vision API
@@ -320,18 +319,22 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         } else {
           analysisText = "Unsupported file format. Please upload a PDF or image (PNG/JPG) and we'll analyze it.";
         }
-        
-        await storage.updateDocumentAnalysis(document.id, analysisText);
       } catch (aiError) {
         console.error("[AI] Document analysis failed:", aiError);
         // Set a fallback message on error
-        const fallbackMessage = "Document received. Our specialists will review it shortly.";
-        await storage.updateDocumentAnalysis(document.id, fallbackMessage);
+        analysisText = "Document received. Our specialists will review it shortly.";
       }
 
-      // Fetch the updated document from storage to ensure aiAnalysis is included
-      const updatedDocument = await storage.getDocumentById(document.id);
-      res.json(updatedDocument);
+      // Update storage with analysis
+      await storage.updateDocumentAnalysis(document.id, analysisText);
+      
+      // Create response object with aiAnalysis included
+      const response = {
+        ...document,
+        aiAnalysis: analysisText,
+      };
+      
+      res.json(response);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
