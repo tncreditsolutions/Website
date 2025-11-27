@@ -45,10 +45,12 @@ export default function ChatWidget() {
 
   // Filter messages to only show this visitor's conversation
   const messages = allMessages.filter(msg => {
-    // If no email set yet, still show AI messages for escalation detection
-    if (!email) return msg.sender === "ai";
-    // Show visitor's own messages OR admin/AI replies
-    return msg.email === email || msg.sender === "admin" || msg.sender === "ai" || msg.email === "support@tncreditsolutions.com";
+    if (!email) {
+      // Before email is set, no messages to show
+      return false;
+    }
+    // Once email is set, show this visitor's conversation (their messages + AI responses)
+    return msg.email === email || msg.sender === "ai";
   });
 
   const sendMutation = useMutation({
