@@ -351,11 +351,6 @@ export default function ChatWidget() {
 
   const handleDownloadPDF = async () => {
     if (!lastDocumentId) {
-      toast({
-        title: "Error",
-        description: "No document available for download",
-        variant: "destructive",
-      });
       return;
     }
 
@@ -374,11 +369,6 @@ export default function ChatWidget() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-
-      toast({
-        title: "Success",
-        description: "PDF downloaded successfully",
-      });
     } catch (error: any) {
       console.error("[PDF Download] Error:", error);
       toast({
