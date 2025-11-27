@@ -16,19 +16,15 @@ console.log("[AI] OpenAI initialized:", !!openai, "API key available:", !!proces
 async function loadPdfParse() {
   if (!pdfParse) {
     try {
-      // pdf-parse default export is the parse function
-      const module = await import("pdf-parse");
-      pdfParse = module.default;
-      
+      // Dynamic require for CommonJS module
+      const parsePdf = await import("pdf-parse/lib/pdf-parse.js").then(m => m.default).catch(async () => {
+        // Fallback: use standard import
+        return (await import("pdf-parse")).default;
+      });
+      pdfParse = parsePdf;
       if (typeof pdfParse !== "function") {
-        console.error("[PDF] Module.default is not a function, it is:", typeof pdfParse);
-        // Try the module itself as fallback
-        if (typeof module === "function") {
-          pdfParse = module;
-        } else {
-          console.error("[PDF] Could not find pdf-parse function");
-          return null;
-        }
+        console.error("[PDF] pdf-parse is not a function");
+        return null;
       }
       console.log("[PDF] PDF parse module loaded successfully");
     } catch (e) {
