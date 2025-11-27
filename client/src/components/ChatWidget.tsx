@@ -93,16 +93,27 @@ export default function ChatWidget() {
         reader.readAsDataURL(file);
       });
     },
-    onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Document uploaded and analyzed successfully",
-      });
+    onSuccess: async (document: any) => {
       setUploadedFileName("");
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
       queryClient.invalidateQueries({ queryKey: ["/api/documents"] });
+      
+      // Send AI message with analysis
+      if (document.aiAnalysis) {
+        try {
+          await apiRequest("POST", "/api/chat", {
+            email,
+            name: "Riley",
+            message: `I've analyzed your ${document.fileName}:\n\n${document.aiAnalysis}`,
+            sender: "ai",
+          });
+          queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
+        } catch (error) {
+          console.error("Failed to send analysis message:", error);
+        }
+      }
     },
     onError: (error: any) => {
       toast({
