@@ -55,8 +55,11 @@ export default function ChatWidget() {
     if (msg.sender === "ai") {
       const visitorMsgs = allMessages.filter(m => m.email === email && m.sender === "visitor");
       
-      // If visitor hasn't sent a message yet, don't show any AI messages yet
-      // (the greeting will appear once they send their first message)
+      // Always show the greeting message (it contains "How can I help you today?")
+      // This should appear immediately after visitor enters email
+      if (msg.message.includes("How can I help you today?")) return true;
+      
+      // For other AI messages, only show if they come AFTER this visitor's first message
       if (visitorMsgs.length === 0) return false;
       
       const visitorFirstTime = Math.min(...visitorMsgs.map(m => new Date(m.createdAt).getTime()));
