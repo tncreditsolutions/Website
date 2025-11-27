@@ -14,34 +14,35 @@ const require = createRequire(import.meta.url);
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
 console.log("[AI] OpenAI initialized:", !!openai, "API key available:", !!process.env.OPENAI_API_KEY);
 
-// Load pdf-parse using CommonJS require
-function loadPdfParseSync() {
-  if (!pdfParse) {
-    try {
-      const module = require("pdf-parse");
-      
-      // pdf-parse exports can vary - try different patterns
-      if (typeof module === "function") {
-        pdfParse = module;
-      } else if (module.default && typeof module.default === "function") {
-        pdfParse = module.default;
-      } else if (module.PDFParse && typeof module.PDFParse === "function") {
-        // Use PDFParse class directly
-        pdfParse = module.PDFParse;
-      } else {
-        console.error("[PDF] Could not find parse function in module. Keys:", Object.keys(module).slice(0, 15));
-        pdfParse = null;
+// Extract text from PDF using pdfjs-dist
+async function extractTextFromPDF(pdfBuffer: Buffer): Promise<string> {
+  try {
+    const pdfjs = require("pdfjs-dist");
+    console.log("[PDF] Using pdfjs-dist for extraction");
+    
+    const pdf = await pdfjs.getDocument({ data: pdfBuffer }).promise;
+    console.log("[PDF] Loaded PDF with", pdf.numPages, "pages");
+    
+    let fullText = "";
+    // Extract text from first 10 pages
+    for (let i = 1; i <= Math.min(pdf.numPages, 10); i++) {
+      try {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map((item: any) => item.str || "").join(" ");
+        fullText += pageText + "\n";
+        console.log("[PDF] Extracted page", i, "-", pageText.length, "chars");
+      } catch (e) {
+        console.log("[PDF] Could not extract page", i);
       }
-      
-      if (typeof pdfParse === "function") {
-        console.log("[PDF] PDF parse module loaded successfully");
-      }
-    } catch (e) {
-      console.error("[PDF] Failed to load pdf-parse:", e instanceof Error ? e.message : String(e));
-      pdfParse = null;
     }
+    
+    console.log("[PDF] Total extracted:", fullText.length, "characters");
+    return fullText;
+  } catch (e) {
+    console.error("[PDF] pdfjs extraction failed:", e instanceof Error ? e.message : String(e));
+    throw e;
   }
-  return pdfParse;
 }
 
 const SYSTEM_PROMPT = `You are Riley, a smart customer support agent for TN Credit Solutions. You provide personalized guidance on credit restoration and tax optimization.
@@ -384,7 +385,7 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
           });
           analysisText = response.choices[0].message.content || "No analysis available";
         } else if (isPdf) {
-          // For PDFs, try text extraction for text-based PDFs
+          // For PDFs, extract text using pdfjs-dist
           try {
             const filePath = path.join(import.meta.dirname, "..", "uploads", fileId);
             console.log("[AI] PDF file path:", filePath);
@@ -392,72 +393,18 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
             console.log("[AI] PDF buffer size:", pdfBuffer.length);
             
             try {
-              const pdfModule = loadPdfParseSync();
-              console.log("[AI] PDF module loaded:", !!pdfModule);
+              const extractedText = await extractTextFromPDF(pdfBuffer);
+              console.log("[AI] Extracted text length:", extractedText.length, "characters");
               
-              if (pdfModule && typeof pdfModule === "function") {
-                // PDF-Parse: try various invocation patterns
-                let pdfData = null;
-                
-                // Pattern 1: Direct function call with just buffer
-                try {
-                  console.log("[AI] Attempting: pdfModule(buffer)");
-                  pdfData = await pdfModule(pdfBuffer);
-                  console.log("[AI] Success with pdfModule(buffer)");
-                } catch (e1) {
-                  console.log("[AI] Pattern 1 failed, trying with options");
-                  
-                  // Pattern 2: Direct function call with options
-                  try {
-                    console.log("[AI] Attempting: pdfModule(buffer, { max: 0 })");
-                    pdfData = await pdfModule(pdfBuffer, { max: 0 });
-                    console.log("[AI] Success with pdfModule(buffer, options)");
-                  } catch (e2) {
-                    console.log("[AI] Pattern 2 failed, trying class instantiation");
-                    
-                    // Pattern 3: Class constructor with options
-                    try {
-                      console.log("[AI] Attempting: new pdfModule({ verbosity: 0 }) with load/getPageText");
-                      const instance = new pdfModule({ verbosity: 0 });
-                      // PDFParse instance uses load() then getPageText() for each page
-                      await instance.load(pdfBuffer);
-                      // Get info to know how many pages
-                      const info = instance.getInfo ? await instance.getInfo() : null;
-                      const pages = info && info.numpages ? info.numpages : 1;
-                      console.log("[AI] PDF pages:", pages);
-                      
-                      // Extract text from each page
-                      let fullText = "";
-                      for (let pageNum = 1; pageNum <= Math.min(pages, 10); pageNum++) {
-                        try {
-                          const pageText = await instance.getPageText(pageNum);
-                          if (pageText) fullText += pageText + "\n";
-                        } catch (pageErr) {
-                          console.log("[AI] Could not extract page", pageNum);
-                        }
-                      }
-                      
-                      pdfData = { text: fullText };
-                      console.log("[AI] Success with class instantiation, extracted", fullText.length, "characters");
-                    } catch (e3) {
-                      console.error("[AI] All patterns failed. Errors:", e1 instanceof Error ? e1.message : String(e1));
-                      throw e3;
-                    }
-                  }
-                }
-                
-                const extractedText = pdfData && pdfData.text ? pdfData.text.trim() : "";
-                console.log("[AI] Extracted text length:", extractedText.length, "characters");
-                
-                if (extractedText && extractedText.length > 10) {
-                  console.log("[AI] Text extraction successful, sending to OpenAI");
-                  // Send extracted text to OpenAI for analysis using the visual summary template
-                  const response = await openai.chat.completions.create({
-                    model: "gpt-4o",
-                    messages: [
-                      {
-                        role: "user",
-                        content: `You are a professional financial advisor specializing in credit restoration and tax optimization. Analyze this credit report and provide a detailed professional visual summary.
+              if (extractedText && extractedText.length > 10) {
+                console.log("[AI] Text extraction successful, sending to OpenAI");
+                // Send extracted text to OpenAI for analysis using the visual summary template
+                const response = await openai.chat.completions.create({
+                  model: "gpt-4o",
+                  messages: [
+                    {
+                      role: "user",
+                      content: `You are a professional financial advisor specializing in credit restoration and tax optimization. Analyze this credit report and provide a detailed professional visual summary.
 
 DOCUMENT CONTENT:
 ${extractedText}
@@ -518,10 +465,6 @@ Be specific with numbers, percentages, and actionable steps. Make it professiona
                   console.log("[AI] No sufficient text extracted from PDF");
                   analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations to help improve your credit score and financial situation.";
                 }
-              } else {
-                console.log("[AI] PDF module not a function");
-                analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations to help improve your credit score and financial situation.";
-              }
             } catch (textError) {
               console.error("[AI] PDF text extraction error:", textError instanceof Error ? textError.message : String(textError));
               analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations to help improve your credit score and financial situation.";
