@@ -113,14 +113,21 @@ export function PDFViewer({ fileData, fileName }: PDFViewerProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-center bg-muted p-4 rounded-md overflow-auto max-h-96">
-        {rendering ? (
-          <div className="text-muted-foreground">Rendering page...</div>
-        ) : imageUrl ? (
-          <img src={imageUrl} alt={`Page ${currentPage}`} className="rounded" />
-        ) : (
-          <div className="text-muted-foreground">Loading page...</div>
-        )}
+      <div className="bg-muted p-4 rounded-md overflow-auto border" style={{ height: '500px' }}>
+        <div className="flex justify-center items-start">
+          {rendering ? (
+            <div className="text-muted-foreground py-20">Rendering page...</div>
+          ) : imageUrl ? (
+            <img 
+              src={imageUrl} 
+              alt={`Page ${currentPage}`} 
+              className="rounded"
+              style={{ display: 'block' }}
+            />
+          ) : (
+            <div className="text-muted-foreground py-20">Loading page...</div>
+          )}
+        </div>
       </div>
 
       {numPages && (
