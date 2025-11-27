@@ -176,8 +176,6 @@ export default function ChatWidget() {
       });
       
       setIsEscalated(true);
-      setShowEscalatePrompt(false);
-      setHideEscalatePrompt(true);
       queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
     } catch (error) {
       toast({
@@ -305,7 +303,7 @@ export default function ChatWidget() {
                       </div>
                       <button
                         onClick={() => {
-                          setHideEscalatePrompt(true);
+                          escalationDetectedAtRef.current = null;
                           localStorage.setItem(ESCALATE_DISMISSED_KEY, "true");
                         }}
                         className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 mt-0.5"
