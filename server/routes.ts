@@ -540,21 +540,21 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         if (line.match(/^\*\*[A-Z\s]+\*\*$/)) {
           // Section header with modern design
           if (!isFirstSection) {
-            doc.moveDown(0.5);
+            doc.moveDown(0.4);
           }
           const sectionTitle = line.replace(/\*\*/g, "");
           
-          // Accent circle and line
-          doc.fillColor("#fbbf24");
-          doc.circle(48, doc.y + 6, 3);
+          // Gold accent rectangle
+          doc.rect(45, doc.y, 5, 16).fill("#fbbf24");
           
           doc.fontSize(13).font("Helvetica-Bold").fillColor("#0f2d6e");
-          doc.text(sectionTitle, 60, doc.y);
+          doc.text(sectionTitle, 57, doc.y);
           
           // Subtle line under section
-          doc.moveTo(60, doc.y + 2).lineTo(567, doc.y + 2).strokeColor("#e5e7eb").stroke();
+          const currentY = doc.y;
+          doc.moveTo(45, currentY + 3).lineTo(567, currentY + 3).strokeColor("#ddd").lineWidth(0.5).stroke();
           
-          doc.moveDown(0.8);
+          doc.moveDown(0.7);
           doc.fontSize(10).font("Helvetica").fillColor("#374151");
           isFirstSection = false;
         } else if (line.includes("▪") || line.match(/^\d+\./)) {
@@ -563,16 +563,16 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
           const content = isNumbered ? line.substring(line.indexOf('.') + 2) : line.substring(1).trim();
           
           doc.fontSize(10).fillColor("#1f2937").font("Helvetica");
-          doc.text("•  " + content, 70, doc.y);
-          doc.moveDown(0.35);
+          doc.text("•  " + content, 65, doc.y, { width: 502 });
+          doc.moveDown(0.3);
         } else if (line.trim().length > 0) {
           // Regular text with better readability
           doc.fontSize(10).fillColor("#4b5563").font("Helvetica");
-          doc.text(line, 48, doc.y, { width: 519, align: "left" });
-          doc.moveDown(0.25);
+          doc.text(line, 50, doc.y, { width: 517 });
+          doc.moveDown(0.23);
         } else {
           // Subtle spacing
-          doc.moveDown(0.15);
+          doc.moveDown(0.1);
         }
       }
 
