@@ -415,10 +415,10 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
                   } catch (e2) {
                     console.log("[AI] Pattern 2 failed, trying class instantiation");
                     
-                    // Pattern 3: Class constructor
+                    // Pattern 3: Class constructor with options
                     try {
-                      console.log("[AI] Attempting: new pdfModule()");
-                      const instance = new pdfModule();
+                      console.log("[AI] Attempting: new pdfModule({ verbosity: 0 })");
+                      const instance = new pdfModule({ verbosity: 0 });
                       // Try different method names
                       if (typeof instance === "function") {
                         pdfData = await instance(pdfBuffer);
