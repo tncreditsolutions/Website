@@ -391,14 +391,14 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
                   role: "user",
                   content: [
                     {
-                      type: "text",
-                      text: "You are a professional financial advisor. Analyze this credit report and provide a detailed professional visual summary. Use this exact format:\n\n---\n**CREDIT ANALYSIS SUMMARY**\n\n**Current Status**\n• Credit Score: [specific score] ([rating])\n• Overall Risk Level: [high/medium/low]\n• Key Concern: [main issue]\n\n**Top Priority Issues** (Address First)\n1. [Most critical issue] - Impact: [details]\n2. [Second priority] - Impact: [details]\n3. [Third priority] - Impact: [details]\n\n**Payment History**\n• Late Payments: [count]\n• On-Time: [count]\n• Status: [assessment]\n\n**Credit Utilization**\n• Current Rate: [%]\n• Recommended: [%]\n• Action: [steps]\n\n**Collections & Delinquencies**\n• Active Collections: [count]\n• Derogatory Marks: [details]\n• Timeline: [info]\n\n**Immediate Action Plan** (Next 30 Days)\n1. [Action with timeline]\n2. [Action with timeline]\n3. [Action with timeline]\n\n**90-Day Strategy**\n• [Focus area 1]\n• [Focus area 2]\n• [Expected improvement]\n\n**Questions?** Feel free to ask!\n---",
-                    },
-                    {
                       type: "image_url",
                       image_url: {
                         url: `data:image/png;base64,${pngBase64}`,
                       },
+                    },
+                    {
+                      type: "text",
+                      text: "You are a professional financial advisor reviewing a credit report. Extract and analyze the ACTUAL data from this credit report image and provide a detailed professional visual summary. DO NOT provide a template. Provide REAL analysis using these sections:\n\n**CREDIT ANALYSIS SUMMARY**\n\n**Current Status**\n• Credit Score: [actual score from report]\n• Overall Risk Level: [assessment]\n• Key Concern: [main issue identified]\n\n**Top Priority Issues** (Address First)\n1. [Most critical issue from the report] - Impact: [details]\n2. [Second priority] - Impact: [details]\n3. [Third priority] - Impact: [details]\n\n**Payment History**\n• Late Payments: [actual count from report]\n• On-Time: [actual count]\n• Status: [assessment based on report]\n\n**Credit Utilization**\n• Current Rate: [actual percentage from report]\n• Recommended: [suggested percentage]\n• Action: [specific steps]\n\n**Collections & Delinquencies**\n• Active Collections: [actual count]\n• Derogatory Marks: [specific details]\n• Timeline: [when they occurred]\n\n**Immediate Action Plan** (Next 30 Days)\n1. [Specific action based on report findings]\n2. [Next priority action]\n3. [Third action]\n\n**90-Day Strategy**\n• [Focus area 1 based on report]\n• [Focus area 2]\n• [Expected improvement]\n\nAnalyze the ACTUAL credit report shown in the image. Provide SPECIFIC numbers, dates, and account names from the report. Do not give generic advice.",
                     },
                   ],
                 },
