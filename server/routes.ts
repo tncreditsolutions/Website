@@ -20,11 +20,27 @@ async function extractTextFromPDF(pdfBuffer: Buffer): Promise<string> {
     const { PDFParse } = require("pdf-parse");
     console.log("[PDF] Using PDFParse class for extraction");
     
-    const parser = new PDFParse();
-    const data = await parser.parseBuffer(pdfBuffer);
-    const extractedText = data.text || "";
-    console.log("[PDF] Total extracted:", extractedText.length, "characters from", data.numpages, "pages");
-    return extractedText;
+    const parser = new PDFParse({ verbosity: 0 });
+    await parser.load(pdfBuffer);
+    
+    let fullText = "";
+    const pageCount = parser.getInfo()?.pages || 0;
+    console.log("[PDF] Document has", pageCount, "pages");
+    
+    // Extract text from all pages
+    for (let i = 1; i <= pageCount; i++) {
+      try {
+        const pageText = await parser.getPageText(i);
+        if (pageText) {
+          fullText += pageText + "\n";
+        }
+      } catch (e) {
+        console.log("[PDF] Could not extract page", i);
+      }
+    }
+    
+    console.log("[PDF] Total extracted:", fullText.length, "characters");
+    return fullText;
   } catch (e) {
     console.error("[PDF] pdf-parse extraction failed:", e instanceof Error ? e.message : String(e));
     throw e;
