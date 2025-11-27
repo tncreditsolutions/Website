@@ -503,161 +503,127 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
       const doc = new PDFDocument({ margin: 0, size: "A4" });
       doc.pipe(res);
 
-      // Color scheme matching website design
-      const PRIMARY_BLUE = "#2c5aa0"; // HSL 217 91% 45% converted to hex
-      const LIGHT_BG = "#f8f9fc";
-      const TEXT_DARK = "#1a1f35";
-      const TEXT_LIGHT = "#6b7280";
-      const ACCENT_GRAY = "#e5e7eb";
-      const CARD_BG = "#ffffff";
-
-      const PAGE_WIDTH = 612;
       const PAGE_HEIGHT = 792;
-      const MARGIN = 40;
-      const FOOTER_HEIGHT = 50;
-      const MAX_CONTENT_Y = PAGE_HEIGHT - FOOTER_HEIGHT - MARGIN;
+      const FOOTER_HEIGHT = 60;
+      const MAX_CONTENT_Y = PAGE_HEIGHT - FOOTER_HEIGHT;
 
-      // ===== ELEGANT HEADER SECTION =====
-      doc.rect(0, 0, PAGE_WIDTH, 120).fill(LIGHT_BG);
-      doc.rect(0, 0, PAGE_WIDTH, 4).fill(PRIMARY_BLUE);
-      
-      doc.fontSize(28).font("Helvetica-Bold").fillColor(PRIMARY_BLUE);
-      doc.text("CREDIT ANALYSIS REPORT", MARGIN, 20);
-      
-      doc.fontSize(10).font("Helvetica").fillColor(TEXT_LIGHT);
-      doc.text("TN Credit Solutions • Professional Financial Analysis", MARGIN, 52);
-      
-      doc.fontSize(9).font("Helvetica").fillColor(TEXT_DARK);
-      doc.text(`Client: ${document.visitorName}`, MARGIN, 70);
-      doc.text(`Generated: ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`, MARGIN, 85);
-      
-      // Subtle divider
-      doc.moveTo(MARGIN, 110).lineTo(PAGE_WIDTH - MARGIN, 110).strokeColor(ACCENT_GRAY).lineWidth(1).stroke();
-      
-      let yPosition = 130;
+      // ===== PREMIUM HEADER SECTION (Professional & Modern) =====
+      doc.rect(0, 0, 612, 145).fill("#0f2d6e");
+      doc.rect(0, 0, 612, 6).fill("#fbbf24");
+      doc.rect(0, 139, 612, 6).fill("#fbbf24");
 
-      // Parse and intelligently format the analysis
-      const analysisText = document.aiAnalysis;
+      doc.fontSize(32).font("Helvetica-Bold").fillColor("#ffffff");
+      doc.text("TN CREDIT SOLUTIONS", 50, 28);
       
-      // Extract sections
-      const mainFindingsMatch = analysisText.match(/#### Main Findings([\s\S]*?)(?=#### |$)/);
-      const keyMetricsMatch = analysisText.match(/#### Key Metrics([\s\S]*?)(?=#### |$)/);
-      const areasOfConcernMatch = analysisText.match(/#### Areas of Concern([\s\S]*?)(?=#### |$)/);
-      const recommendedStepsMatch = analysisText.match(/#### Recommended Next Steps([\s\S]*?)(?=#### |$)/);
+      doc.fontSize(10).font("Helvetica").fillColor("#c5d3ff");
+      doc.text("Professional Credit Restoration & Tax Optimization Services", 50, 65);
 
-      // Helper function to add section header
-      const addSectionHeader = (title: string) => {
-        if (yPosition > MAX_CONTENT_Y - 30) {
-          doc.addPage();
-          yPosition = MARGIN;
-        }
-        doc.rect(MARGIN, yPosition - 2, PAGE_WIDTH - MARGIN * 2, 3).fill(PRIMARY_BLUE);
-        doc.fontSize(13).font("Helvetica-Bold").fillColor(PRIMARY_BLUE);
-        doc.text(title, MARGIN, yPosition + 8);
-        yPosition += 32;
-      };
+      doc.fontSize(14).font("Helvetica-Bold").fillColor("#fbbf24");
+      doc.text("CREDIT ANALYSIS REPORT", 50, 82);
 
-      // Helper function to add bullet point
-      const addBulletPoint = (text: string) => {
+      doc.fontSize(9).font("Helvetica").fillColor("#e0e7ff");
+      doc.text(`Client Name: ${document.visitorName}`, 50, 102);
+      doc.text(`Report Date: ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`, 50, 115);
+
+      doc.moveTo(0, 145).lineTo(612, 145).strokeColor("#f3f4f6").lineWidth(0.75).stroke();
+      
+      let yPosition = 160;
+
+      // ===== PROCESS ANALYSIS CONTENT =====
+      const lines = document.aiAnalysis.split("\n");
+      let isFirstSection = true;
+      
+      for (const line of lines) {
+        // Page break management
         if (yPosition > MAX_CONTENT_Y - 20) {
           doc.addPage();
-          yPosition = MARGIN;
+          yPosition = 40;
         }
-        const cleanText = text.replace(/^[\s•▪\-*]+/, "").trim();
-        if (!cleanText) return;
-        
-        doc.fontSize(9).fillColor(PRIMARY_BLUE);
-        doc.text("•", MARGIN + 5, yPosition, { width: 15 });
-        
-        doc.fontSize(9.5).fillColor(TEXT_DARK).font("Helvetica");
-        const wrappedHeight = doc.heightOfString(cleanText, { width: PAGE_WIDTH - MARGIN * 2 - 25 });
-        doc.text(cleanText, MARGIN + 25, yPosition, { width: PAGE_WIDTH - MARGIN * 2 - 25 });
-        yPosition += wrappedHeight + 8;
-      };
 
-      // Helper function to add metric row
-      const addMetricRow = (label: string, value: string) => {
-        if (yPosition > MAX_CONTENT_Y - 20) {
-          doc.addPage();
-          yPosition = MARGIN;
+        // Skip decorative lines and summaries
+        if (line.includes("CREDIT ANALYSIS SUMMARY") || line.includes("═") || line.includes("━") || 
+            line.includes("Summary Analysis") || line.includes("**Summary") || 
+            line.includes("---") || line.includes("Certainly!")) {
+          continue;
         }
-        doc.fontSize(9).font("Helvetica-Bold").fillColor(TEXT_DARK);
-        doc.text(label, MARGIN + 15, yPosition);
-        
-        doc.fontSize(9).font("Helvetica").fillColor(PRIMARY_BLUE);
-        doc.text(value, PAGE_WIDTH / 2 + 20, yPosition);
-        
-        yPosition += 14;
-      };
 
-      // ===== MAIN FINDINGS SECTION =====
-      if (mainFindingsMatch) {
-        addSectionHeader("Main Findings");
-        const findingsText = mainFindingsMatch[1];
-        const findingsLines = findingsText.split("\n").filter(l => l.trim().length > 0);
-        for (const line of findingsLines) {
-          if (line.match(/^-\s+/)) {
-            addBulletPoint(line);
+        // Section headers (#### Main Findings, #### Key Metrics, etc.)
+        if (line.match(/^#+\s+[A-Z]/)) {
+          if (!isFirstSection) {
+            yPosition += 10;
           }
-        }
-        yPosition += 6;
-      }
-
-      // ===== KEY METRICS SECTION =====
-      if (keyMetricsMatch) {
-        addSectionHeader("Key Metrics");
-        const metricsText = keyMetricsMatch[1];
-        const metricsLines = metricsText.split("\n").filter(l => l.trim().length > 0);
-        
-        for (const line of metricsLines) {
-          const cleanLine = line.replace(/^\s*-\s*/, "").replace(/\*\*/g, "").trim();
-          if (cleanLine.length === 0) continue;
           
-          if (cleanLine.includes(":")) {
-            const [label, value] = cleanLine.split(":").map(s => s.trim());
-            addMetricRow(label, value);
-          } else if (cleanLine.match(/^[A-Z]/)) {
-            addBulletPoint(cleanLine);
+          const sectionTitle = line.replace(/^#+\s+/, "").trim();
+          
+          // Gold vertical accent bar
+          doc.rect(40, yPosition, 4, 20).fill("#fbbf24");
+          
+          // Section title
+          doc.fontSize(12).font("Helvetica-Bold").fillColor("#0f2d6e");
+          doc.text(sectionTitle, 50, yPosition + 2);
+          
+          // Elegant underline
+          doc.moveTo(50, yPosition + 20).lineTo(560, yPosition + 20).strokeColor("#e5e7eb").lineWidth(0.75).stroke();
+          
+          yPosition += 32;
+          isFirstSection = false;
+        } 
+        // Bullet points (-, •, ▪, or numbered)
+        else if (line.match(/^\s*[-•▪*]\s+/) || line.match(/^\s*\d+\.\s+/)) {
+          const cleanContent = line.replace(/^\s*[-•▪*\d.]\s+/, "").replace(/\*\*/g, "").trim();
+          if (!cleanContent) continue;
+          
+          doc.fontSize(9).fillColor("#fbbf24").font("Helvetica-Bold");
+          doc.text("●", 48, yPosition);
+          
+          doc.fontSize(10).fillColor("#374151").font("Helvetica");
+          const wrappedHeight = doc.heightOfString(cleanContent, { width: 500 });
+          doc.text(cleanContent, 62, yPosition, { width: 500 });
+          
+          yPosition += wrappedHeight + 6;
+        } 
+        // Key-value pairs (FICO® Score: 672, etc.)
+        else if (line.includes(":") && !line.match(/^#+/) && line.trim().length > 0) {
+          const parts = line.split(":").map(p => p.trim());
+          if (parts.length === 2) {
+            const cleanLabel = parts[0].replace(/^\s*[-•▪*]\s+/, "").replace(/\*\*/g, "");
+            const cleanValue = parts[1].replace(/\*\*/g, "");
+            
+            doc.fontSize(9).font("Helvetica-Bold").fillColor("#0f2d6e");
+            doc.text(cleanLabel + ":", 55, yPosition);
+            
+            doc.fontSize(9).font("Helvetica").fillColor("#1e40af");
+            doc.text(cleanValue, 320, yPosition);
+            
+            yPosition += 14;
           }
         }
-        yPosition += 6;
-      }
-
-      // ===== AREAS OF CONCERN SECTION =====
-      if (areasOfConcernMatch) {
-        addSectionHeader("Areas of Concern");
-        const concernText = areasOfConcernMatch[1];
-        const concernLines = concernText.split("\n").filter(l => l.trim().length > 0);
-        for (const line of concernLines) {
-          if (line.match(/^-\s+/)) {
-            addBulletPoint(line);
-          }
-        }
-        yPosition += 6;
-      }
-
-      // ===== RECOMMENDED NEXT STEPS SECTION =====
-      if (recommendedStepsMatch) {
-        addSectionHeader("Recommended Next Steps");
-        const stepsText = recommendedStepsMatch[1];
-        const stepsLines = stepsText.split("\n").filter(l => l.trim().length > 0);
-        for (const line of stepsLines) {
-          if (line.match(/^-\s+/) || line.match(/^\*\*/)) {
-            addBulletPoint(line);
-          }
+        // Regular paragraphs
+        else if (line.trim().length > 0 && !line.match(/^###/)) {
+          const cleanLine = line.replace(/\*\*/g, "").trim();
+          doc.fontSize(10).fillColor("#4b5563").font("Helvetica");
+          const wrappedHeight = doc.heightOfString(cleanLine, { width: 520 });
+          doc.text(cleanLine, 48, yPosition, { width: 520 });
+          
+          yPosition += wrappedHeight + 5;
+        } 
+        // Empty lines for spacing
+        else if (yPosition > 200) {
+          yPosition += 3;
         }
       }
 
-      // ===== FOOTER SECTION =====
-      const footerY = PAGE_HEIGHT - FOOTER_HEIGHT;
-      doc.moveTo(MARGIN, footerY).lineTo(PAGE_WIDTH - MARGIN, footerY).strokeColor(ACCENT_GRAY).lineWidth(1).stroke();
+      // ===== ELEGANT FOOTER SECTION =====
+      doc.rect(0, 750, 612, 6).fill("#fbbf24");
       
-      doc.fontSize(8).fillColor(TEXT_LIGHT).font("Helvetica");
-      doc.text("This analysis is confidential and for personal use only. For professional financial advice, consult a qualified advisor.", 
-               MARGIN, footerY + 10, { width: PAGE_WIDTH - MARGIN * 2, align: "center" });
+      doc.moveTo(50, 735).lineTo(560, 735).strokeColor("#d1d5db").lineWidth(0.75).stroke();
       
-      doc.fontSize(7).fillColor(TEXT_LIGHT);
-      doc.text("© 2025 TN Credit Solutions", MARGIN, footerY + 30, { align: "center" });
+      doc.fontSize(8).fillColor("#6b7280").font("Helvetica");
+      doc.text("This analysis is confidential and for personal use only.", 50, 705, { align: "center" });
+      
+      doc.fontSize(7).fillColor("#9ca3af").font("Helvetica");
+      doc.text("© 2025 TN Credit Solutions | Confidential & Proprietary", 50, 718, { align: "center" });
+      doc.text("For professional financial advice, please consult with a qualified advisor.", 50, 727, { align: "center" });
 
       doc.end();
     } catch (error: any) {
