@@ -94,6 +94,7 @@ export default function ChatWidget() {
       });
     },
     onSuccess: async (document: any) => {
+      console.log("[Upload] Document upload success:", { id: document.id, hasAnalysis: !!document.aiAnalysis, analysis: document.aiAnalysis });
       setUploadedFileName("");
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
@@ -102,6 +103,7 @@ export default function ChatWidget() {
       
       // Send AI message with analysis - use document's visitorEmail
       if (document.aiAnalysis) {
+        console.log("[Upload] Sending AI message about analysis");
         try {
           await apiRequest("POST", "/api/chat", {
             email: document.visitorEmail,
@@ -110,9 +112,12 @@ export default function ChatWidget() {
             sender: "ai",
           });
           queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
+          console.log("[Upload] AI message sent successfully");
         } catch (error) {
-          console.error("Failed to send analysis message:", error);
+          console.error("[Upload] Failed to send analysis message:", error);
         }
+      } else {
+        console.log("[Upload] No aiAnalysis in document response, skipping AI message");
       }
     },
     onError: (error: any) => {
