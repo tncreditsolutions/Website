@@ -417,13 +417,28 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
                     
                     // Pattern 3: Class constructor with options
                     try {
-                      console.log("[AI] Attempting: new pdfModule({ verbosity: 0 }) with load/getText");
+                      console.log("[AI] Attempting: new pdfModule({ verbosity: 0 }) with load/getPageText");
                       const instance = new pdfModule({ verbosity: 0 });
-                      // PDFParse instance uses load() then getText()
+                      // PDFParse instance uses load() then getPageText() for each page
                       await instance.load(pdfBuffer);
-                      const fullText = await instance.getText();
+                      // Get info to know how many pages
+                      const info = instance.getInfo ? await instance.getInfo() : null;
+                      const pages = info && info.numpages ? info.numpages : 1;
+                      console.log("[AI] PDF pages:", pages);
+                      
+                      // Extract text from each page
+                      let fullText = "";
+                      for (let pageNum = 1; pageNum <= Math.min(pages, 10); pageNum++) {
+                        try {
+                          const pageText = await instance.getPageText(pageNum);
+                          if (pageText) fullText += pageText + "\n";
+                        } catch (pageErr) {
+                          console.log("[AI] Could not extract page", pageNum);
+                        }
+                      }
+                      
                       pdfData = { text: fullText };
-                      console.log("[AI] Success with class instantiation");
+                      console.log("[AI] Success with class instantiation, extracted", fullText.length, "characters");
                     } catch (e3) {
                       console.error("[AI] All patterns failed. Errors:", e1 instanceof Error ? e1.message : String(e1));
                       throw e3;
