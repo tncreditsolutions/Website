@@ -6,11 +6,20 @@ import OpenAI from "openai";
 import fs from "fs";
 import path from "path";
 
-let pdfParse: any;
-
 // Using gpt-4o (most recent stable model)
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
 console.log("[AI] OpenAI initialized:", !!openai, "API key available:", !!process.env.OPENAI_API_KEY);
+
+// Lazy load pdf-parse
+async function getPdfParser() {
+  try {
+    const pdf = await import("pdf-parse");
+    return pdf;
+  } catch (e) {
+    console.error("[PDF] Failed to load pdf-parse:", e);
+    return null;
+  }
+}
 
 const SYSTEM_PROMPT = `You are Riley, a smart customer support agent for TN Credit Solutions. You provide personalized guidance on credit restoration and tax optimization.
 
@@ -57,16 +66,6 @@ function detectUrgentSituation(message: string): boolean {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Dynamically import pdf-parse
-  if (!pdfParse) {
-    try {
-      const module = await import("pdf-parse/lib/pdf-parse.js");
-      pdfParse = module.default;
-    } catch {
-      console.warn("[PDF] pdf-parse import failed, PDF analysis will be limited");
-    }
-  }
-
   app.post("/api/contact", async (req, res) => {
     try {
       const validatedData = insertContactSubmissionSchema.parse(req.body);
@@ -330,7 +329,11 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
           try {
             const filePath = path.join(import.meta.dirname, "..", "uploads", fileId);
             const pdfBuffer = fs.readFileSync(filePath);
-            const pdfData = await pdfParse(pdfBuffer);
+            const pdfModule = await getPdfParser();
+            if (!pdfModule) {
+              throw new Error("PDF parser not available");
+            }
+            const pdfData = await pdfModule.default(pdfBuffer);
             const extractedText = pdfData.text;
             
             if (extractedText.trim()) {
