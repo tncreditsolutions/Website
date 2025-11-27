@@ -364,12 +364,13 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
             const filePath = path.join(import.meta.dirname, "..", "uploads", fileId);
             console.log("[AI] PDF file path:", filePath);
             
-            // Convert PDF to PNG using ImageMagick
+            // Convert PDF to PNG using ImageMagick with higher quality settings
             const { exec } = require("child_process");
             const pngPath = filePath + "-page0.png";
             
             await new Promise<void>((resolve, reject) => {
-              exec(`convert "${filePath}[0]" "${pngPath}"`, (error: any) => {
+              // Use higher DPI (300) and quality settings for better readability
+              exec(`convert -density 300 -quality 95 "${filePath}[0]" "${pngPath}"`, (error: any) => {
                 if (error) {
                   console.log("[AI] ImageMagick convert not available, trying alternative method");
                   reject(error);
