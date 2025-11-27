@@ -14,6 +14,7 @@ export interface IStorage {
   createDocument(document: InsertDocument): Promise<Document>;
   getAllDocuments(): Promise<Document[]>;
   getDocumentsByEmail(email: string): Promise<Document[]>;
+  getDocumentById(id: string): Promise<Document | undefined>;
   updateDocumentAnalysis(id: string, analysis: string): Promise<void>;
   updateDocumentStatus(id: string, status: string): Promise<void>;
 }
@@ -132,6 +133,10 @@ export class MemStorage implements IStorage {
     return Array.from(this.documents.values())
       .filter(doc => doc.visitorEmail === email)
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+
+  async getDocumentById(id: string): Promise<Document | undefined> {
+    return this.documents.get(id);
   }
 
   async updateDocumentAnalysis(id: string, analysis: string): Promise<void> {

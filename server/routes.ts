@@ -315,45 +315,8 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
           });
           analysisText = response.choices[0].message.content || "No analysis available";
         } else if (isPdf) {
-          // For PDFs, use OpenAI Files API
-          try {
-            const pdfBuffer = Buffer.from(base64Data, "base64");
-            const file = await openai.beta.files.upload({
-              file: new File([pdfBuffer], fileName, { type: "application/pdf" }),
-              purpose: "assistants",
-            });
-
-            const response = await openai.chat.completions.create({
-              model: "gpt-4o",
-              messages: [
-                {
-                  role: "user",
-                  content: [
-                    {
-                      type: "text",
-                      text: "Please analyze this credit report or financial document for a credit restoration or tax optimization case. Provide a brief summary of key information, any issues identified, and recommended next steps.",
-                    },
-                    {
-                      type: "document",
-                      document: {
-                        type: "document",
-                        id: file.id,
-                      },
-                    } as any,
-                  ],
-                },
-              ],
-              max_tokens: 500,
-            });
-
-            analysisText = response.choices[0].message.content || "No analysis available";
-
-            // Clean up uploaded file
-            await openai.beta.files.delete(file.id);
-          } catch (uploadError) {
-            console.error("[AI] PDF upload/analysis error:", uploadError);
-            analysisText = "PDF document received. Our specialists will review it shortly.";
-          }
+          // For PDFs, provide a message that it's been received
+          analysisText = "Your PDF has been received and saved. Our specialists will review it and provide detailed feedback shortly.";
         } else {
           analysisText = "Unsupported file format. Please upload a PDF or image (PNG/JPG) and we'll analyze it.";
         }
