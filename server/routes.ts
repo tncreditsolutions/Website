@@ -14,34 +14,18 @@ const require = createRequire(import.meta.url);
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
 console.log("[AI] OpenAI initialized:", !!openai, "API key available:", !!process.env.OPENAI_API_KEY);
 
-// Extract text from PDF using pdfjs-dist with Node.js support
+// Extract text from PDF using pdf-parse
 async function extractTextFromPDF(pdfBuffer: Buffer): Promise<string> {
   try {
-    // Use the legacy build for Node.js compatibility
-    const pdfjsLib = require("pdfjs-dist/legacy/build/pdf.js");
-    console.log("[PDF] Using pdfjs-dist legacy for Node.js extraction");
+    const PDFParse = require("pdf-parse/lib/pdf-parse.js");
+    console.log("[PDF] Using pdf-parse for extraction");
     
-    const pdf = await pdfjsLib.getDocument({ data: pdfBuffer }).promise;
-    console.log("[PDF] Loaded PDF with", pdf.numPages, "pages");
-    
-    let fullText = "";
-    // Extract text from first 10 pages
-    for (let i = 1; i <= Math.min(pdf.numPages, 10); i++) {
-      try {
-        const page = await pdf.getPage(i);
-        const textContent = await page.getTextContent();
-        const pageText = textContent.items.map((item: any) => item.str || "").join(" ");
-        fullText += pageText + "\n";
-        console.log("[PDF] Extracted page", i, "-", pageText.length, "chars");
-      } catch (e) {
-        console.log("[PDF] Could not extract page", i);
-      }
-    }
-    
-    console.log("[PDF] Total extracted:", fullText.length, "characters");
-    return fullText;
+    const data = await PDFParse(pdfBuffer);
+    const extractedText = data.text || "";
+    console.log("[PDF] Total extracted:", extractedText.length, "characters from", data.numpages, "pages");
+    return extractedText;
   } catch (e) {
-    console.error("[PDF] pdfjs extraction failed:", e instanceof Error ? e.message : String(e));
+    console.error("[PDF] pdf-parse extraction failed:", e instanceof Error ? e.message : String(e));
     throw e;
   }
 }
