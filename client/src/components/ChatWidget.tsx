@@ -50,6 +50,18 @@ export default function ChatWidget() {
     return msg.email === email || msg.sender === "admin" || msg.sender === "ai" || msg.email === "support@tncreditsolutions.com";
   });
 
+  // Extract the escalated message ID - used as dependency to avoid timeout being cleared on every refetch
+  const escalatedMessageId = (() => {
+    const aiMessages = allMessages.filter(msg => msg.sender === "ai");
+    if (aiMessages.length === 0) return null;
+    for (let i = aiMessages.length - 1; i >= 0; i--) {
+      if (aiMessages[i].isEscalated === "true") {
+        return aiMessages[i].id;
+      }
+    }
+    return null;
+  })();
+
   const sendMutation = useMutation({
     mutationFn: async (data: any) => {
       return apiRequest("POST", "/api/chat", data);
@@ -69,23 +81,20 @@ export default function ChatWidget() {
   });
 
   // Detect escalation and schedule 5-second delay
+  // Only depends on escalatedMessageId, not allMessages, so timeout doesn't get cleared on every refetch
   useEffect(() => {
-    const aiMessages = allMessages.filter(msg => msg.sender === "ai");
-    if (aiMessages.length === 0) return;
-    
-    // Find the LAST/NEWEST escalated message (not the first)
-    let escalatedMessage = null;
-    for (let i = aiMessages.length - 1; i >= 0; i--) {
-      if (aiMessages[i].isEscalated === "true") {
-        escalatedMessage = aiMessages[i];
-        break;
-      }
+    if (!escalatedMessageId) {
+      // No escalation - reset
+      escalationMessageIdRef.current = null;
+      setEscalationTime(null);
+      setShouldShowEscalationButton(false);
+      return;
     }
-    
-    if (escalatedMessage && escalationMessageIdRef.current !== escalatedMessage.id) {
+
+    if (escalationMessageIdRef.current !== escalatedMessageId) {
       // NEW escalation detected - record the time
-      console.log("New escalation detected, ID:", escalatedMessage.id);
-      escalationMessageIdRef.current = escalatedMessage.id;
+      console.log("New escalation detected, ID:", escalatedMessageId);
+      escalationMessageIdRef.current = escalatedMessageId;
       setEscalationTime(Date.now());
       setShouldShowEscalationButton(false); // Reset button visibility
       
@@ -96,13 +105,8 @@ export default function ChatWidget() {
       }, 5000);
       
       return () => clearTimeout(timeoutId);
-    } else if (!escalatedMessage) {
-      // No escalation - reset
-      escalationMessageIdRef.current = null;
-      setEscalationTime(null);
-      setShouldShowEscalationButton(false);
     }
-  }, [allMessages]);
+  }, [escalatedMessageId]);
   
   // Show button if escalation detected AND 5 seconds have passed
   const showButton = shouldShowEscalationButton && !isEscalated;
