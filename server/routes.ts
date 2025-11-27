@@ -17,11 +17,11 @@ console.log("[AI] OpenAI initialized:", !!openai, "API key available:", !!proces
 // Extract text from PDF using pdf-parse
 async function extractTextFromPDF(pdfBuffer: Buffer): Promise<string> {
   try {
-    const pdfModule = require("pdf-parse");
-    const pdfParse = pdfModule.default || pdfModule;
-    console.log("[PDF] Using pdf-parse for extraction");
+    const { PDFParse } = require("pdf-parse");
+    console.log("[PDF] Using PDFParse class for extraction");
     
-    const data = await pdfParse(pdfBuffer);
+    const parser = new PDFParse();
+    const data = await parser.parseBuffer(pdfBuffer);
     const extractedText = data.text || "";
     console.log("[PDF] Total extracted:", extractedText.length, "characters from", data.numpages, "pages");
     return extractedText;
