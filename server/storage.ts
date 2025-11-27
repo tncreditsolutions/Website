@@ -9,7 +9,6 @@ export interface IStorage {
   getAllContactSubmissions(): Promise<ContactSubmission[]>;
   createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
   getAllChatMessages(): Promise<ChatMessage[]>;
-  deleteMessagesByEmail(email: string): Promise<void>;
   subscribeNewsletter(subscription: InsertNewsletterSubscription): Promise<NewsletterSubscription | null>;
   getAllNewsletterSubscriptions(): Promise<NewsletterSubscription[]>;
 }
@@ -78,16 +77,6 @@ export class MemStorage implements IStorage {
     return Array.from(this.chatMessages.values()).sort(
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     );
-  }
-
-  async deleteMessagesByEmail(email: string): Promise<void> {
-    const keysToDelete: string[] = [];
-    this.chatMessages.forEach((msg, key) => {
-      if (msg.email === email) {
-        keysToDelete.push(key);
-      }
-    });
-    keysToDelete.forEach(key => this.chatMessages.delete(key));
   }
 
   async subscribeNewsletter(insertSubscription: InsertNewsletterSubscription): Promise<NewsletterSubscription | null> {
