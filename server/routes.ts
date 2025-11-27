@@ -5,6 +5,7 @@ import { insertContactSubmissionSchema, insertChatMessageSchema, insertNewslette
 import OpenAI from "openai";
 import fs from "fs";
 import path from "path";
+import pdfParse from "pdf-parse/legacy/build/pdf.js";
 
 // Using gpt-4o (most recent stable model)
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
@@ -285,7 +286,6 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
 
       // Analyze document with OpenAI
       try {
-        // Check if it's an image or PDF
         const isImage = ["image/png", "image/jpeg", "image/jpg"].includes(fileType);
         const isPdf = fileType === "application/pdf";
         
@@ -316,10 +316,28 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
           });
           analysisText = response.choices[0].message.content || "No analysis available";
         } else if (isPdf) {
-          // For PDFs, we don't have direct support, so provide a message
-          analysisText = "PDF document received. Our AI can analyze images (PNG, JPG) directly. Please upload a screenshot or image of your credit report for detailed analysis, or contact our specialists for manual review of your PDF documents.";
+          // For PDFs, extract text and analyze
+          const pdfBuffer = Buffer.from(base64Data, "base64");
+          const pdfData = await pdfParse(pdfBuffer);
+          const pdfText = pdfData.text;
+          
+          if (pdfText && pdfText.trim()) {
+            const response = await openai.chat.completions.create({
+              model: "gpt-4o",
+              messages: [
+                {
+                  role: "user",
+                  content: `Please analyze this credit report or financial document for a credit restoration or tax optimization case. Provide a brief summary of key information, any issues identified, and recommended next steps.\n\nDocument content:\n${pdfText.substring(0, 3000)}`, // Limit to first 3000 chars to avoid token limits
+                },
+              ],
+              max_tokens: 500,
+            });
+            analysisText = response.choices[0].message.content || "No analysis available";
+          } else {
+            analysisText = "Unable to extract text from PDF. Please try uploading an image of your document or contact our specialists.";
+          }
         } else {
-          analysisText = "Unsupported file format. Please upload a PNG/JPG image or contact our support team.";
+          analysisText = "Unsupported file format. Please upload a PDF or image (PNG/JPG) and we'll analyze it.";
         }
         
         await storage.updateDocumentAnalysis(document.id, analysisText);
