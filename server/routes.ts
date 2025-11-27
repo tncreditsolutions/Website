@@ -13,8 +13,8 @@ console.log("[AI] OpenAI initialized:", !!openai, "API key available:", !!proces
 // Lazy load pdf-parse
 async function getPdfParser() {
   try {
-    const pdf = await import("pdf-parse");
-    return pdf;
+    const pdfModule = await import("pdf-parse");
+    return pdfModule.default || pdfModule;
   } catch (e) {
     console.error("[PDF] Failed to load pdf-parse:", e);
     return null;
@@ -329,11 +329,11 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
           try {
             const filePath = path.join(import.meta.dirname, "..", "uploads", fileId);
             const pdfBuffer = fs.readFileSync(filePath);
-            const pdfModule = await getPdfParser();
-            if (!pdfModule) {
+            const pdfParser = await getPdfParser();
+            if (!pdfParser) {
               throw new Error("PDF parser not available");
             }
-            const pdfData = await pdfModule.default(pdfBuffer);
+            const pdfData = await pdfParser(pdfBuffer);
             const extractedText = pdfData.text;
             
             if (extractedText.trim()) {
