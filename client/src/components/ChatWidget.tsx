@@ -22,6 +22,7 @@ export default function ChatWidget() {
   const [shouldShowEscalationButton, setShouldShowEscalationButton] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState<string>("");
   const escalationMessageIdRef = useRef<string | null>(null);
+  const dismissedEscalationIdRef = useRef<string | null>(null);
   const escalationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -166,6 +167,13 @@ export default function ChatWidget() {
           escalationTimeoutRef.current = null;
         }
       }
+      return;
+    }
+
+    // If this escalation has been dismissed, don't show it again
+    if (dismissedEscalationIdRef.current === latestEscalationRequest.id) {
+      console.log("Escalation was dismissed by user, not showing again");
+      setShouldShowEscalationButton(false);
       return;
     }
 
@@ -413,10 +421,17 @@ export default function ChatWidget() {
                       </div>
                       <button
                         onClick={() => {
+                          // Store the dismissed escalation ID so it won't show again
+                          if (escalationMessageIdRef.current) {
+                            dismissedEscalationIdRef.current = escalationMessageIdRef.current;
+                          }
                           escalationMessageIdRef.current = null;
                           setEscalationTime(null);
                           setShouldShowEscalationButton(false);
-                          localStorage.setItem(ESCALATE_DISMISSED_KEY, "true");
+                          if (escalationTimeoutRef.current) {
+                            clearTimeout(escalationTimeoutRef.current);
+                            escalationTimeoutRef.current = null;
+                          }
                         }}
                         className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 mt-0.5"
                         data-testid="button-close-escalate"
