@@ -74,12 +74,10 @@ export default function ChatWidget() {
     // Find the most recent AI message that asks for escalation
     const aiMessages = messages.filter(msg => msg.sender === "ai");
     let latestEscalationRequest = null;
-    let latestEscalationIndex = -1;
     
     for (let i = aiMessages.length - 1; i >= 0; i--) {
       if (aiMessages[i].isEscalated === "true") {
         latestEscalationRequest = aiMessages[i];
-        latestEscalationIndex = i;
         console.log("Found escalation request:", latestEscalationRequest.id);
         break;
       }
@@ -115,6 +113,10 @@ export default function ChatWidget() {
       if (escalationMessageIdRef.current !== null) {
         escalationMessageIdRef.current = null;
         setShouldShowEscalationButton(false);
+        if (escalationTimeoutRef.current) {
+          clearTimeout(escalationTimeoutRef.current);
+          escalationTimeoutRef.current = null;
+        }
       }
       return;
     }
@@ -138,13 +140,6 @@ export default function ChatWidget() {
         setShouldShowEscalationButton(true);
       }, 5000);
     }
-    
-    // Cleanup: clear timeout on unmount
-    return () => {
-      if (escalationTimeoutRef.current) {
-        clearTimeout(escalationTimeoutRef.current);
-      }
-    };
   }, [messages, email]);
   
   // Show button if escalation detected AND 5 seconds have passed
