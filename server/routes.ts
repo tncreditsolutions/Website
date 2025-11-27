@@ -373,15 +373,21 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
           // For PDFs, try text extraction for text-based PDFs
           try {
             const filePath = path.join(import.meta.dirname, "..", "uploads", fileId);
+            console.log("[AI] PDF file path:", filePath);
             const pdfBuffer = fs.readFileSync(filePath);
+            console.log("[AI] PDF buffer size:", pdfBuffer.length);
             
             try {
               const pdfModule = await loadPdfParse();
+              console.log("[AI] PDF module loaded:", !!pdfModule);
+              
               if (pdfModule && typeof pdfModule === "function") {
                 const pdfData = await pdfModule(pdfBuffer);
                 const extractedText = pdfData && pdfData.text ? pdfData.text.trim() : "";
+                console.log("[AI] Extracted text length:", extractedText.length);
                 
-                if (extractedText) {
+                if (extractedText && extractedText.length > 10) {
+                  console.log("[AI] Text extraction successful, sending to OpenAI");
                   // Send extracted text to OpenAI for analysis using the visual summary template
                   const response = await openai.chat.completions.create({
                     model: "gpt-4o",
@@ -443,15 +449,18 @@ Be specific with numbers, percentages, and actionable steps. Make it professiona
                     max_tokens: 1500,
                   });
                   analysisText = response.choices[0].message.content || "PDF received. Our specialists will review it and provide detailed feedback shortly.";
+                  console.log("[AI] OpenAI analysis received, length:", analysisText.length);
                 } else {
-                  // Could not extract text, use fallback message
+                  // Could not extract sufficient text, use fallback message
+                  console.log("[AI] No sufficient text extracted from PDF");
                   analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations to help improve your credit score and financial situation.";
                 }
               } else {
+                console.log("[AI] PDF module not a function");
                 analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations to help improve your credit score and financial situation.";
               }
             } catch (textError) {
-              console.log("[AI] PDF text extraction not available, using specialist review message");
+              console.error("[AI] PDF text extraction error:", textError instanceof Error ? textError.message : String(textError));
               analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations to help improve your credit score and financial situation.";
             }
           } catch (pdfError) {
