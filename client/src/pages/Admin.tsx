@@ -45,8 +45,18 @@ export default function Admin() {
         throw new Error("Failed to fetch document");
       }
       const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      setDocumentBlobUrl(blobUrl);
+      
+      // For images, convert blob to data URL
+      if (doc.fileType.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setDocumentBlobUrl(e.target?.result as string);
+        };
+        reader.readAsDataURL(blob);
+      } else {
+        // For PDFs, just set a marker that we've loaded it
+        setDocumentBlobUrl("loaded");
+      }
     } catch (error) {
       console.error("Error loading document:", error);
       toast({
@@ -633,7 +643,7 @@ export default function Admin() {
             <div className="space-y-4">
               {selectedDocument.fileType.startsWith('image/') ? (
                 <div className="flex justify-center bg-muted p-4 rounded-md">
-                  {documentBlobUrl ? (
+                  {documentBlobUrl && documentBlobUrl !== "loaded" ? (
                     <img 
                       src={documentBlobUrl} 
                       alt={selectedDocument.fileName}
@@ -645,15 +655,23 @@ export default function Admin() {
                 </div>
               ) : selectedDocument.fileType === 'application/pdf' ? (
                 <div className="bg-muted p-4 rounded-md">
-                  {documentBlobUrl ? (
-                    <iframe
-                      src={documentBlobUrl}
-                      className="w-full h-96 border rounded"
-                      title={selectedDocument.fileName}
-                    />
-                  ) : (
-                    <div className="text-center text-muted-foreground py-8">Loading PDF...</div>
-                  )}
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground mb-4">PDF files cannot be previewed in the dashboard.</p>
+                    <Button
+                      onClick={() => {
+                        const link = document.createElement('a');
+                        link.href = `/api/documents/${selectedDocument.id}/download`;
+                        link.download = selectedDocument.fileName;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                      }}
+                      data-testid={`button-download-pdf-from-dialog-${selectedDocument.id}`}
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Download PDF to View
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <div className="bg-muted p-4 rounded-md text-center text-muted-foreground">
