@@ -14,13 +14,14 @@ const require = createRequire(import.meta.url);
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
 console.log("[AI] OpenAI initialized:", !!openai, "API key available:", !!process.env.OPENAI_API_KEY);
 
-// Extract text from PDF using pdfjs-dist
+// Extract text from PDF using pdfjs-dist with Node.js support
 async function extractTextFromPDF(pdfBuffer: Buffer): Promise<string> {
   try {
-    const pdfjs = require("pdfjs-dist");
-    console.log("[PDF] Using pdfjs-dist for extraction");
+    // Use the legacy build for Node.js compatibility
+    const pdfjsLib = require("pdfjs-dist/legacy/build/pdf.js");
+    console.log("[PDF] Using pdfjs-dist legacy for Node.js extraction");
     
-    const pdf = await pdfjs.getDocument({ data: pdfBuffer }).promise;
+    const pdf = await pdfjsLib.getDocument({ data: pdfBuffer }).promise;
     console.log("[PDF] Loaded PDF with", pdf.numPages, "pages");
     
     let fullText = "";
