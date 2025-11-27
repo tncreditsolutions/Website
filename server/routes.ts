@@ -348,10 +348,10 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         aiAnalysis: updatedDoc.aiAnalysis,
         adminReview: updatedDoc.adminReview,
         status: updatedDoc.status,
-        createdAt: updatedDoc.createdAt,
+        createdAt: updatedDoc.createdAt instanceof Date ? updatedDoc.createdAt.toISOString() : updatedDoc.createdAt,
       };
       
-      console.log("[API] Sending response:", { hasAnalysis: !!responseBody.aiAnalysis });
+      console.log("[API] Sending response:", { hasAnalysis: !!responseBody.aiAnalysis, fields: Object.keys(responseBody) });
       res.json(responseBody);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
