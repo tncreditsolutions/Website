@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import * as pdfjsLib from "pdfjs-dist";
+import pdfjsWorker from "pdfjs-dist/build/pdf.worker?url";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // Set up the PDF worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 interface PDFViewerProps {
   fileData: Blob;
