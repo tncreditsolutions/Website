@@ -370,6 +370,26 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
     }
   });
 
+  app.get("/api/documents/:id/view", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const document = await storage.getDocumentById(id);
+      if (!document) {
+        return res.status(404).json({ error: "Document not found" });
+      }
+
+      const filePath = path.join(import.meta.dirname, "..", "uploads", document.filePath);
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ error: "File not found on server" });
+      }
+
+      res.set("Content-Type", document.fileType);
+      res.sendFile(filePath);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   app.get("/api/documents/:id/download", async (req, res) => {
     try {
       const { id } = req.params;

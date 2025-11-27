@@ -22,7 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowLeft, Mail, Phone, Calendar, User, MessageSquare, X, MessageCircle, AlertCircle, FileText, Download } from "lucide-react";
+import { ArrowLeft, Mail, Phone, Calendar, User, MessageSquare, X, MessageCircle, AlertCircle, FileText, Download, Eye } from "lucide-react";
 import { Link } from "wouter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { ContactSubmission, ChatMessage, NewsletterSubscription, Document } from "@shared/schema";
@@ -365,22 +365,31 @@ export default function Admin() {
                               </div>
                             )}
                           </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              const link = document.createElement('a');
-                              link.href = `/api/documents/${doc.id}/download`;
-                              link.download = doc.fileName;
-                              document.body.appendChild(link);
-                              link.click();
-                              document.body.removeChild(link);
-                            }}
-                            data-testid={`button-download-document-${doc.id}`}
-                            className="ml-2 flex-shrink-0"
-                          >
-                            <Download className="w-4 h-4" />
-                          </Button>
+                          <div className="ml-2 flex-shrink-0 flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setSelectedDocument(doc)}
+                              data-testid={`button-view-document-${doc.id}`}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const link = document.createElement('a');
+                                link.href = `/api/documents/${doc.id}/download`;
+                                link.download = doc.fileName;
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                              }}
+                              data-testid={`button-download-document-${doc.id}`}
+                            >
+                              <Download className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
                       </Card>
                     ))}
@@ -579,6 +588,50 @@ export default function Admin() {
                     <MessageSquare className="w-4 h-4 mr-2" />
                     Reply to This Conversation
                   </Button>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Document Viewer Dialog */}
+      <Dialog open={!!selectedDocument} onOpenChange={() => setSelectedDocument(null)}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto" data-testid="dialog-view-document">
+          <DialogHeader>
+            <DialogTitle>View Document</DialogTitle>
+            <DialogDescription>
+              {selectedDocument?.fileName} - {selectedDocument?.visitorName} ({selectedDocument?.visitorEmail})
+            </DialogDescription>
+          </DialogHeader>
+          {selectedDocument && (
+            <div className="space-y-4">
+              {selectedDocument.fileType.startsWith('image/') ? (
+                <div className="flex justify-center bg-muted p-4 rounded-md">
+                  <img 
+                    src={`/api/documents/${selectedDocument.id}/view`} 
+                    alt={selectedDocument.fileName}
+                    className="max-w-full max-h-96 rounded"
+                  />
+                </div>
+              ) : selectedDocument.fileType === 'application/pdf' ? (
+                <div className="bg-muted p-4 rounded-md">
+                  <iframe
+                    src={`/api/documents/${selectedDocument.id}/view`}
+                    className="w-full h-96 border rounded"
+                    title={selectedDocument.fileName}
+                  />
+                </div>
+              ) : (
+                <div className="bg-muted p-4 rounded-md text-center text-muted-foreground">
+                  File type cannot be previewed. Please download to view.
+                </div>
+              )}
+              
+              {selectedDocument.aiAnalysis && (
+                <div className="border-t pt-4">
+                  <p className="text-sm font-semibold mb-2">AI Analysis:</p>
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">{selectedDocument.aiAnalysis}</p>
                 </div>
               )}
             </div>
