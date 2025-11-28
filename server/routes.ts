@@ -592,8 +592,14 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
                 console.log("[AI] Using standard prompt");
                 // Add context about previously covered topics and conversation progression
                 let systemPromptWithContext = SYSTEM_PROMPT;
-                // Only mention uploaded documents if we're in an existing session (not a fresh conversation)
-                if (hasUploadedDocuments && currentSessionMessages.length > 1) {
+                // Only mention uploaded documents if they were uploaded IN THIS SESSION (check current conversation)
+                const documentMentionedInSession = currentSessionMessages.some(msg => 
+                  msg.content.toLowerCase().includes("analysis") || 
+                  msg.content.toLowerCase().includes("pdf") ||
+                  msg.content.toLowerCase().includes("report") ||
+                  msg.content.toLowerCase().includes("downloaded")
+                );
+                if (documentMentionedInSession) {
                   systemPromptWithContext += `\n\nIMPORTANT: This visitor has already uploaded a document for analysis. DO NOT ask them to upload again or request their report. Focus on helping them with their questions, next steps, or offer a PDF summary of their analysis.`;
                 }
                 if (uniqueTopics.length > 0) {
