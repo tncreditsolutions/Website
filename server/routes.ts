@@ -651,6 +651,8 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         adminReview: updatedDoc.adminReview,
         status: updatedDoc.status,
         pdfPath: pdfFileName,
+        visitorDateForFilename: (updatedDoc as any).visitorDateForFilename,
+        visitorTimezone: (updatedDoc as any).visitorTimezone,
         createdAt: updatedDoc.createdAt instanceof Date ? updatedDoc.createdAt.toISOString() : updatedDoc.createdAt,
       };
       
@@ -798,7 +800,9 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
       }
 
       // Use the date sent from frontend (already in correct visitor timezone)
+      console.log("[PDF Endpoint] Document retrieved:", { id: document.id, visitorDateForFilename: (document as any).visitorDateForFilename, visitorTimezone: (document as any).visitorTimezone });
       const dateOnlyStr = (document as any).visitorDateForFilename || new Date().toISOString().split('T')[0];
+      console.log("[PDF Endpoint] Using dateOnlyStr:", dateOnlyStr);
 
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `attachment; filename="credit-analysis-${dateOnlyStr}.pdf"`);
