@@ -49,10 +49,6 @@ export default function Admin() {
   const handleLogout = async () => {
     try {
       await apiRequest("POST", "/api/auth/logout", {});
-      toast({
-        title: "Success",
-        description: "Logged out successfully",
-      });
       setLocation("/login");
     } catch (error: any) {
       toast({
