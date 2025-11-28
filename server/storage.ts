@@ -1,7 +1,7 @@
-import { type User, type InsertUser, type ContactSubmission, type InsertContactSubmission, type ChatMessage, type InsertChatMessage, type NewsletterSubscription, type InsertNewsletterSubscription, type Document, type InsertDocument, users } from "@shared/schema";
+import { type User, type InsertUser, type ContactSubmission, type InsertContactSubmission, type ChatMessage, type InsertChatMessage, type NewsletterSubscription, type InsertNewsletterSubscription, type Document, type InsertDocument, users, chatMessages, documents } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { drizzle } from "drizzle-orm/neon-http";
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -155,6 +155,15 @@ export class DbStorage implements IStorage {
   }
 
   async createChatMessage(insertMessage: InsertChatMessage): Promise<ChatMessage> {
+    if (dbInitialized && db) {
+      try {
+        const result = await db.insert(chatMessages).values(insertMessage).returning();
+        return result[0];
+      } catch (error) {
+        console.error("[DbStorage] Error creating chat message in database:", error);
+      }
+    }
+    // Fallback to in-memory
     const id = randomUUID();
     const message: ChatMessage = {
       ...insertMessage,
@@ -166,12 +175,32 @@ export class DbStorage implements IStorage {
   }
 
   async getAllChatMessages(): Promise<ChatMessage[]> {
+    if (dbInitialized && db) {
+      try {
+        const result = await db.select().from(chatMessages).orderBy((t) => []);
+        return result.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      } catch (error) {
+        console.error("[DbStorage] Error fetching chat messages from database:", error);
+      }
+    }
+    // Fallback to in-memory
     return Array.from(this.chatMessages.values()).sort(
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     );
   }
 
   async clearChatMessagesByEmail(email: string): Promise<void> {
+    if (dbInitialized && db) {
+      try {
+        await db.delete(chatMessages).where(
+          or(eq(chatMessages.email, email), eq(chatMessages.email, "support@tncreditsolutions.com"))
+        );
+        return;
+      } catch (error) {
+        console.error("[DbStorage] Error clearing chat messages from database:", error);
+      }
+    }
+    // Fallback to in-memory
     const idsToDelete: string[] = [];
     this.chatMessages.forEach((msg, id) => {
       if (msg.email === email || msg.email === "support@tncreditsolutions.com") {
@@ -204,6 +233,19 @@ export class DbStorage implements IStorage {
   }
 
   async createDocument(insertDocument: InsertDocument): Promise<Document> {
+    if (dbInitialized && db) {
+      try {
+        const result = await db.insert(documents).values({
+          ...insertDocument,
+          visitorTimezone: insertDocument.visitorTimezone || "UTC",
+          visitorDateForFilename: insertDocument.visitorDateForFilename || new Date().toISOString().split('T')[0],
+        }).returning();
+        return result[0];
+      } catch (error) {
+        console.error("[DbStorage] Error creating document in database:", error);
+      }
+    }
+    // Fallback to in-memory
     const id = randomUUID();
     const document: Document = {
       visitorEmail: insertDocument.visitorEmail,
@@ -225,18 +267,45 @@ export class DbStorage implements IStorage {
   }
 
   async getAllDocuments(): Promise<Document[]> {
+    if (dbInitialized && db) {
+      try {
+        const result = await db.select().from(documents).orderBy((t) => []);
+        return result.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      } catch (error) {
+        console.error("[DbStorage] Error fetching documents from database:", error);
+      }
+    }
+    // Fallback to in-memory
     return Array.from(this.documents.values()).sort(
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     );
   }
 
   async getDocumentsByEmail(email: string): Promise<Document[]> {
+    if (dbInitialized && db) {
+      try {
+        const result = await db.select().from(documents).where(eq(documents.visitorEmail, email)).orderBy((t) => []);
+        return result.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      } catch (error) {
+        console.error("[DbStorage] Error fetching documents by email from database:", error);
+      }
+    }
+    // Fallback to in-memory
     return Array.from(this.documents.values())
       .filter(doc => doc.visitorEmail === email)
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
   async deleteDocumentsByEmail(email: string): Promise<void> {
+    if (dbInitialized && db) {
+      try {
+        await db.delete(documents).where(eq(documents.visitorEmail, email));
+        return;
+      } catch (error) {
+        console.error("[DbStorage] Error deleting documents by email from database:", error);
+      }
+    }
+    // Fallback to in-memory
     const idsToDelete: string[] = [];
     this.documents.forEach((doc, id) => {
       if (doc.visitorEmail === email) {
@@ -247,10 +316,28 @@ export class DbStorage implements IStorage {
   }
 
   async getDocumentById(id: string): Promise<Document | undefined> {
+    if (dbInitialized && db) {
+      try {
+        const result = await db.select().from(documents).where(eq(documents.id, id)).limit(1);
+        return result[0];
+      } catch (error) {
+        console.error("[DbStorage] Error fetching document by id from database:", error);
+      }
+    }
+    // Fallback to in-memory
     return this.documents.get(id);
   }
 
   async updateDocumentAnalysis(id: string, analysis: string): Promise<void> {
+    if (dbInitialized && db) {
+      try {
+        await db.update(documents).set({ aiAnalysis: analysis }).where(eq(documents.id, id));
+        return;
+      } catch (error) {
+        console.error("[DbStorage] Error updating document analysis in database:", error);
+      }
+    }
+    // Fallback to in-memory
     const doc = this.documents.get(id);
     if (doc) {
       doc.aiAnalysis = analysis;
@@ -258,6 +345,15 @@ export class DbStorage implements IStorage {
   }
 
   async updateDocumentStatus(id: string, status: string): Promise<void> {
+    if (dbInitialized && db) {
+      try {
+        await db.update(documents).set({ status }).where(eq(documents.id, id));
+        return;
+      } catch (error) {
+        console.error("[DbStorage] Error updating document status in database:", error);
+      }
+    }
+    // Fallback to in-memory
     const doc = this.documents.get(id);
     if (doc) {
       doc.status = status;
@@ -265,10 +361,28 @@ export class DbStorage implements IStorage {
   }
 
   async deleteDocumentById(id: string): Promise<void> {
+    if (dbInitialized && db) {
+      try {
+        await db.delete(documents).where(eq(documents.id, id));
+        return;
+      } catch (error) {
+        console.error("[DbStorage] Error deleting document by id from database:", error);
+      }
+    }
+    // Fallback to in-memory
     this.documents.delete(id);
   }
 
   async updateDocumentPdfPath(id: string, pdfPath: string): Promise<void> {
+    if (dbInitialized && db) {
+      try {
+        await db.update(documents).set({ pdfPath }).where(eq(documents.id, id));
+        return;
+      } catch (error) {
+        console.error("[DbStorage] Error updating document pdf path in database:", error);
+      }
+    }
+    // Fallback to in-memory
     const doc = this.documents.get(id);
     if (doc) {
       doc.pdfPath = pdfPath;
