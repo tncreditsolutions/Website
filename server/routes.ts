@@ -338,7 +338,7 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
                 content: [
                   {
                     type: "text",
-                    text: "Please analyze this document for a credit restoration or tax optimization case. Provide a brief summary of key information, any issues identified, and recommended next steps.",
+                    text: "IMPORTANT: Provide ONLY the professional financial analysis of this image. Do NOT include any conversational preamble, acknowledgments, or agent responses. Format ONLY with: sections marked with #### headers, bullet points starting with -, and key-value pairs with colons. Start immediately with the analysis content.",
                   },
                   {
                     type: "image_url",
@@ -349,9 +349,29 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
                 ],
               },
             ],
-            max_tokens: 500,
+            max_tokens: 1500,
           });
-          analysisText = response.choices[0].message.content || "No analysis available";
+          let rawAnalysis = response.choices[0].message.content || "No analysis available";
+          
+          // Clean analysis text: remove conversational preambles
+          rawAnalysis = rawAnalysis
+            .replace(/^(Certainly!|Of course!|Sure!|Here's|I'll|Let me|Based on|Thank you).*?\n/i, "")
+            .replace(/^(```.*?\n|```)/gm, "")
+            .split("\n")
+            .filter(line => {
+              const lower = line.toLowerCase();
+              return !lower.includes("certainly") && 
+                     !lower.includes("here's the") && 
+                     !lower.includes("based on") && 
+                     !lower.includes("let me") &&
+                     !lower.includes("can help") &&
+                     !lower.includes("would be happy") &&
+                     !lower.startsWith("i ");
+            })
+            .join("\n")
+            .trim();
+          
+          analysisText = rawAnalysis || "No analysis available";
         } else if (isPdf) {
           // For PDFs, convert first page to PNG image and send to OpenAI for analysis
           try {
@@ -393,7 +413,7 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
                     },
                     {
                       type: "text",
-                      text: "Please review this financial document and provide a professional summary analysis. Include: main findings, key metrics visible in the document, areas of concern, and recommended next steps for improvement. Format the response clearly with sections and bullet points.",
+                      text: "IMPORTANT: Provide ONLY the professional financial analysis of this document. Do NOT include any conversational preamble, acknowledgments, or agent responses. Format ONLY with: sections marked with #### headers, bullet points starting with -, and key-value pairs with colons. Start immediately with the analysis content.",
                     },
                   ],
                 },
@@ -408,7 +428,27 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
               console.log("[AI] Could not delete temporary PNG");
             }
             
-            analysisText = response.choices[0].message.content || "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
+            let rawAnalysis = response.choices[0].message.content || "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
+            
+            // Clean analysis text: remove conversational preambles and agent-like responses
+            rawAnalysis = rawAnalysis
+              .replace(/^(Certainly!|Of course!|Sure!|Here's|I'll|Let me|Based on|Thank you).*?\n/i, "")
+              .replace(/^(```.*?\n|```)/gm, "")
+              .split("\n")
+              .filter(line => {
+                const lower = line.toLowerCase();
+                return !lower.includes("certainly") && 
+                       !lower.includes("here's the") && 
+                       !lower.includes("based on") && 
+                       !lower.includes("let me") &&
+                       !lower.includes("can help") &&
+                       !lower.includes("would be happy") &&
+                       !lower.startsWith("i ");
+              })
+              .join("\n")
+              .trim();
+            
+            analysisText = rawAnalysis || "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
             console.log("[AI] PDF analysis received, length:", analysisText.length);
           } catch (pdfError) {
             console.error("[AI] PDF processing error:", pdfError instanceof Error ? pdfError.message : String(pdfError));
