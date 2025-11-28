@@ -81,14 +81,17 @@ export default function ChatWidget() {
           try {
             // Get visitor's timezone and format today's date
             const visitorTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const now = new Date();
             const formatter = new Intl.DateTimeFormat('en-US', {
               year: 'numeric',
               month: '2-digit',
               day: '2-digit',
               timeZone: visitorTimezone
             });
-            const todayFormatted = formatter.format(new Date()); // MM/DD/YYYY
+            const todayFormatted = formatter.format(now); // MM/DD/YYYY
             const visitorDateForFilename = todayFormatted.replace(/\//g, '-'); // MM-DD-YYYY
+            
+            console.log("[Upload] Timezone:", visitorTimezone, "Now UTC:", now.toISOString(), "Formatted:", todayFormatted, "For filename:", visitorDateForFilename);
             
             const response = await apiRequest("POST", "/api/documents", {
               visitorEmail: email,

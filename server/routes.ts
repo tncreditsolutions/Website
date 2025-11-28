@@ -469,6 +469,8 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
 
       const { visitorEmail, visitorName, fileName, fileType, fileContent, visitorTimezone, visitorDateForFilename } = req.body;
       
+      console.log("[Document Upload] visitorDateForFilename:", visitorDateForFilename, "visitorTimezone:", visitorTimezone);
+      
       if (!visitorEmail || !visitorName || !fileName || !fileType || !fileContent) {
         return res.status(400).json({ error: "Missing required fields" });
       }
