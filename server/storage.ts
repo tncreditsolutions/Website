@@ -126,14 +126,18 @@ export class MemStorage implements IStorage {
   async createDocument(insertDocument: InsertDocument): Promise<Document> {
     const id = randomUUID();
     const document: Document = {
-      ...insertDocument,
+      visitorEmail: insertDocument.visitorEmail,
+      visitorName: insertDocument.visitorName,
+      fileName: insertDocument.fileName,
+      fileType: insertDocument.fileType,
+      filePath: insertDocument.filePath,
       id,
       aiAnalysis: null,
       adminReview: null,
       status: "pending",
       pdfPath: null,
-      visitorTimezone: insertDocument.visitorTimezone,
-      visitorDateForFilename: insertDocument.visitorDateForFilename,
+      visitorTimezone: insertDocument.visitorTimezone || "UTC",
+      visitorDateForFilename: insertDocument.visitorDateForFilename || new Date().toISOString().split('T')[0],
       createdAt: new Date(),
     };
     this.documents.set(id, document);
