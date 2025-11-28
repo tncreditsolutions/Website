@@ -727,9 +727,15 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         return res.status(404).json({ error: "PDF file not found" });
       }
 
-      // Format date for filename - extract from ISO string stored in database
-      const isoString = document.createdAt instanceof Date ? document.createdAt.toISOString() : String(document.createdAt);
-      const dateOnly = isoString.split('T')[0]; // "2025-11-28"
+      // Format date using visitor's timezone
+      const viewDate = document.createdAt instanceof Date ? document.createdAt : new Date(document.createdAt);
+      const formatter = new Intl.DateTimeFormat('en-CA', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        timeZone: document.visitorTimezone || 'UTC'
+      });
+      const dateOnly = formatter.format(viewDate); // "2025-11-28" format (YYYY-MM-DD)
 
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `inline; filename=credit-analysis-${dateOnly}.pdf`);
@@ -771,9 +777,15 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         return res.status(400).json({ error: "No analysis available for PDF generation" });
       }
 
-      // Format date for filename - extract from ISO string stored in database
-      const isoStr = document.createdAt instanceof Date ? document.createdAt.toISOString() : String(document.createdAt);
-      const dateOnlyStr = isoStr.split('T')[0]; // "2025-11-28"
+      // Format date using visitor's timezone
+      const genDate = document.createdAt instanceof Date ? document.createdAt : new Date(document.createdAt);
+      const genFormatter = new Intl.DateTimeFormat('en-CA', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        timeZone: document.visitorTimezone || 'UTC'
+      });
+      const dateOnlyStr = genFormatter.format(genDate); // "2025-11-28" format (YYYY-MM-DD)
 
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `attachment; filename="credit-analysis-${dateOnlyStr}.pdf"`);
