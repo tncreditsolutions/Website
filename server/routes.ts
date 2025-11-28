@@ -837,15 +837,20 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
       doc.fontSize(10).font("Helvetica").fillColor("#c5d3ff");
       doc.text("Professional Credit Restoration & Tax Optimization Services", 50, 65);
 
-      console.log("[PDF] Writing title with dateOnlyStr:", dateOnlyStr, "Type:", typeof dateOnlyStr);
       doc.fontSize(14).font("Helvetica-Bold").fillColor("#fbbf24");
-      doc.text(`CREDIT ANALYSIS REPORT - ${dateOnlyStr}`, 50, 82);
+      doc.text("CREDIT ANALYSIS REPORT", 50, 82);
+
+      // Convert MM-DD-YYYY to "Month DD, YYYY" format
+      const monthNames = ["January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"];
+      const [month, day, year] = dateOnlyStr.split('-');
+      const monthIndex = parseInt(month) - 1;
+      const formattedDate = `${monthNames[monthIndex]} ${parseInt(day)}, ${year}`;
 
       doc.fontSize(9).font("Helvetica").fillColor("#e0e7ff");
       doc.text(`Client Name: ${document.visitorName}`, 50, 102);
       
-      console.log("[PDF] Writing report date with dateOnlyStr:", dateOnlyStr);
-      doc.text(`Report Date: ${dateOnlyStr}`, 50, 115);
+      doc.text(`Report Date: ${formattedDate}`, 50, 115);
 
       doc.moveTo(0, 145).lineTo(612, 145).strokeColor("#f3f4f6").lineWidth(0.75).stroke();
       
