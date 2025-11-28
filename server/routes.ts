@@ -339,30 +339,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const userId = (req.session as any).userId;
-      console.log("[Auth] Attempting password change for userId:", userId);
       const user = await storage.getUser(userId);
       if (!user) {
-        console.log("[Auth] User not found for password change");
         return res.status(401).json({ error: "User not found" });
       }
 
       const isValidPassword = await bcrypt.compare(oldPassword, user.password);
       if (!isValidPassword) {
-        console.log("[Auth] Old password does not match for userId:", userId);
         return res.status(401).json({ error: "Incorrect current password" });
       }
 
       const hashedNewPassword = await bcrypt.hash(newPassword, 10);
       await storage.updateUserPassword(userId, hashedNewPassword);
       
-      // Verify the update
-      const updatedUser = await storage.getUser(userId);
-      console.log("[Auth] Password changed successfully for userId:", userId);
-      console.log("[Auth] Verification - new password hash stored:", updatedUser?.password?.substring(0, 20));
-      
       res.json({ success: true, message: "Password changed successfully" });
     } catch (error: any) {
-      console.error("[Auth] Error during password change:", error);
       res.status(500).json({ error: error.message });
     }
   });
