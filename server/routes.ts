@@ -519,15 +519,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
               const hasUploadedDocuments = userDocuments.length > 0;
               console.log("[AI] User has uploaded documents:", hasUploadedDocuments, "Count:", userDocuments.length);
               
-              // Get conversation history for context
+              // Get conversation history for context - ONLY current session (after last greeting)
               const allMessages = await storage.getAllChatMessages();
-              const conversationHistory = allMessages
+              const visitorMessages = allMessages
                 .filter(msg => msg.email === message.email)
-                .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+                .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+              
+              // Find the most recent greeting message (new session start)
+              let lastGreetingIndex = -1;
+              for (let i = visitorMessages.length - 1; i >= 0; i--) {
+                const msg = visitorMessages[i];
+                if (msg.sender === "ai" && msg.message && msg.message.includes("Hi") && msg.message.includes("How can I help you today")) {
+                  lastGreetingIndex = i;
+                  break;
+                }
+              }
+              
+              // Only include messages from the current session (after the last greeting)
+              const currentSessionMessages = lastGreetingIndex >= 0 
+                ? visitorMessages.slice(lastGreetingIndex)
+                : visitorMessages;
+              
+              const conversationHistory = currentSessionMessages
                 .map(msg => ({
                   role: msg.sender === "visitor" ? "user" as const : "assistant" as const,
                   content: msg.message
                 }));
+              
+              console.log("[AI] Current session only - total messages:", visitorMessages.length, "current session:", currentSessionMessages.length);
               
               // Add the current visitor message to the history
               const messagesForAI = [
@@ -839,9 +858,11 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
       }
       
       console.log("[Document Upload] Updated doc aiAnalysis length:", updatedDoc.aiAnalysis?.length || 0, "preview:", updatedDoc.aiAnalysis?.substring(0, 100));
+      console.log("[Document Upload] About to generate PDF - analysisText length:", analysisText.length, "analysisText preview:", analysisText.substring(0, 150));
       
       // Generate and save PDF for admin resending - pass analysisText directly to ensure it's included
       const pdfFileName = await generateAndSavePDF(updatedDoc, analysisText);
+      console.log("[Document Upload] PDF generation complete - file:", pdfFileName);
       if (pdfFileName) {
         await storage.updateDocumentPdfPath(updatedDoc.id, pdfFileName);
       }
