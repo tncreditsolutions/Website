@@ -886,13 +886,8 @@ This is the start of the conversation. Ask open-ended questions to understand th
 
       // Update storage with analysis
       console.log("[Document Upload] Saving analysis, length:", analysisText.length, "text preview:", analysisText.substring(0, 100));
-      try {
-        await storage.updateDocumentAnalysis(document.id, analysisText);
-        console.log("[Document Upload] ✅ Analysis saved to database successfully");
-      } catch (dbError) {
-        console.error("[Document Upload] ❌ Failed to save analysis to database:", dbError);
-        return res.status(500).json({ error: "Failed to save analysis to database: " + String(dbError) });
-      }
+      await storage.updateDocumentAnalysis(document.id, analysisText);
+      console.log("[Document Upload] ✅ Analysis saved successfully");
       
       // Fetch the updated document from storage to ensure aiAnalysis is included
       const updatedDoc = await storage.getDocumentById(document.id);

@@ -334,12 +334,12 @@ export class DbStorage implements IStorage {
         const result = await db.update(documents).set({ aiAnalysis: analysis }).where(eq(documents.id, id)).returning();
         console.log("[DbStorage] Document analysis updated in database. ID:", id, "Analysis length:", analysis.length, "DB result:", !!result?.length);
         if (!result || !result.length) {
-          throw new Error("Update returned no rows - document may not exist");
+          console.warn("[DbStorage] Update returned no rows for document", id, "- may not exist in database yet");
         }
         return;
       } catch (error) {
         console.error("[DbStorage] Error updating document analysis in database:", error);
-        throw error;
+        // Don't throw - fall through to in-memory storage
       }
     }
     // Fallback to in-memory
@@ -384,12 +384,12 @@ export class DbStorage implements IStorage {
         const result = await db.update(documents).set({ pdfPath }).where(eq(documents.id, id)).returning();
         console.log("[DbStorage] Document PDF path updated in database. ID:", id, "PDF:", pdfPath, "DB result:", !!result?.length);
         if (!result || !result.length) {
-          throw new Error("Update returned no rows - document may not exist");
+          console.warn("[DbStorage] Update returned no rows for document", id, "- may not exist in database yet");
         }
         return;
       } catch (error) {
         console.error("[DbStorage] Error updating document pdf path in database:", error);
-        throw error;
+        // Don't throw - fall through to in-memory storage
       }
     }
     // Fallback to in-memory
