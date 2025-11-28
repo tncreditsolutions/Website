@@ -280,6 +280,16 @@ export default function ChatWidget() {
     
     localStorage.setItem(VISITOR_INFO_KEY, JSON.stringify({ name: trimmedName, email: trimmedEmail }));
     
+    // CRITICAL: Clear any previous chat history for this email from the backend
+    // This ensures fresh sessions don't inherit old conversation context
+    try {
+      console.log("[Chat] Clearing previous messages for fresh session");
+      await apiRequest("DELETE", "/api/chat", { email: trimmedEmail });
+    } catch (error) {
+      console.error("[Chat] Error clearing previous messages (this is OK on first visit):", error);
+      // Don't fail - this is expected if user is new
+    }
+    
     // Send greeting message from AI agent
     try {
       await apiRequest("POST", "/api/chat", {
