@@ -351,6 +351,25 @@ export default function ChatWidget() {
     }
   };
 
+  const handleClearChat = async () => {
+    try {
+      await apiRequest("DELETE", "/api/chat", { email });
+      queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
+      setLastDocumentId(null);
+      setIsNewVisitor(true);
+      toast({
+        title: "Success",
+        description: "Chat history cleared. Starting fresh!",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to clear chat",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="fixed bottom-4 right-4 z-50">
       {!isOpen ? (
@@ -374,15 +393,27 @@ export default function ChatWidget() {
                 <p className="text-xs opacity-90">TN Credit Solutions</p>
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsOpen(false)}
-              className="text-primary-foreground hover:bg-primary-foreground/20 rounded-full"
-              data-testid="button-close-chat"
-            >
-              <X className="w-4 h-4" />
-            </Button>
+            <div className="flex gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleClearChat}
+                className="text-primary-foreground hover:bg-primary-foreground/20 rounded-full"
+                data-testid="button-clear-chat"
+                title="Start fresh conversation"
+              >
+                <MessageCircle className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsOpen(false)}
+                className="text-primary-foreground hover:bg-primary-foreground/20 rounded-full"
+                data-testid="button-close-chat"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
 
           <div className="flex flex-col h-96">
