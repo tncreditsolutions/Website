@@ -94,6 +94,9 @@ export const insertDocumentSchema = createInsertSchema(documents).omit({
   adminReview: true,
   status: true,
   pdfPath: true,
+}).extend({
+  visitorDateForFilename: z.string().optional(),
+  visitorTimezone: z.string().optional(),
 });
 
 export type InsertDocument = z.infer<typeof insertDocumentSchema>;
