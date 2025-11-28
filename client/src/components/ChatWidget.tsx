@@ -22,6 +22,7 @@ export default function ChatWidget() {
   const [shouldShowEscalationButton, setShouldShowEscalationButton] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState<string>("");
   const [lastDocumentId, setLastDocumentId] = useState<string | null>(null);
+  const [visitorDateForFilename, setVisitorDateForFilename] = useState<string>("");
   const escalationMessageIdRef = useRef<string | null>(null);
   const dismissedEscalationIdRef = useRef<string | null>(null);
   const escalationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -116,6 +117,7 @@ export default function ChatWidget() {
       console.log("[Upload] Document uploaded successfully:", document);
       setUploadedFileName("");
       setLastDocumentId(document.id);
+      setVisitorDateForFilename(document.visitorDateForFilename);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -365,7 +367,7 @@ export default function ChatWidget() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `credit-analysis-${new Date().toISOString().split('T')[0]}.pdf`;
+      a.download = `credit-analysis-${visitorDateForFilename}.pdf`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
