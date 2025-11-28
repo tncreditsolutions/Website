@@ -122,6 +122,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
               const isUrgent = detectUrgentSituation(message.message);
               console.log("[AI] Detected urgent situation:", isUrgent);
               
+              // Check if user has uploaded documents
+              const userDocuments = await storage.getDocumentsByEmail(message.email);
+              const hasUploadedDocuments = userDocuments.length > 0;
+              console.log("[AI] User has uploaded documents:", hasUploadedDocuments, "Count:", userDocuments.length);
+              
               // Get conversation history for context
               const allMessages = await storage.getAllChatMessages();
               const conversationHistory = allMessages
@@ -176,6 +181,9 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
                 console.log("[AI] Using standard prompt");
                 // Add context about previously covered topics and conversation progression
                 let systemPromptWithContext = SYSTEM_PROMPT;
+                if (hasUploadedDocuments) {
+                  systemPromptWithContext += `\n\nIMPORTANT: This visitor has already uploaded a document for analysis. DO NOT ask them to upload again or request their report. Focus on helping them with their questions, next steps, or offer a PDF summary of their analysis.`;
+                }
                 if (uniqueTopics.length > 0) {
                   systemPromptWithContext += `\n\nPreviously discussed: ${uniqueTopics.join(", ")}. Do NOT ask about these again. Move to new topics or escalate.`;
                 }
