@@ -28,7 +28,7 @@ async function generateAndSavePDF(document: any): Promise<string | null> {
       fs.mkdirSync(pdfsDir, { recursive: true });
     }
 
-    // Format date using visitor's timezone for filename (MM/DD/YYYY)
+    // Format date using visitor's timezone for filename (MM-DD-YYYY)
     const fileDate = document.createdAt instanceof Date ? document.createdAt : new Date(document.createdAt);
     const fileFormatter = new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
@@ -36,10 +36,13 @@ async function generateAndSavePDF(document: any): Promise<string | null> {
       day: '2-digit',
       timeZone: document.visitorTimezone || 'UTC'
     });
-    const dateStr = fileFormatter.format(fileDate);
+    const formattedDate = fileFormatter.format(fileDate); // Returns MM/DD/YYYY
+    const dateStr = formattedDate.replace(/\//g, '-'); // Convert to MM-DD-YYYY for filename
+    console.log("[PDF Save] Visitor timezone:", document.visitorTimezone, "Formatted date:", dateStr);
     
     const pdfFileName = `${document.id}-${dateStr}.pdf`;
     const pdfFilePath = path.join(pdfsDir, pdfFileName);
+    console.log("[PDF Save] Saving to:", pdfFileName);
 
     // Create PDF document
     const doc = new PDFDocument({ margin: 0, size: "A4" });
@@ -139,8 +142,14 @@ async function generateAndSavePDF(document: any): Promise<string | null> {
     doc.end();
 
     return new Promise((resolve) => {
-      writeStream.on('finish', () => resolve(pdfFileName));
-      writeStream.on('error', () => resolve(null));
+      writeStream.on('finish', () => {
+        console.log("[PDF Save] Successfully saved:", pdfFileName);
+        resolve(pdfFileName);
+      });
+      writeStream.on('error', (err) => {
+        console.error("[PDF Save] Write stream error:", err);
+        resolve(null);
+      });
     });
   } catch (error) {
     console.error("[PDF Save] Error:", error);
@@ -737,7 +746,7 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         return res.status(404).json({ error: "PDF file not found" });
       }
 
-      // Format date using visitor's timezone for filename (MM/DD/YYYY)
+      // Format date using visitor's timezone for filename (MM-DD-YYYY)
       const viewDate = document.createdAt instanceof Date ? document.createdAt : new Date(document.createdAt);
       const viewFormatter = new Intl.DateTimeFormat('en-US', {
         year: 'numeric',
@@ -745,7 +754,8 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         day: '2-digit',
         timeZone: document.visitorTimezone || 'UTC'
       });
-      const dateOnly = viewFormatter.format(viewDate); // "11/28/2025" format (MM/DD/YYYY)
+      const formattedViewDate = viewFormatter.format(viewDate); // Returns MM/DD/YYYY
+      const dateOnly = formattedViewDate.replace(/\//g, '-'); // Convert to MM-DD-YYYY
 
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `inline; filename=credit-analysis-${dateOnly}.pdf`);
@@ -787,7 +797,7 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         return res.status(400).json({ error: "No analysis available for PDF generation" });
       }
 
-      // Format date using visitor's timezone for filename (MM/DD/YYYY)
+      // Format date using visitor's timezone for filename (MM-DD-YYYY)
       const genDate = document.createdAt instanceof Date ? document.createdAt : new Date(document.createdAt);
       const genFormatter = new Intl.DateTimeFormat('en-US', {
         year: 'numeric',
@@ -795,7 +805,8 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         day: '2-digit',
         timeZone: document.visitorTimezone || 'UTC'
       });
-      const dateOnlyStr = genFormatter.format(genDate); // "11/28/2025" format (MM/DD/YYYY)
+      const formattedGenDate = genFormatter.format(genDate); // Returns MM/DD/YYYY
+      const dateOnlyStr = formattedGenDate.replace(/\//g, '-'); // Convert to MM-DD-YYYY
 
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `attachment; filename="credit-analysis-${dateOnlyStr}.pdf"`);
