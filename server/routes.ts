@@ -61,15 +61,14 @@ async function generateAndSavePDF(document: any): Promise<string | null> {
     doc.fontSize(9).font("Helvetica").fillColor("#e0e7ff");
     doc.text(`Client Name: ${document.visitorName}`, 50, 102);
     
-    // Format date using visitor's timezone
-    const displayDate = document.createdAt instanceof Date ? document.createdAt : new Date(document.createdAt);
+    // Format TODAY's date using visitor's timezone for report
     const displayFormatter = new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
       timeZone: document.visitorTimezone || 'UTC'
     });
-    const reportDate = displayFormatter.format(displayDate);
+    const reportDate = displayFormatter.format(new Date()); // Use TODAY in visitor's timezone
     doc.text(`Report Date: ${reportDate}`, 50, 115);
     doc.moveTo(0, 145).lineTo(612, 145).strokeColor("#f3f4f6").lineWidth(0.75).stroke();
 
