@@ -19,7 +19,9 @@ function ProtectedAdminRoute() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch("/api/auth/check");
+        const response = await fetch("/api/auth/check", {
+          credentials: 'include'
+        });
         setIsAuthenticated(response.ok);
       } catch {
         setIsAuthenticated(false);
