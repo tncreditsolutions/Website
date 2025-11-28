@@ -776,7 +776,14 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         return res.status(404).json({ error: "PDF file not found" });
       }
 
-      res.download(pdfFilePath, `credit-analysis-${document.id}.pdf`);
+      // Extract date from pdfPath filename (format: id-MM-DD-YYYY.pdf)
+      let dateOnlyStr = new Date().toISOString().split('T')[0];
+      const dateMatch = document.pdfPath.match(/(\d{2}-\d{2}-\d{4})/);
+      if (dateMatch) {
+        dateOnlyStr = dateMatch[1];
+      }
+
+      res.download(pdfFilePath, `credit-analysis-${dateOnlyStr}.pdf`);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
