@@ -45,10 +45,11 @@ app.use(session({
   }),
   secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
   cookie: { 
-    secure: process.env.NODE_ENV === 'production',
+    secure: process.env.NODE_ENV === 'production' ? 'auto' : false,
     httpOnly: true,
+    sameSite: 'lax',
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
