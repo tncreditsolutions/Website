@@ -1,5 +1,7 @@
-import { type User, type InsertUser, type ContactSubmission, type InsertContactSubmission, type ChatMessage, type InsertChatMessage, type NewsletterSubscription, type InsertNewsletterSubscription, type Document, type InsertDocument } from "@shared/schema";
+import { type User, type InsertUser, type ContactSubmission, type InsertContactSubmission, type ChatMessage, type InsertChatMessage, type NewsletterSubscription, type InsertNewsletterSubscription, type Document, type InsertDocument, users } from "@shared/schema";
 import { randomUUID } from "crypto";
+import { drizzle } from "drizzle-orm/neon-http";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -24,15 +26,16 @@ export interface IStorage {
   deleteDocumentById(id: string): Promise<void>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
+// Initialize database connection
+const db = drizzle(process.env.DATABASE_URL || "");
+
+export class DbStorage implements IStorage {
   private contactSubmissions: Map<string, ContactSubmission>;
   private chatMessages: Map<string, ChatMessage>;
   private newsletterSubscriptions: Set<string>;
   private documents: Map<string, Document>;
 
   constructor() {
-    this.users = new Map();
     this.contactSubmissions = new Map();
     this.chatMessages = new Map();
     this.newsletterSubscriptions = new Set();
@@ -40,26 +43,43 @@ export class MemStorage implements IStorage {
   }
 
   async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+    try {
+      const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+      return result[0];
+    } catch (error) {
+      console.error("[DbStorage] Error getting user by id:", error);
+      return undefined;
+    }
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    try {
+      const result = await db.select().from(users).where(eq(users.username, username)).limit(1);
+      return result[0];
+    } catch (error) {
+      console.error("[DbStorage] Error getting user by username:", error);
+      return undefined;
+    }
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
+    try {
+      const id = randomUUID();
+      const user: User = { ...insertUser, id };
+      await db.insert(users).values(user);
+      return user;
+    } catch (error) {
+      console.error("[DbStorage] Error creating user:", error);
+      throw error;
+    }
   }
 
   async updateUserPassword(id: string, hashedPassword: string): Promise<void> {
-    const user = this.users.get(id);
-    if (user) {
-      user.password = hashedPassword;
+    try {
+      await db.update(users).set({ password: hashedPassword }).where(eq(users.id, id));
+    } catch (error) {
+      console.error("[DbStorage] Error updating user password:", error);
+      throw error;
     }
   }
 
@@ -204,4 +224,4 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DbStorage();
