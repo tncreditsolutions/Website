@@ -1,0 +1,106 @@
+You reached the start of the range
+Nov 28, 2025, 1:54 PM
+Starting Container
+    at QueryPromise.execute (file:///app/node_modules/drizzle-orm/pg-core/db.js:280:22)
+[DbStorage] Initializing database schema...
+    at QueryPromise.then (file:///app/node_modules/drizzle-orm/query-promise.js:21:17)
+[DbStorage] Error getting user by username: TypeError: client is not a function
+[DbStorage] Error initializing schema: TypeError: client is not a function
+    at NeonHttpPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-http/session.js:31:14)
+    at NeonHttpPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-http/session.js:40:26)
+    at file:///app/node_modules/drizzle-orm/pg-core/query-builders/select.js:708:30
+    at Object.startActiveSpan (file:///app/node_modules/drizzle-orm/tracing.js:8:14)
+    at PgSelectBase.execute (file:///app/node_modules/drizzle-orm/pg-core/query-builders/select.js:707:19)
+    at PgSelectBase.then (file:///app/node_modules/drizzle-orm/query-promise.js:21:17)
+[Auth] Creating default admin user...
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+[DbStorage] WARNING: DATABASE_URL environment variable is not set!
+[AI] OpenAI initialized: true API key available: true
+[DbStorage] Error creating user: TypeError: client is not a function
+    at NeonHttpPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-http/session.js:31:14)
+    at file:///app/node_modules/drizzle-orm/pg-core/query-builders/insert.js:178:30
+    at Object.startActiveSpan (file:///app/node_modules/drizzle-orm/tracing.js:8:14)
+    at QueryPromise.execute (file:///app/node_modules/drizzle-orm/pg-core/query-builders/insert.js:177:19)
+    at QueryPromise.then (file:///app/node_modules/drizzle-orm/query-promise.js:21:17)
+[Auth] Error initializing default admin: TypeError: client is not a function
+    at NeonHttpPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-http/session.js:31:14)
+    at file:///app/node_modules/drizzle-orm/pg-core/query-builders/insert.js:178:30
+    at Object.startActiveSpan (file:///app/node_modules/drizzle-orm/tracing.js:8:14)
+    at QueryPromise.execute (file:///app/node_modules/drizzle-orm/pg-core/query-builders/insert.js:177:19)
+    at QueryPromise.then (file:///app/node_modules/drizzle-orm/query-promise.js:21:17)
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+TypeError: client is not a function
+    at NeonHttpPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-http/session.js:31:14)
+    at file:///app/node_modules/drizzle-orm/pg-core/query-builders/insert.js:178:30
+    at Object.startActiveSpan (file:///app/node_modules/drizzle-orm/tracing.js:8:14)
+    at QueryPromise.execute (file:///app/node_modules/drizzle-orm/pg-core/query-builders/insert.js:177:19)
+    at QueryPromise.then (file:///app/node_modules/drizzle-orm/query-promise.js:21:17)
+Node.js v22.21.1
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+[DbStorage] WARNING: DATABASE_URL environment variable is not set!
+[AI] OpenAI initialized: true API key available: true
+[DbStorage] Initializing database schema...
+[DbStorage] Error initializing schema: TypeError: client is not a function
+    at NeonHttpPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-http/session.js:31:14)
+    at QueryPromise.execute (file:///app/node_modules/drizzle-orm/pg-core/db.js:280:22)
+    at QueryPromise.then (file:///app/node_modules/drizzle-orm/query-promise.js:21:17)
+[Auth] Creating default admin user...
+[DbStorage] Error getting user by username: TypeError: client is not a function
+    at NeonHttpPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-http/session.js:40:26)
+    at file:///app/node_modules/drizzle-orm/pg-core/query-builders/select.js:708:30
+    at Object.startActiveSpan (file:///app/node_modules/drizzle-orm/tracing.js:8:14)
+    at PgSelectBase.execute (file:///app/node_modules/drizzle-orm/pg-core/query-builders/select.js:707:19)
+    at PgSelectBase.then (file:///app/node_modules/drizzle-orm/query-promise.js:21:17)
+[DbStorage] Error creating user: TypeError: client is not a function
+    at NeonHttpPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-http/session.js:31:14)
+    at file:///app/node_modules/drizzle-orm/pg-core/query-builders/insert.js:178:30
+    at Object.startActiveSpan (file:///app/node_modules/drizzle-orm/tracing.js:8:14)
+    at QueryPromise.execute (file:///app/node_modules/drizzle-orm/pg-core/query-builders/insert.js:177:19)
+    at QueryPromise.then (file:///app/node_modules/drizzle-orm/query-promise.js:21:17)
+[Auth] Error initializing default admin: TypeError: client is not a function
+    at NeonHttpPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-http/session.js:31:14)
+    at file:///app/node_modules/drizzle-orm/pg-core/query-builders/insert.js:178:30
+    at Object.startActiveSpan (file:///app/node_modules/drizzle-orm/tracing.js:8:14)
+    at QueryPromise.execute (file:///app/node_modules/drizzle-orm/pg-core/query-builders/insert.js:177:19)
+    at QueryPromise.then (file:///app/node_modules/drizzle-orm/query-promise.js:21:17)
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+TypeError: client is not a function
+    at NeonHttpPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-http/session.js:31:14)
+    at file:///app/node_modules/drizzle-orm/pg-core/query-builders/insert.js:178:30
+    at Object.startActiveSpan (file:///app/node_modules/drizzle-orm/tracing.js:8:14)
+    at QueryPromise.execute (file:///app/node_modules/drizzle-orm/pg-core/query-builders/insert.js:177:19)
+    at QueryPromise.then (file:///app/node_modules/drizzle-orm/query-promise.js:21:17)
+Node.js v22.21.1
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+    at NeonHttpPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-http/session.js:40:26)
+    at file:///app/node_modules/drizzle-orm/pg-core/query-builders/select.js:708:30
+    at Object.startActiveSpan (file:///app/node_modules/drizzle-orm/tracing.js:8:14)
+    at PgSelectBase.execute (file:///app/node_modules/drizzle-orm/pg-core/query-builders/select.js:707:19)
+    at PgSelectBase.then (file:///app/node_modules/drizzle-orm/query-promise.js:21:17)
+[DbStorage] Error creating user: TypeError: client is not a function
+    at NeonHttpPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-http/session.js:31:14)
+    at file:///app/node_modules/drizzle-orm/pg-core/query-builders/insert.js:178:30
+[DbStorage] WARNING: DATABASE_URL environment variable is not set!
+[AI] OpenAI initialized: true API key available: true
+[DbStorage] Initializing database schema...
+[DbStorage] Error initializing schema: TypeError: client is not a function
+    at NeonHttpPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-http/session.js:31:14)
+    at QueryPromise.execute (file:///app/node_modules/drizzle-orm/pg-core/db.js:280:22)
+    at QueryPromise.then (file:///app/node_modules/drizzle-orm/query-promise.js:21:17)
+[Auth] Creating default admin user...
+[DbStorage] Error getting user by username: TypeError: client is not a function
+    at file:///app/node_modules/drizzle-orm/pg-core/query-builders/insert.js:178:30
+    at Object.startActiveSpan (file:///app/node_modules/drizzle-orm/tracing.js:8:14)
+    at Object.startActiveSpan (file:///app/node_modules/drizzle-orm/tracing.js:8:14)
+    at QueryPromise.execute (file:///app/node_modules/drizzle-orm/pg-core/query-builders/insert.js:177:19)
+    at QueryPromise.execute (file:///app/node_modules/drizzle-orm/pg-core/query-builders/insert.js:177:19)
