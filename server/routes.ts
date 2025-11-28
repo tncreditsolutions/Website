@@ -812,7 +812,12 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
       console.log("[PDF Endpoint] Using dateOnlyStr from pdfPath:", dateOnlyStr, "pdfPath:", document.pdfPath);
 
       res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `attachment; filename="credit-analysis-${dateOnlyStr}.pdf"`);
+      res.setHeader("Content-Disposition", `attachment; filename*=UTF-8''credit-analysis-${encodeURIComponent(dateOnlyStr)}.pdf`);
+      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+      res.setHeader("Pragma", "no-cache");
+      res.setHeader("Expires", "0");
+
+      console.log("[PDF Endpoint] Setting Content-Disposition with dateOnlyStr:", dateOnlyStr, "final header: attachment; filename*=UTF-8''credit-analysis-" + encodeURIComponent(dateOnlyStr) + ".pdf");
 
       const doc = new PDFDocument({ margin: 0, size: "A4" });
       doc.pipe(res);
