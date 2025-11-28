@@ -589,12 +589,13 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
                   max_tokens: 512,
                 });
               } else {
-                console.log("[AI] Using standard prompt, visitor turns:", visitorTurns);
-                // For fresh sessions (only greeting), use simplified prompt without "previous analysis" references
+                console.log("[AI] Using standard prompt, visitor turns:", visitorTurns, "session message count:", currentSessionMessages.length);
+                // For fresh sessions (greeting + first message only), use simplified prompt without "previous analysis" references
                 let systemPromptWithContext: string;
                 
-                if (visitorTurns === 0) {
-                  // Fresh conversation - only greeting sent so far
+                // Check if this is the first exchange: greeting + first user message = 2 current session messages total
+                if (currentSessionMessages.length <= 1) {
+                  // Fresh conversation - only greeting or just started
                   console.log("[AI] Fresh session - using simple greeting prompt");
                   systemPromptWithContext = `You are Riley, a smart customer support agent for TN Credit Solutions. You provide personalized guidance on credit restoration and tax optimization.
 
