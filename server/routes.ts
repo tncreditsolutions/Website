@@ -594,10 +594,12 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
                 let systemPromptWithContext = SYSTEM_PROMPT;
                 // Only mention uploaded documents if they were uploaded IN THIS SESSION (check current conversation)
                 const documentMentionedInSession = currentSessionMessages.some(msg => 
-                  msg.content.toLowerCase().includes("analysis") || 
-                  msg.content.toLowerCase().includes("pdf") ||
-                  msg.content.toLowerCase().includes("report") ||
-                  msg.content.toLowerCase().includes("downloaded")
+                  msg.message && (
+                    msg.message.toLowerCase().includes("analysis") || 
+                    msg.message.toLowerCase().includes("pdf") ||
+                    msg.message.toLowerCase().includes("report") ||
+                    msg.message.toLowerCase().includes("downloaded")
+                  )
                 );
                 if (documentMentionedInSession) {
                   systemPromptWithContext += `\n\nIMPORTANT: This visitor has already uploaded a document for analysis. DO NOT ask them to upload again or request their report. Focus on helping them with their questions, next steps, or offer a PDF summary of their analysis.`;
