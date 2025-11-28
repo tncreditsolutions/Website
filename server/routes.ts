@@ -727,22 +727,12 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         return res.status(404).json({ error: "PDF file not found" });
       }
 
-      // Format date using visitor's timezone for filename
-      const viewDate = document.createdAt instanceof Date ? document.createdAt : new Date(document.createdAt);
-      const viewFormatter = new Intl.DateTimeFormat('en-US', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        timeZone: document.visitorTimezone || 'UTC'
-      });
-      const viewParts = viewFormatter.formatToParts(viewDate);
-      const viewYear = viewParts.find((p: any) => p.type === 'year')?.value;
-      const viewMonth = viewParts.find((p: any) => p.type === 'month')?.value;
-      const viewDay = viewParts.find((p: any) => p.type === 'day')?.value;
-      const viewDateStr = `${viewYear}-${viewMonth}-${viewDay}`;
+      // Format date for filename - extract from ISO string stored in database
+      const isoString = document.createdAt instanceof Date ? document.createdAt.toISOString() : String(document.createdAt);
+      const dateOnly = isoString.split('T')[0]; // "2025-11-28"
 
       res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `inline; filename=credit-analysis-${viewDateStr}.pdf`);
+      res.setHeader("Content-Disposition", `inline; filename=credit-analysis-${dateOnly}.pdf`);
       res.sendFile(pdfFilePath);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -781,22 +771,12 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         return res.status(400).json({ error: "No analysis available for PDF generation" });
       }
 
-      // Format date using visitor's timezone for filename
-      const genDate = document.createdAt instanceof Date ? document.createdAt : new Date(document.createdAt);
-      const genFormatter = new Intl.DateTimeFormat('en-US', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        timeZone: document.visitorTimezone || 'UTC'
-      });
-      const genParts = genFormatter.formatToParts(genDate);
-      const genYear = genParts.find((p: any) => p.type === 'year')?.value;
-      const genMonth = genParts.find((p: any) => p.type === 'month')?.value;
-      const genDay = genParts.find((p: any) => p.type === 'day')?.value;
-      const genDateStr = `${genYear}-${genMonth}-${genDay}`;
+      // Format date for filename - extract from ISO string stored in database
+      const isoStr = document.createdAt instanceof Date ? document.createdAt.toISOString() : String(document.createdAt);
+      const dateOnlyStr = isoStr.split('T')[0]; // "2025-11-28"
 
       res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `attachment; filename="credit-analysis-${genDateStr}.pdf"`);
+      res.setHeader("Content-Disposition", `attachment; filename="credit-analysis-${dateOnlyStr}.pdf"`);
 
       const doc = new PDFDocument({ margin: 0, size: "A4" });
       doc.pipe(res);
