@@ -268,13 +268,17 @@ function authMiddleware(req: Request, res: Response, next: NextFunction) {
 async function initializeDefaultAdmin() {
   try {
     const existingAdmin = await storage.getUserByUsername("admin");
-    if (!existingAdmin) {
-      const hashedPassword = await bcrypt.hash("admin123", 10);
-      await storage.createUser({ username: "admin", password: hashedPassword });
-      console.log("[Auth] Default admin user created. Username: admin, Password: admin123");
+    if (existingAdmin) {
+      console.log("[Auth] Admin user already exists");
+      return;
     }
+    console.log("[Auth] Creating default admin user...");
+    const hashedPassword = await bcrypt.hash("admin123", 10);
+    const newAdmin = await storage.createUser({ username: "admin", password: hashedPassword });
+    console.log("[Auth] Default admin user created. ID:", newAdmin.id, "Username: admin, Password: admin123");
   } catch (error) {
     console.error("[Auth] Error initializing default admin:", error);
+    throw error;
   }
 }
 
