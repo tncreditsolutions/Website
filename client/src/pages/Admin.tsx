@@ -99,11 +99,6 @@ export default function Admin() {
         newPassword,
       });
 
-      toast({
-        title: "Success",
-        description: "Password changed successfully",
-      });
-
       setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
