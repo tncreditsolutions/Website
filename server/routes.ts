@@ -403,6 +403,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Password reset endpoint - for account recovery
+  app.post("/api/auth/reset-admin-password", async (req, res) => {
+    try {
+      console.log("[Reset] Password reset requested");
+      
+      const admin = await storage.getUserByUsername("admin");
+      if (!admin) {
+        return res.status(404).json({ error: "Admin user not found" });
+      }
+      
+      const tempPassword = "admin123";
+      const hashedPassword = await bcrypt.hash(tempPassword, 10);
+      await storage.updateUserPassword(admin.id, hashedPassword);
+      
+      console.log("[Reset] Admin password reset successfully");
+      res.json({ 
+        success: true, 
+        message: "Admin password reset successfully",
+        tempPassword: tempPassword,
+        instruction: "Please log in with the temporary password and change it immediately"
+      });
+    } catch (error: any) {
+      console.error("[Reset] Error resetting password:", error);
+      res.status(500).json({ error: error.message || "Failed to reset password" });
+    }
+  });
+
   // Change password endpoint
   app.post("/api/auth/change-password", authMiddleware, async (req, res) => {
     try {
