@@ -279,6 +279,9 @@ async function initializeDefaultAdmin() {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Initialize database schema first
+  await storage.initializeSchema();
+  
   // Initialize default admin user
   await initializeDefaultAdmin();
 

@@ -1,7 +1,7 @@
 import { type User, type InsertUser, type ContactSubmission, type InsertContactSubmission, type ChatMessage, type InsertChatMessage, type NewsletterSubscription, type InsertNewsletterSubscription, type Document, type InsertDocument, users } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { drizzle } from "drizzle-orm/neon-http";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -43,6 +43,22 @@ export class DbStorage implements IStorage {
     this.chatMessages = new Map();
     this.newsletterSubscriptions = new Set();
     this.documents = new Map();
+  }
+
+  async initializeSchema(): Promise<void> {
+    try {
+      console.log("[DbStorage] Initializing database schema...");
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS users (
+          id varchar PRIMARY KEY,
+          username varchar NOT NULL UNIQUE,
+          password varchar NOT NULL
+        )
+      `);
+      console.log("[DbStorage] Schema initialization complete");
+    } catch (error) {
+      console.error("[DbStorage] Error initializing schema:", error);
+    }
   }
 
   async getUser(id: string): Promise<User | undefined> {
