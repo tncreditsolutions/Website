@@ -280,13 +280,15 @@ export default function ChatWidget() {
     
     localStorage.setItem(VISITOR_INFO_KEY, JSON.stringify({ name: trimmedName, email: trimmedEmail }));
     
-    // CRITICAL: Clear any previous chat history for this email from the backend
+    // CRITICAL: Clear any previous chat history AND documents for this email from the backend
     // This ensures fresh sessions don't inherit old conversation context
     try {
-      console.log("[Chat] Clearing previous messages for fresh session");
+      console.log("[Chat] Clearing previous messages and documents for fresh session");
       await apiRequest("DELETE", "/api/chat", { email: trimmedEmail });
+      // Also clear documents so Riley doesn't think there's a previous analysis
+      await apiRequest("DELETE", "/api/documents-by-email", { email: trimmedEmail });
     } catch (error) {
-      console.error("[Chat] Error clearing previous messages (this is OK on first visit):", error);
+      console.error("[Chat] Error clearing previous data (this is OK on first visit):", error);
       // Don't fail - this is expected if user is new
     }
     
