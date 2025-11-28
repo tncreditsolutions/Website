@@ -32,14 +32,15 @@ export default function Login() {
         password: password.trim(),
       });
 
-      setLocation("/admin");
+      setTimeout(() => {
+        setLocation("/admin");
+      }, 100);
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "Failed to log in",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
   };
