@@ -321,6 +321,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Diagnostic endpoint - check configuration
+  app.get("/api/diagnostic", async (req, res) => {
+    try {
+      const diagnostic = {
+        databaseUrlSet: !!process.env.DATABASE_URL,
+        sessionSecretSet: !!process.env.SESSION_SECRET,
+        nodeEnv: process.env.NODE_ENV,
+        openaiKeySet: !!process.env.OPENAI_API_KEY,
+        adminUserExists: false,
+        dbConnectionWorks: false,
+        errors: [] as string[]
+      };
+
+      // Check database connection
+      try {
+        const adminUser = await storage.getUserByUsername("admin");
+        diagnostic.adminUserExists = !!adminUser;
+        diagnostic.dbConnectionWorks = true;
+      } catch (error: any) {
+        diagnostic.errors.push(`Database connection error: ${error.message}`);
+      }
+
+      res.json(diagnostic);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Check auth status endpoint
   app.get("/api/auth/check", (req, res) => {
     if ((req.session as any)?.userId) {
