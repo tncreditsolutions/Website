@@ -331,21 +331,19 @@ export class DbStorage implements IStorage {
   async updateDocumentAnalysis(id: string, analysis: string): Promise<void> {
     if (dbInitialized && db) {
       try {
-        const result = await db.update(documents).set({ aiAnalysis: analysis }).where(eq(documents.id, id)).returning();
-        console.log("[DbStorage] Document analysis updated in database. ID:", id, "Analysis length:", analysis.length, "DB result:", !!result?.length);
-        if (!result || !result.length) {
-          console.warn("[DbStorage] Update returned no rows for document", id, "- may not exist in database yet");
-        }
+        const result = await db.update(documents).set({ aiAnalysis: analysis }).where(eq(documents.id, id));
+        console.log("[DbStorage] Document analysis updated in database. ID:", id, "Analysis length:", analysis.length);
         return;
       } catch (error) {
-        console.error("[DbStorage] Error updating document analysis in database:", error);
-        // Don't throw - fall through to in-memory storage
+        console.error("[DbStorage] CRITICAL: Error updating document analysis in database:", error);
+        console.error("[DbStorage] Update failed for document", id, "- falling back to in-memory");
       }
     }
     // Fallback to in-memory
     const doc = this.documents.get(id);
     if (doc) {
       doc.aiAnalysis = analysis;
+      console.log("[DbStorage] Analysis saved to in-memory storage for document:", id);
     }
   }
 
@@ -381,21 +379,19 @@ export class DbStorage implements IStorage {
   async updateDocumentPdfPath(id: string, pdfPath: string): Promise<void> {
     if (dbInitialized && db) {
       try {
-        const result = await db.update(documents).set({ pdfPath }).where(eq(documents.id, id)).returning();
-        console.log("[DbStorage] Document PDF path updated in database. ID:", id, "PDF:", pdfPath, "DB result:", !!result?.length);
-        if (!result || !result.length) {
-          console.warn("[DbStorage] Update returned no rows for document", id, "- may not exist in database yet");
-        }
+        const result = await db.update(documents).set({ pdfPath }).where(eq(documents.id, id));
+        console.log("[DbStorage] Document PDF path updated in database. ID:", id, "PDF:", pdfPath);
         return;
       } catch (error) {
-        console.error("[DbStorage] Error updating document pdf path in database:", error);
-        // Don't throw - fall through to in-memory storage
+        console.error("[DbStorage] CRITICAL: Error updating document pdf path in database:", error);
+        console.error("[DbStorage] PDF update failed for document", id, "- falling back to in-memory");
       }
     }
     // Fallback to in-memory
     const doc = this.documents.get(id);
     if (doc) {
       doc.pdfPath = pdfPath;
+      console.log("[DbStorage] PDF path saved to in-memory storage for document:", id);
     }
   }
 }
