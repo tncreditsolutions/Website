@@ -1,0 +1,108 @@
+
+
+You reached the start of the range
+Nov 28, 2025, 4:13 PM
+Starting Container
+vite v5.4.20 building for production...
+transforming...
+> rest-express@1.0.0 build
+> vite build && esbuild server/index-prod.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/index.js
+npm warn config production Use `--omit=dev` instead.
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+✓ 1742 modules transformed.
+rendering chunks...
+computing gzip size...
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+../dist/public/index.html                                            2.37 kB │ gzip:   0.95 kB
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 5.03s
+../dist/public/assets/ready_for_better_future_hero-C6oVMAMg.png    945.56 kB
+../dist/public/assets/client_testimonial_photo_2-B8UX-XkM.png    1,312.17 kB
+../dist/public/assets/client_testimonial_photo_1-C49icyGe.png    1,313.43 kB
+../dist/public/assets/client_testimonial_photo_3-BHvJgOFH.png    1,457.77 kB
+../dist/public/assets/pdf.worker-zxMdjS_u.mjs                    1,916.05 kB
+../dist/public/assets/index-B2cAoITb.css                            96.33 kB │ gzip:  14.74 kB
+../dist/public/assets/index-BumSpYfU.js                            873.23 kB │ gzip: 260.98 kB
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+  dist/index.js  56.3kb
+⚡ Done in 11ms
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+[DbStorage] ✅ Database connected successfully - User credentials will PERSIST
+[AI] OpenAI initialized: true API key available: true
+[DbStorage] Error getting user by username: NeonDbError: relation "users" does not exist
+    at execute (file:///app/node_modules/@neondatabase/serverless/index.mjs:1556:55)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonHttpPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-http/session.js:40:20)
+    at async DbStorage.getUserByUsername (file:///app/dist/index.js:147:24)
+    at async initializeDefaultAdmin (file:///app/dist/index.js:530:27)
+    at async registerRoutes (file:///app/dist/index.js:544:3)
+    at async runApp (file:///app/dist/index.js:1336:18)
+    at async file:///app/dist/index.js:1367:3 {
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '42',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable',
+  sourceError: undefined
+}
+[Auth] Creating default admin user...
+[DbStorage] Using in-memory storage for user: 57a9d942-c5bf-4083-8609-13ebb9b95d37
+[Auth] Default admin user created. ID: 57a9d942-c5bf-4083-8609-13ebb9b95d37 Username: admin, Password: admin123
+[DbStorage] Error creating user in database: NeonDbError: relation "users" does not exist
+    at execute (file:///app/node_modules/@neondatabase/serverless/index.mjs:1556:55)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async DbStorage.createUser (file:///app/dist/index.js:165:9)
+    at async initializeDefaultAdmin (file:///app/dist/index.js:537:22)
+    at async registerRoutes (file:///app/dist/index.js:544:3)
+    at async runApp (file:///app/dist/index.js:1336:18)
+    at async file:///app/dist/index.js:1367:3 {
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '13',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable',
+  sourceError: undefined
+}
+9:14:00 PM [express] serving on port 8080
+9:14:12 PM [express] GET /api/chat 304 in 3ms :: []
+9:14:15 PM [express] GET /api/chat 304 in 1ms :: []
+9:14:17 PM [express] GET /api/auth/check 401 in 1ms :: {"authenticated":false}
+9:14:17 PM [express] GET /api/chat 304 in 0ms :: []
+9:14:17 PM [express] GET /api/chat 304 in 1ms :: []
+9:14:19 PM [express] GET /api/chat 304 in 0ms :: []
+9:14:21 PM [express] GET /api/chat 304 in 0ms :: []
+[Auth] Login attempt
+[Auth] Received username: admin
+[DbStorage] Error getting user by username: NeonDbError: relation "users" does not exist
+    at execute (file:///app/node_modules/@neondatabase/serverless/index.mjs:1556:55)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async DbStorage.getUserByUsername (file:///app/dist/index.js:147:24)
+    at async NeonHttpPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-http/session.js:40:20)
+  code: '42P01',
+    at async file:///app/dist/index.js:554:20 {
+  routine: 'parserOpenTable',
