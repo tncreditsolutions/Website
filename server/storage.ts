@@ -34,12 +34,14 @@ if (process.env.DATABASE_URL) {
   try {
     db = drizzle(process.env.DATABASE_URL);
     dbInitialized = true;
-    console.log("[DbStorage] Database connected successfully");
+    console.log("[DbStorage] ✅ Database connected successfully - User credentials will PERSIST");
   } catch (error) {
-    console.error("[DbStorage] Failed to initialize database:", error);
+    console.error("[DbStorage] ❌ Failed to initialize database:", error);
+    console.error("[DbStorage] ⚠️  CRITICAL: Without database, password changes will be LOST on restart!");
   }
 } else {
-  console.warn("[DbStorage] WARNING: DATABASE_URL environment variable is not set! Using in-memory storage only.");
+  console.error("[DbStorage] ❌ CRITICAL: DATABASE_URL environment variable is not set!");
+  console.error("[DbStorage] ⚠️  WARNING: Using in-memory storage only - Admin passwords will RESET on every restart!");
 }
 
 export class DbStorage implements IStorage {
