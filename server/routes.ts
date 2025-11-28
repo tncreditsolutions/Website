@@ -49,11 +49,12 @@ async function generateAndSavePDF(document: any): Promise<string | null> {
     doc.fontSize(9).font("Helvetica").fillColor("#e0e7ff");
     doc.text(`Client Name: ${document.visitorName}`, 50, 102);
     
-    const dateStr = document.createdAt instanceof Date ? document.createdAt.toISOString() : String(document.createdAt);
-    const datePart = dateStr.split('T')[0];
-    const [year, monthStr, dayStr] = datePart.split('-');
+    const date = document.createdAt instanceof Date ? document.createdAt : new Date(document.createdAt);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
     const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    const reportDate = `${monthNames[parseInt(monthStr) - 1]} ${parseInt(dayStr)}, ${year}`;
+    const reportDate = `${monthNames[month - 1]} ${day}, ${year}`;
     doc.text(`Report Date: ${reportDate}`, 50, 115);
     doc.moveTo(0, 145).lineTo(612, 145).strokeColor("#f3f4f6").lineWidth(0.75).stroke();
 
@@ -767,14 +768,13 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
       doc.fontSize(9).font("Helvetica").fillColor("#e0e7ff");
       doc.text(`Client Name: ${document.visitorName}`, 50, 102);
       
-      // Format date from ISO string without timezone conversion
-      const dateStr = document.createdAt instanceof Date 
-        ? document.createdAt.toISOString() 
-        : String(document.createdAt);
-      const datePart = dateStr.split('T')[0]; // "2025-11-28"
-      const [year, monthStr, dayStr] = datePart.split('-');
+      // Format date using local time, not UTC
+      const date = document.createdAt instanceof Date ? document.createdAt : new Date(document.createdAt);
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
       const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-      const reportDate = `${monthNames[parseInt(monthStr) - 1]} ${parseInt(dayStr)}, ${year}`;
+      const reportDate = `${monthNames[month - 1]} ${day}, ${year}`;
       
       doc.text(`Report Date: ${reportDate}`, 50, 115);
 
