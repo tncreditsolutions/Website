@@ -252,6 +252,7 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         return res.status(400).json({ error: "Email required" });
       }
       await storage.clearChatMessagesByEmail(email);
+      await storage.deleteDocumentsByEmail(email);
       res.json({ success: true });
     } catch (error: any) {
       res.status(500).json({ error: error.message });

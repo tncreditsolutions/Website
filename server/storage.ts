@@ -18,6 +18,7 @@ export interface IStorage {
   getDocumentById(id: string): Promise<Document | undefined>;
   updateDocumentAnalysis(id: string, analysis: string): Promise<void>;
   updateDocumentStatus(id: string, status: string): Promise<void>;
+  deleteDocumentsByEmail(email: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -144,6 +145,16 @@ export class MemStorage implements IStorage {
     return Array.from(this.documents.values())
       .filter(doc => doc.visitorEmail === email)
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+
+  async deleteDocumentsByEmail(email: string): Promise<void> {
+    const idsToDelete: string[] = [];
+    this.documents.forEach((doc, id) => {
+      if (doc.visitorEmail === email) {
+        idsToDelete.push(id);
+      }
+    });
+    idsToDelete.forEach(id => this.documents.delete(id));
   }
 
   async getDocumentById(id: string): Promise<Document | undefined> {
