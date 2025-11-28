@@ -49,12 +49,15 @@ async function generateAndSavePDF(document: any): Promise<string | null> {
     doc.fontSize(9).font("Helvetica").fillColor("#e0e7ff");
     doc.text(`Client Name: ${document.visitorName}`, 50, 102);
     
-    // Extract date directly from ISO string to avoid timezone conversion
-    const isoString = document.createdAt instanceof Date ? document.createdAt.toISOString() : String(document.createdAt);
-    const dateOnlyPart = isoString.split('T')[0]; // "2025-11-28"
-    const [yearStr, monthStr, dayStr] = dateOnlyPart.split('-');
-    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    const reportDate = `${monthNames[parseInt(monthStr) - 1]} ${parseInt(dayStr)}, ${yearStr}`;
+    // Format date using visitor's timezone
+    const date = document.createdAt instanceof Date ? document.createdAt : new Date(document.createdAt);
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      timeZone: document.visitorTimezone || 'UTC'
+    });
+    const reportDate = formatter.format(date);
     doc.text(`Report Date: ${reportDate}`, 50, 115);
     doc.moveTo(0, 145).lineTo(612, 145).strokeColor("#f3f4f6").lineWidth(0.75).stroke();
 
@@ -457,7 +460,7 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         return res.status(500).json({ error: "AI service not configured" });
       }
 
-      const { visitorEmail, visitorName, fileName, fileType, fileContent } = req.body;
+      const { visitorEmail, visitorName, fileName, fileType, fileContent, visitorTimezone } = req.body;
       
       if (!visitorEmail || !visitorName || !fileName || !fileType || !fileContent) {
         return res.status(400).json({ error: "Missing required fields" });
@@ -481,6 +484,7 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         fileName,
         fileType,
         filePath: fileId,
+        visitorTimezone: visitorTimezone || "UTC",
       });
 
       // Analyze document with OpenAI
@@ -790,12 +794,15 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
       doc.fontSize(9).font("Helvetica").fillColor("#e0e7ff");
       doc.text(`Client Name: ${document.visitorName}`, 50, 102);
       
-      // Extract date directly from ISO string to avoid timezone conversion
-      const isoString = document.createdAt instanceof Date ? document.createdAt.toISOString() : String(document.createdAt);
-      const dateOnlyPart = isoString.split('T')[0]; // "2025-11-28"
-      const [yearStr, monthStr, dayStr] = dateOnlyPart.split('-');
-      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-      const reportDate = `${monthNames[parseInt(monthStr) - 1]} ${parseInt(dayStr)}, ${yearStr}`;
+      // Format date using visitor's timezone
+      const date = document.createdAt instanceof Date ? document.createdAt : new Date(document.createdAt);
+      const formatter = new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        timeZone: document.visitorTimezone || 'UTC'
+      });
+      const reportDate = formatter.format(date);
       
       doc.text(`Report Date: ${reportDate}`, 50, 115);
 

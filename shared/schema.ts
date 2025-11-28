@@ -82,6 +82,7 @@ export const documents = pgTable("documents", {
   adminReview: text("admin_review"),
   status: text("status").notNull().default("pending"), // pending, reviewed, archived
   pdfPath: text("pdf_path"), // path to generated summary PDF for resending to visitor
+  visitorTimezone: text("visitor_timezone"), // e.g. "America/New_York"
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -91,6 +92,7 @@ export const insertDocumentSchema = createInsertSchema(documents).omit({
   aiAnalysis: true,
   adminReview: true,
   status: true,
+  pdfPath: true,
 });
 
 export type InsertDocument = z.infer<typeof insertDocumentSchema>;
