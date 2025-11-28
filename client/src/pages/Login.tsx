@@ -32,11 +32,6 @@ export default function Login() {
         password: password.trim(),
       });
 
-      toast({
-        title: "Success",
-        description: "Logged in successfully",
-      });
-
       setLocation("/admin");
     } catch (error: any) {
       toast({
