@@ -326,6 +326,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Change password endpoint
+  app.post("/api/auth/change-password", authMiddleware, async (req, res) => {
+    try {
+      const { oldPassword, newPassword } = req.body;
+      if (!oldPassword || !newPassword) {
+        return res.status(400).json({ error: "Old password and new password are required" });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({ error: "New password must be at least 6 characters" });
+      }
+
+      const userId = (req.session as any).userId;
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(401).json({ error: "User not found" });
+      }
+
+      const isValidPassword = await bcrypt.compare(oldPassword, user.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ error: "Incorrect current password" });
+      }
+
+      const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+      await storage.updateUserPassword(userId, hashedNewPassword);
+      
+      res.json({ success: true, message: "Password changed successfully" });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   app.post("/api/contact", async (req, res) => {
     try {
       const validatedData = insertContactSubmissionSchema.parse(req.body);

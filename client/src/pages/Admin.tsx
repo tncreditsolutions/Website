@@ -38,6 +38,11 @@ export default function Admin() {
   const [adminReplyMessage, setAdminReplyMessage] = useState("");
   const [activeTab, setActiveTab] = useState("submissions");
   const [deleteConfirmDocId, setDeleteConfirmDocId] = useState<string | null>(null);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
 
@@ -55,6 +60,62 @@ export default function Admin() {
         description: error.message || "Failed to log out",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: "Error",
+        description: "New passwords do not match",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast({
+        title: "Error",
+        description: "New password must be at least 6 characters",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsChangingPassword(true);
+    try {
+      await apiRequest("POST", "/api/auth/change-password", {
+        oldPassword,
+        newPassword,
+      });
+
+      toast({
+        title: "Success",
+        description: "Password changed successfully",
+      });
+
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setShowChangePassword(false);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to change password",
+        variant: "destructive",
+      });
+    } finally {
+      setIsChangingPassword(false);
     }
   };
 
@@ -212,15 +273,25 @@ export default function Admin() {
                 <p className="text-sm text-muted-foreground">TN Credit Solutions</p>
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLogout}
-              data-testid="button-logout"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowChangePassword(true)}
+                data-testid="button-change-password"
+              >
+                Change Password
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                data-testid="button-logout"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -917,6 +988,79 @@ export default function Admin() {
               )}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showChangePassword} onOpenChange={setShowChangePassword}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Change Password</DialogTitle>
+            <DialogDescription>
+              Enter your current password and choose a new password
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleChangePassword} className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="old-password" className="text-sm font-medium">
+                Current Password
+              </label>
+              <Input
+                id="old-password"
+                type="password"
+                placeholder="Enter current password"
+                value={oldPassword}
+                onChange={(e) => setOldPassword(e.target.value)}
+                disabled={isChangingPassword}
+                data-testid="input-old-password"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="new-password" className="text-sm font-medium">
+                New Password
+              </label>
+              <Input
+                id="new-password"
+                type="password"
+                placeholder="Enter new password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                disabled={isChangingPassword}
+                data-testid="input-new-password"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="confirm-password" className="text-sm font-medium">
+                Confirm New Password
+              </label>
+              <Input
+                id="confirm-password"
+                type="password"
+                placeholder="Confirm new password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                disabled={isChangingPassword}
+                data-testid="input-confirm-password"
+              />
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowChangePassword(false)}
+                disabled={isChangingPassword}
+                data-testid="button-cancel-password"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isChangingPassword}
+                data-testid="button-save-password"
+              >
+                {isChangingPassword ? "Changing..." : "Change Password"}
+              </Button>
+            </div>
+          </form>
         </DialogContent>
       </Dialog>
     </div>
