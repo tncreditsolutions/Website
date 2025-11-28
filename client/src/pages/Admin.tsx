@@ -23,7 +23,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ArrowLeft, Mail, Phone, Calendar, User, MessageSquare, X, MessageCircle, AlertCircle, FileText, Download, Eye, Trash2, LogOut } from "lucide-react";
-import { Link, useNavigate } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PDFViewer } from "@/components/PDFViewer";
 import type { ContactSubmission, ChatMessage, NewsletterSubscription, Document } from "@shared/schema";
@@ -39,7 +39,7 @@ export default function Admin() {
   const [activeTab, setActiveTab] = useState("submissions");
   const [deleteConfirmDocId, setDeleteConfirmDocId] = useState<string | null>(null);
   const { toast } = useToast();
-  const [, navigate] = useNavigate();
+  const [, setLocation] = useLocation();
 
   const handleLogout = async () => {
     try {
@@ -48,7 +48,7 @@ export default function Admin() {
         title: "Success",
         description: "Logged out successfully",
       });
-      navigate("/login");
+      setLocation("/login");
     } catch (error: any) {
       toast({
         title: "Error",
