@@ -50,9 +50,9 @@ async function generateAndSavePDF(document: any): Promise<string | null> {
     doc.text(`Client Name: ${document.visitorName}`, 50, 102);
     
     const date = document.createdAt instanceof Date ? document.createdAt : new Date(document.createdAt);
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
+    const year = date.getUTCFullYear();
+    const month = date.getUTCMonth() + 1;
+    const day = date.getUTCDate();
     const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const reportDate = `${monthNames[month - 1]} ${day}, ${year}`;
     doc.text(`Report Date: ${reportDate}`, 50, 115);
@@ -709,7 +709,29 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
     }
   });
 
-  // Retrieve saved PDF for resending
+  // View saved PDF in browser
+  app.get("/api/documents/:id/pdf-view", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const document = await storage.getDocumentById(id);
+      if (!document || !document.pdfPath) {
+        return res.status(404).json({ error: "No saved PDF available" });
+      }
+
+      const pdfFilePath = path.join(import.meta.dirname, "..", "pdfs", document.pdfPath);
+      if (!fs.existsSync(pdfFilePath)) {
+        return res.status(404).json({ error: "PDF file not found" });
+      }
+
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", "inline; filename=credit-analysis.pdf");
+      res.sendFile(pdfFilePath);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Download saved PDF
   app.get("/api/documents/:id/pdf-download", async (req, res) => {
     try {
       const { id } = req.params;
@@ -768,11 +790,11 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
       doc.fontSize(9).font("Helvetica").fillColor("#e0e7ff");
       doc.text(`Client Name: ${document.visitorName}`, 50, 102);
       
-      // Format date using local time, not UTC
+      // Format date using UTC time
       const date = document.createdAt instanceof Date ? document.createdAt : new Date(document.createdAt);
-      const year = date.getFullYear();
-      const month = date.getMonth() + 1;
-      const day = date.getDate();
+      const year = date.getUTCFullYear();
+      const month = date.getUTCMonth() + 1;
+      const day = date.getUTCDate();
       const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
       const reportDate = `${monthNames[month - 1]} ${day}, ${year}`;
       

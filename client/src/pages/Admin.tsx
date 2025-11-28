@@ -503,7 +503,7 @@ export default function Admin() {
                                   variant="outline"
                                   size="sm"
                                   onClick={() => {
-                                    window.open(`/api/documents/${doc.id}/pdf-download`, '_blank');
+                                    window.open(`/api/documents/${doc.id}/pdf-view`, '_blank');
                                   }}
                                   data-testid={`button-view-pdf-${doc.id}`}
                                   title="View PDF summary"
