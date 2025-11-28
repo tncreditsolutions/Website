@@ -347,22 +347,74 @@ export default function Admin() {
               </Card>
             ) : (
               <div className="space-y-4">
-                {[...chatMessages].reverse().map((msg) => (
-                  <Card key={msg.id} className="p-4 hover-elevate cursor-pointer" onClick={() => {
-                    setSelectedChatMessage(msg);
-                  }} data-testid={`card-chat-message-${msg.id}`}>
-                    <div className="space-y-2">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <p className="font-medium text-sm">{msg.name || "Unknown"}</p>
-                          <p className="text-xs text-muted-foreground">{msg.email}</p>
+                {Array.from(
+                  chatMessages?.reduce((acc, msg) => {
+                    // Filter out admin system messages to get unique visitor emails
+                    if (msg.email !== "support@tncreditsolutions.com" || msg.sender === "visitor") {
+                      const email = msg.email;
+                      if (!acc.has(email)) {
+                        acc.set(email, []);
+                      }
+                      acc.get(email)?.push(msg);
+                    }
+                    return acc;
+                  }, new Map<string, ChatMessage[]>()) || new Map()
+                )
+                  .sort((a, b) => {
+                    const aLatest = a[1][a[1].length - 1]?.createdAt || new Date();
+                    const bLatest = b[1][b[1].length - 1]?.createdAt || new Date();
+                    return new Date(bLatest).getTime() - new Date(aLatest).getTime();
+                  })
+                  .map(([email, messages]) => {
+                    const visitorMsg = messages.find(m => m.sender === "visitor");
+                    return (
+                      <Card key={email} className="p-4 hover-elevate cursor-pointer" data-testid={`card-visitor-conversation-${email}`}>
+                        <div className="space-y-3">
+                          <div className="flex items-start justify-between gap-2 pb-3 border-b">
+                            <div>
+                              <p className="font-medium text-sm">{visitorMsg?.name || "Unknown"}</p>
+                              <a href={`mailto:${email}`} className="text-xs text-primary hover:underline">
+                                {email}
+                              </a>
+                            </div>
+                            <p className="text-xs text-muted-foreground flex-shrink-0">
+                              {messages.length} messages
+                            </p>
+                          </div>
+                          <div className="space-y-2">
+                            {[...messages]
+                              .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+                              .slice(-3)
+                              .map((msg) => (
+                                <div key={msg.id} className="text-sm">
+                                  <div className="flex gap-2">
+                                    <span className="font-medium text-xs flex-shrink-0 w-12">
+                                      {msg.sender === "visitor" ? "Visitor:" : "Riley:"}
+                                    </span>
+                                    <p className="text-muted-foreground line-clamp-1">
+                                      {msg.message.replace(/\s*\[ESCALATE:(YES|NO)\]\s*$/, "")}
+                                    </p>
+                                  </div>
+                                </div>
+                              ))}
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full mt-2"
+                            onClick={() => {
+                              // Show the first message to open reply dialog
+                              setSelectedChatMessage(messages[0]);
+                              setIsReplying(true);
+                            }}
+                            data-testid={`button-view-conversation-${email}`}
+                          >
+                            View Full Conversation
+                          </Button>
                         </div>
-                        <p className="text-xs text-muted-foreground flex-shrink-0">{formatDate(msg.createdAt)}</p>
-                      </div>
-                      <p className="text-sm text-muted-foreground line-clamp-2">{msg.message.replace(/\s*\[ESCALATE:(YES|NO)\]\s*$/, "")}</p>
-                    </div>
-                  </Card>
-                ))}
+                      </Card>
+                    );
+                  })}
               </div>
             )}
           </TabsContent>
