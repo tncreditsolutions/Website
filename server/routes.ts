@@ -28,7 +28,17 @@ async function generateAndSavePDF(document: any): Promise<string | null> {
       fs.mkdirSync(pdfsDir, { recursive: true });
     }
 
-    const pdfFileName = `${document.id}-${Date.now()}.pdf`;
+    // Format date using visitor's timezone
+    const date = document.createdAt instanceof Date ? document.createdAt : new Date(document.createdAt);
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      timeZone: document.visitorTimezone || 'UTC'
+    });
+    const dateStr = formatter.format(date);
+    
+    const pdfFileName = `${document.id}-${dateStr}.pdf`;
     const pdfFilePath = path.join(pdfsDir, pdfFileName);
 
     // Create PDF document
