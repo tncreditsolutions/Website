@@ -822,20 +822,15 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
       doc.text("Professional Credit Restoration & Tax Optimization Services", 50, 65);
 
       doc.fontSize(14).font("Helvetica-Bold").fillColor("#fbbf24");
-      doc.text("CREDIT ANALYSIS REPORT", 50, 82);
+      doc.text(`CREDIT ANALYSIS REPORT - ${dateOnlyStr}`, 50, 82);
 
       doc.fontSize(9).font("Helvetica").fillColor("#e0e7ff");
       doc.text(`Client Name: ${document.visitorName}`, 50, 102);
       
-      // Format date using visitor's timezone
-      const date = document.createdAt instanceof Date ? document.createdAt : new Date(document.createdAt);
-      const formatter = new Intl.DateTimeFormat('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        timeZone: document.visitorTimezone || 'UTC'
-      });
-      const reportDate = formatter.format(date);
+      // Format report date from visitor's date (MM-DD-YYYY format)
+      const [month, day, year] = dateOnlyStr.split('-');
+      const monthNames = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      const reportDate = `${monthNames[parseInt(month)]} ${parseInt(day)}, ${year}`;
       
       doc.text(`Report Date: ${reportDate}`, 50, 115);
 
