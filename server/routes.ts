@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { createRequire } from "module";
 import { storage } from "./storage";
@@ -7,6 +7,7 @@ import OpenAI from "openai";
 import fs from "fs";
 import path from "path";
 import PDFDocument from "pdfkit";
+import bcrypt from "bcrypt";
 
 let pdfParse: any = null;
 const require = createRequire(import.meta.url);
@@ -254,7 +255,77 @@ function detectUrgentSituation(message: string): boolean {
   return URGENT_KEYWORDS.some(keyword => lowerMessage.includes(keyword));
 }
 
+// Auth middleware to check if user is authenticated
+function authMiddleware(req: Request, res: Response, next: NextFunction) {
+  if ((req.session as any)?.userId) {
+    next();
+  } else {
+    res.status(401).json({ error: "Not authenticated" });
+  }
+}
+
+// Initialize default admin user on startup
+async function initializeDefaultAdmin() {
+  try {
+    const existingAdmin = await storage.getUserByUsername("admin");
+    if (!existingAdmin) {
+      const hashedPassword = await bcrypt.hash("admin123", 10);
+      await storage.createUser({ username: "admin", password: hashedPassword });
+      console.log("[Auth] Default admin user created. Username: admin, Password: admin123");
+    }
+  } catch (error) {
+    console.error("[Auth] Error initializing default admin:", error);
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Initialize default admin user
+  await initializeDefaultAdmin();
+
+  // Login endpoint
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      if (!username || !password) {
+        return res.status(400).json({ error: "Username and password required" });
+      }
+
+      const user = await storage.getUserByUsername(username);
+      if (!user) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+
+      const isValidPassword = await bcrypt.compare(password, user.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+
+      (req.session as any).userId = user.id;
+      res.json({ success: true, user: { id: user.id, username: user.username } });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Logout endpoint
+  app.post("/api/auth/logout", (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ error: "Failed to logout" });
+      }
+      res.json({ success: true });
+    });
+  });
+
+  // Check auth status endpoint
+  app.get("/api/auth/check", (req, res) => {
+    if ((req.session as any)?.userId) {
+      res.json({ authenticated: true });
+    } else {
+      res.status(401).json({ authenticated: false });
+    }
+  });
+
   app.post("/api/contact", async (req, res) => {
     try {
       const validatedData = insertContactSubmissionSchema.parse(req.body);
