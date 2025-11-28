@@ -70,6 +70,19 @@ async function generateAndSavePDF(document: any): Promise<string | null> {
     const FOOTER_HEIGHT = 60;
     const MAX_CONTENT_Y = PAGE_HEIGHT - FOOTER_HEIGHT;
     let yPosition = 160;
+    
+    // Safety check for analysis
+    if (!document.aiAnalysis) {
+      console.error("[PDF Save] No AI analysis found for document:", document.id);
+      doc.end();
+      return new Promise((resolve) => {
+        writeStream.on('finish', () => {
+          console.log("[PDF Save] Empty PDF saved (no analysis):", pdfFileName);
+          resolve(pdfFileName);
+        });
+      });
+    }
+    
     const lines = document.aiAnalysis.split("\n");
     let isFirstSection = true;
 
