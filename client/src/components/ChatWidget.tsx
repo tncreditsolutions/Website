@@ -253,7 +253,7 @@ export default function ChatWidget() {
     try {
       await apiRequest("POST", "/api/chat", {
         name: "Riley",
-        email: "support@tncreditsolutions.com",
+        email: trimmedEmail,
         message: `Hi ${trimmedName}! How can I help you today?`,
         sender: "ai",
         isEscalated: "false",
@@ -300,7 +300,7 @@ export default function ChatWidget() {
       // Send friendly escalation message from Riley
       await apiRequest("POST", "/api/chat", {
         name: "Riley",
-        email: "support@tncreditsolutions.com",
+        email: email,
         message: "Perfect! I've connected you with our specialist team. They'll review your situation and get back to you shortly with personalized guidance. Thank you for choosing TN Credit Solutions!",
         sender: "ai",
         isEscalated: "true",
