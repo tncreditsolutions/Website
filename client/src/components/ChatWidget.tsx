@@ -284,9 +284,8 @@ export default function ChatWidget() {
     // This ensures fresh sessions don't inherit old conversation context
     try {
       console.log("[Chat] Clearing previous messages and documents for fresh session");
+      // The DELETE /api/chat endpoint clears both messages AND documents for this email
       await apiRequest("DELETE", "/api/chat", { email: trimmedEmail });
-      // Also clear documents so Riley doesn't think there's a previous analysis
-      await apiRequest("DELETE", "/api/documents-by-email", { email: trimmedEmail });
     } catch (error) {
       console.error("[Chat] Error clearing previous data (this is OK on first visit):", error);
       // Don't fail - this is expected if user is new
