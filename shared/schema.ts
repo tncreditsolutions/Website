@@ -83,6 +83,7 @@ export const documents = pgTable("documents", {
   status: text("status").notNull().default("pending"), // pending, reviewed, archived
   pdfPath: text("pdf_path"), // path to generated summary PDF for resending to visitor
   visitorTimezone: text("visitor_timezone"), // e.g. "America/New_York"
+  visitorDateForFilename: text("visitor_date_for_filename"), // e.g. "11-27-2025" in visitor's local timezone
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
