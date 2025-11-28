@@ -79,12 +79,16 @@ export default function ChatWidget() {
       return new Promise((resolve, reject) => {
         reader.onload = async () => {
           try {
+            // Get visitor's timezone
+            const visitorTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            
             const response = await apiRequest("POST", "/api/documents", {
               visitorEmail: email,
               visitorName: name,
               fileName: file.name,
               fileType: file.type,
               fileContent: reader.result as string,
+              visitorTimezone,
             });
             const document = await response.json();
             resolve(document);
