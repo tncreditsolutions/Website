@@ -51,8 +51,8 @@ export default function ChatWidget() {
   // Filter messages to only show this visitor's conversation
   const messages = allMessages.filter(msg => {
     if (!email) return false;
-    // Only show messages belonging to this visitor's email
-    return msg.email === email;
+    // Show visitor's own messages OR admin/AI replies
+    return msg.email === email || msg.sender === "admin" || msg.sender === "ai" || msg.email === "support@tncreditsolutions.com";
   });
 
   const sendMutation = useMutation({
@@ -253,7 +253,7 @@ export default function ChatWidget() {
     try {
       await apiRequest("POST", "/api/chat", {
         name: "Riley",
-        email: trimmedEmail,
+        email: "support@tncreditsolutions.com",
         message: `Hi ${trimmedName}! How can I help you today?`,
         sender: "ai",
         isEscalated: "false",
@@ -300,7 +300,7 @@ export default function ChatWidget() {
       // Send friendly escalation message from Riley
       await apiRequest("POST", "/api/chat", {
         name: "Riley",
-        email: email,
+        email: "support@tncreditsolutions.com",
         message: "Perfect! I've connected you with our specialist team. They'll review your situation and get back to you shortly with personalized guidance. Thank you for choosing TN Credit Solutions!",
         sender: "ai",
         isEscalated: "true",
