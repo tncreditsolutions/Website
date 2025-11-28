@@ -6,6 +6,8 @@ import express, {
   Response,
   NextFunction,
 } from "express";
+import session from "express-session";
+import MemoryStore from "memorystore";
 
 import { registerRoutes } from "./routes";
 
@@ -34,6 +36,22 @@ app.use(express.json({
   }
 }));
 app.use(express.urlencoded({ extended: false, limit: '25mb' }));
+
+// Set up session middleware
+const MemStoreClass = MemoryStore(session);
+app.use(session({
+  store: new MemStoreClass({
+    checkInterval: 86400000, // prune expired entries every 24h
+  }),
+  secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { 
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
 
 app.use((req, res, next) => {
   const start = Date.now();
