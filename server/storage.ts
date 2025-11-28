@@ -90,11 +90,11 @@ export class MemStorage implements IStorage {
 
   async clearChatMessagesByEmail(email: string): Promise<void> {
     const idsToDelete: string[] = [];
-    for (const [id, msg] of this.chatMessages.entries()) {
+    this.chatMessages.forEach((msg, id) => {
       if (msg.email === email || msg.email === "support@tncreditsolutions.com") {
         idsToDelete.push(id);
       }
-    }
+    });
     idsToDelete.forEach(id => this.chatMessages.delete(id));
   }
 
