@@ -81,6 +81,7 @@ export const documents = pgTable("documents", {
   aiAnalysis: text("ai_analysis"),
   adminReview: text("admin_review"),
   status: text("status").notNull().default("pending"), // pending, reviewed, archived
+  pdfPath: text("pdf_path"), // path to generated summary PDF for resending to visitor
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

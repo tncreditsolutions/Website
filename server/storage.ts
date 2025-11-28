@@ -18,6 +18,7 @@ export interface IStorage {
   getDocumentById(id: string): Promise<Document | undefined>;
   updateDocumentAnalysis(id: string, analysis: string): Promise<void>;
   updateDocumentStatus(id: string, status: string): Promise<void>;
+  updateDocumentPdfPath(id: string, pdfPath: string): Promise<void>;
   deleteDocumentsByEmail(email: string): Promise<void>;
   deleteDocumentById(id: string): Promise<void>;
 }
@@ -178,6 +179,13 @@ export class MemStorage implements IStorage {
 
   async deleteDocumentById(id: string): Promise<void> {
     this.documents.delete(id);
+  }
+
+  async updateDocumentPdfPath(id: string, pdfPath: string): Promise<void> {
+    const doc = this.documents.get(id);
+    if (doc) {
+      doc.pdfPath = pdfPath;
+    }
   }
 }
 
