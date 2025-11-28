@@ -26,11 +26,21 @@ export interface IStorage {
   deleteDocumentById(id: string): Promise<void>;
 }
 
-// Initialize database connection
-if (!process.env.DATABASE_URL) {
-  console.error("[DbStorage] WARNING: DATABASE_URL environment variable is not set!");
+// Initialize database connection - make it optional
+let db: any = null;
+let dbInitialized = false;
+
+if (process.env.DATABASE_URL) {
+  try {
+    db = drizzle(process.env.DATABASE_URL);
+    dbInitialized = true;
+    console.log("[DbStorage] Database connected successfully");
+  } catch (error) {
+    console.error("[DbStorage] Failed to initialize database:", error);
+  }
+} else {
+  console.warn("[DbStorage] WARNING: DATABASE_URL environment variable is not set! Using in-memory storage only.");
 }
-const db = drizzle(process.env.DATABASE_URL!);
 
 export class DbStorage implements IStorage {
   private contactSubmissions: Map<string, ContactSubmission>;
@@ -46,6 +56,7 @@ export class DbStorage implements IStorage {
   }
 
   async getUser(id: string): Promise<User | undefined> {
+    if (!dbInitialized || !db) return undefined;
     try {
       const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
       return result[0];
@@ -56,6 +67,7 @@ export class DbStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
+    if (!dbInitialized || !db) return undefined;
     try {
       const result = await db.select().from(users).where(eq(users.username, username)).limit(1);
       return result[0];
@@ -66,6 +78,10 @@ export class DbStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
+    if (!dbInitialized || !db) {
+      console.warn("[DbStorage] Database not available, skipping user creation");
+      throw new Error("Database not initialized");
+    }
     try {
       const id = randomUUID();
       const user: User = { ...insertUser, id };
@@ -78,6 +94,10 @@ export class DbStorage implements IStorage {
   }
 
   async updateUserPassword(id: string, hashedPassword: string): Promise<void> {
+    if (!dbInitialized || !db) {
+      console.warn("[DbStorage] Database not available, skipping password update");
+      throw new Error("Database not initialized");
+    }
     try {
       await db.update(users).set({ password: hashedPassword }).where(eq(users.id, id));
     } catch (error) {

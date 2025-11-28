@@ -277,8 +277,8 @@ async function initializeDefaultAdmin() {
     const newAdmin = await storage.createUser({ username: "admin", password: hashedPassword });
     console.log("[Auth] Default admin user created. ID:", newAdmin.id, "Username: admin, Password: admin123");
   } catch (error) {
-    console.error("[Auth] Error initializing default admin:", error);
-    throw error;
+    console.warn("[Auth] Could not initialize default admin user (database may not be available):", error);
+    // Don't crash the app - just warn and continue. The database can be set up later.
   }
 }
 

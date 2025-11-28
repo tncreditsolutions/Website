@@ -1,0 +1,98 @@
+Filter and search logs
+
+You reached the start of the range
+Nov 28, 2025, 2:03 PM
+Starting Container
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 build
+> vite build && esbuild server/index-prod.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/index.js
+vite v5.4.20 building for production...
+transforming...
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+✓ 1742 modules transformed.
+rendering chunks...
+computing gzip size...
+../dist/public/index.html                                            2.37 kB │ gzip:   0.95 kB
+../dist/public/assets/ready_for_better_future_hero-C6oVMAMg.png    945.56 kB
+../dist/public/assets/client_testimonial_photo_2-B8UX-XkM.png    1,312.17 kB
+../dist/public/assets/client_testimonial_photo_1-C49icyGe.png    1,313.43 kB
+../dist/public/assets/client_testimonial_photo_3-BHvJgOFH.png    1,457.77 kB
+../dist/public/assets/pdf.worker-zxMdjS_u.mjs                    1,916.05 kB
+../dist/public/assets/index-B2cAoITb.css                            96.33 kB │ gzip:  14.74 kB
+../dist/public/assets/index-BumSpYfU.js                            873.23 kB │ gzip: 260.98 kB
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 4.86s
+  dist/index.js  51.0kb
+⚡ Done in 9ms
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+[DbStorage] WARNING: DATABASE_URL environment variable is not set!
+[AI] OpenAI initialized: true API key available: true
+    at PgSelectBase.execute (file:///app/node_modules/drizzle-orm/pg-core/query-builders/select.js:707:19)
+    at NeonHttpPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-http/session.js:40:26)
+    at PgSelectBase.then (file:///app/node_modules/drizzle-orm/query-promise.js:21:17)
+[Auth] Creating default admin user...
+    at file:///app/node_modules/drizzle-orm/pg-core/query-builders/select.js:708:30
+    at Object.startActiveSpan (file:///app/node_modules/drizzle-orm/tracing.js:8:14)
+[DbStorage] Error getting user by username: TypeError: client is not a function
+[DbStorage] Error creating user: TypeError: client is not a function
+    at NeonHttpPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-http/session.js:31:14)
+    at file:///app/node_modules/drizzle-orm/pg-core/query-builders/insert.js:178:30
+    at Object.startActiveSpan (file:///app/node_modules/drizzle-orm/tracing.js:8:14)
+    at QueryPromise.execute (file:///app/node_modules/drizzle-orm/pg-core/query-builders/insert.js:177:19)
+    at QueryPromise.then (file:///app/node_modules/drizzle-orm/query-promise.js:21:17)
+[Auth] Error initializing default admin: TypeError: client is not a function
+    at NeonHttpPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-http/session.js:31:14)
+    at file:///app/node_modules/drizzle-orm/pg-core/query-builders/insert.js:178:30
+    at Object.startActiveSpan (file:///app/node_modules/drizzle-orm/tracing.js:8:14)
+    at QueryPromise.execute (file:///app/node_modules/drizzle-orm/pg-core/query-builders/insert.js:177:19)
+    at QueryPromise.then (file:///app/node_modules/drizzle-orm/query-promise.js:21:17)
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+TypeError: client is not a function
+    at NeonHttpPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-http/session.js:31:14)
+    at file:///app/node_modules/drizzle-orm/pg-core/query-builders/insert.js:178:30
+    at Object.startActiveSpan (file:///app/node_modules/drizzle-orm/tracing.js:8:14)
+    at QueryPromise.execute (file:///app/node_modules/drizzle-orm/pg-core/query-builders/insert.js:177:19)
+    at QueryPromise.then (file:///app/node_modules/drizzle-orm/query-promise.js:21:17)
+Node.js v22.21.1
+> rest-express@1.0.0 build
+> vite build && esbuild server/index-prod.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/index.js
+npm warn config production Use `--omit=dev` instead.
+vite v5.4.20 building for production...
+transforming...
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+✓ 1742 modules transformed.
+rendering chunks...
+computing gzip size...
+../dist/public/index.html                                            2.37 kB │ gzip:   0.95 kB
+../dist/public/assets/ready_for_better_future_hero-C6oVMAMg.png    945.56 kB
+../dist/public/assets/client_testimonial_photo_2-B8UX-XkM.png    1,312.17 kB
+../dist/public/assets/client_testimonial_photo_1-C49icyGe.png    1,313.43 kB
+../dist/public/assets/client_testimonial_photo_3-BHvJgOFH.png    1,457.77 kB
+../dist/public/assets/pdf.worker-zxMdjS_u.mjs                    1,916.05 kB
+../dist/public/assets/index-B2cAoITb.css                            96.33 kB │ gzip:  14.74 kB
+../dist/public/assets/index-BumSpYfU.js                            873.23 kB │ gzip: 260.98 kB
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 4.79s
+  dist/index.js  51.0kb
+⚡ Done in 8ms
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+    at PgSelectBase.then (file:///app/node_modules/drizzle-orm/query-promise.js:21:17)
+    at NeonHttpPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-http/session.js:31:14)
+[Auth] Creating default admin user...
+[DbStorage] Error creating user: TypeError: client is not a function
+    at NeonHttpPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-http/session.js:31:14)
+    at file:///app/node_modules/drizzle-orm/pg-core/query-builders/insert.js:178:30
+    at Object.startActiveSpan (file:///app/node_modules/drizzle-orm/tracing.js:8:14)
+    at QueryPromise.execute (file:///app/node_modules/drizzle-orm/pg-core/query-builders/insert.js:177:19)
