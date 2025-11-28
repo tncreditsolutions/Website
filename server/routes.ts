@@ -831,12 +831,7 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
       doc.fontSize(9).font("Helvetica").fillColor("#e0e7ff");
       doc.text(`Client Name: ${document.visitorName}`, 50, 102);
       
-      // Format report date from visitor's date (MM-DD-YYYY format)
-      const [month, day, year] = dateOnlyStr.split('-');
-      const monthNames = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-      const reportDate = `${monthNames[parseInt(month)]} ${parseInt(day)}, ${year}`;
-      
-      doc.text(`Report Date: ${reportDate}`, 50, 115);
+      doc.text(`Report Date: ${dateOnlyStr}`, 50, 115);
 
       doc.moveTo(0, 145).lineTo(612, 145).strokeColor("#f3f4f6").lineWidth(0.75).stroke();
       
