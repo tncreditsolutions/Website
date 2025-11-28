@@ -330,6 +330,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Setup endpoint - creates admin user if it doesn't exist
+  app.post("/api/auth/setup", async (req, res) => {
+    try {
+      const existingAdmin = await storage.getUserByUsername("admin");
+      if (existingAdmin) {
+        return res.json({ success: true, message: "Admin user already exists" });
+      }
+      
+      const hashedPassword = await bcrypt.hash("admin123", 10);
+      await storage.createUser({
+        username: "admin",
+        password: hashedPassword,
+      });
+      
+      res.json({ 
+        success: true, 
+        message: "Admin user created successfully",
+        username: "admin",
+        password: "admin123"
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message || "Failed to create admin user" });
+    }
+  });
+
   // Change password endpoint
   app.post("/api/auth/change-password", authMiddleware, async (req, res) => {
     try {
