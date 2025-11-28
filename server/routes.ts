@@ -20,6 +20,52 @@ function encodeToBase64(buffer: Buffer): string {
   return buffer.toString("base64");
 }
 
+// Helper function to clean AI analysis text
+function cleanAnalysisText(rawText: string): string {
+  // Remove code blocks
+  let cleaned = rawText.replace(/^(```.*?\n|```)/gm, "");
+  
+  // Remove common conversational openers and fallback messages
+  const conversationalPatterns = [
+    /^I(?:'m| am|'ll)\s+unable\s+to\s+view.*?(?:\n|$)/i,
+    /^I\s+can\s+(?:guide|help|provide).*?(?:\n|$)/i,
+    /^(?:Certainly|Of course|Sure|Here's|Let me|Based on|Thank you).*?(?:\n|$)/i,
+    /^(?:Here is|This is)\s+(?:a|the).*?(?:guide|approach|analysis).*?(?:\n|$)/i,
+  ];
+  
+  conversationalPatterns.forEach(pattern => {
+    cleaned = cleaned.replace(pattern, "");
+  });
+  
+  // Split into lines and filter
+  const lines = cleaned.split("\n");
+  const filteredLines = lines.filter(line => {
+    const lower = line.toLowerCase().trim();
+    
+    // Skip empty lines
+    if (!lower) return false;
+    
+    // Skip lines with conversational content
+    if (lower.startsWith("i ") || lower.startsWith("i'm") || lower.startsWith("i'll")) return false;
+    if (lower.includes("unable to view") || lower.includes("unable to") || lower.includes("i can guide")) return false;
+    if (lower.includes("would be happy") || lower.includes("can help you") || lower.includes("can provide")) return false;
+    if (lower.includes("here's the") || lower.includes("here's a") || lower.includes("certainly")) return false;
+    if (lower.includes("apologize") || lower.includes("sorry")) return false;
+    
+    return true;
+  });
+  
+  // Join and clean up extra whitespace
+  const result = filteredLines.join("\n").trim();
+  
+  // If result is empty or still conversational, return empty string to trigger fallback
+  if (!result || result.length < 50) {
+    return "";
+  }
+  
+  return result;
+}
+
 const SYSTEM_PROMPT = `You are Riley, a smart customer support agent for TN Credit Solutions. You provide personalized guidance on credit restoration and tax optimization.
 
 YOUR ROLE:
@@ -354,23 +400,7 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
           let rawAnalysis = response.choices[0].message.content || "No analysis available";
           
           // Clean analysis text: remove conversational preambles
-          rawAnalysis = rawAnalysis
-            .replace(/^(Certainly!|Of course!|Sure!|Here's|I'll|Let me|Based on|Thank you).*?\n/i, "")
-            .replace(/^(```.*?\n|```)/gm, "")
-            .split("\n")
-            .filter(line => {
-              const lower = line.toLowerCase();
-              return !lower.includes("certainly") && 
-                     !lower.includes("here's the") && 
-                     !lower.includes("based on") && 
-                     !lower.includes("let me") &&
-                     !lower.includes("can help") &&
-                     !lower.includes("would be happy") &&
-                     !lower.startsWith("i ");
-            })
-            .join("\n")
-            .trim();
-          
+          rawAnalysis = cleanAnalysisText(rawAnalysis);
           analysisText = rawAnalysis || "No analysis available";
         } else if (isPdf) {
           // For PDFs, convert first page to PNG image and send to OpenAI for analysis
@@ -431,23 +461,7 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
             let rawAnalysis = response.choices[0].message.content || "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
             
             // Clean analysis text: remove conversational preambles and agent-like responses
-            rawAnalysis = rawAnalysis
-              .replace(/^(Certainly!|Of course!|Sure!|Here's|I'll|Let me|Based on|Thank you).*?\n/i, "")
-              .replace(/^(```.*?\n|```)/gm, "")
-              .split("\n")
-              .filter(line => {
-                const lower = line.toLowerCase();
-                return !lower.includes("certainly") && 
-                       !lower.includes("here's the") && 
-                       !lower.includes("based on") && 
-                       !lower.includes("let me") &&
-                       !lower.includes("can help") &&
-                       !lower.includes("would be happy") &&
-                       !lower.startsWith("i ");
-              })
-              .join("\n")
-              .trim();
-            
+            rawAnalysis = cleanAnalysisText(rawAnalysis);
             analysisText = rawAnalysis || "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
             console.log("[AI] PDF analysis received, length:", analysisText.length);
           } catch (pdfError) {
