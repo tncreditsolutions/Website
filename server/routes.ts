@@ -28,15 +28,14 @@ async function generateAndSavePDF(document: any): Promise<string | null> {
       fs.mkdirSync(pdfsDir, { recursive: true });
     }
 
-    // Format date using visitor's timezone for filename (MM-DD-YYYY)
-    const fileDate = document.createdAt instanceof Date ? document.createdAt : new Date(document.createdAt);
+    // Format TODAY's date using visitor's timezone for filename (MM-DD-YYYY)
     const fileFormatter = new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
       timeZone: document.visitorTimezone || 'UTC'
     });
-    const formattedDate = fileFormatter.format(fileDate); // Returns MM/DD/YYYY
+    const formattedDate = fileFormatter.format(new Date()); // Use TODAY in visitor's timezone
     const dateStr = formattedDate.replace(/\//g, '-'); // Convert to MM-DD-YYYY for filename
     console.log("[PDF Save] Visitor timezone:", document.visitorTimezone, "Formatted date:", dateStr);
     
@@ -746,15 +745,14 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         return res.status(404).json({ error: "PDF file not found" });
       }
 
-      // Format date using visitor's timezone for filename (MM-DD-YYYY)
-      const viewDate = document.createdAt instanceof Date ? document.createdAt : new Date(document.createdAt);
+      // Format TODAY's date using visitor's timezone for filename (MM-DD-YYYY)
       const viewFormatter = new Intl.DateTimeFormat('en-US', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
         timeZone: document.visitorTimezone || 'UTC'
       });
-      const formattedViewDate = viewFormatter.format(viewDate); // Returns MM/DD/YYYY
+      const formattedViewDate = viewFormatter.format(new Date()); // Use TODAY in visitor's timezone
       const dateOnly = formattedViewDate.replace(/\//g, '-'); // Convert to MM-DD-YYYY
 
       res.setHeader("Content-Type", "application/pdf");
@@ -797,15 +795,14 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         return res.status(400).json({ error: "No analysis available for PDF generation" });
       }
 
-      // Format date using visitor's timezone for filename (MM-DD-YYYY)
-      const genDate = document.createdAt instanceof Date ? document.createdAt : new Date(document.createdAt);
+      // Format TODAY's date using visitor's timezone for filename (MM-DD-YYYY)
       const genFormatter = new Intl.DateTimeFormat('en-US', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
         timeZone: document.visitorTimezone || 'UTC'
       });
-      const formattedGenDate = genFormatter.format(genDate); // Returns MM/DD/YYYY
+      const formattedGenDate = genFormatter.format(new Date()); // Use TODAY in visitor's timezone
       const dateOnlyStr = formattedGenDate.replace(/\//g, '-'); // Convert to MM-DD-YYYY
 
       res.setHeader("Content-Type", "application/pdf");
