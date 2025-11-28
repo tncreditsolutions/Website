@@ -22,7 +22,7 @@ function encodeToBase64(buffer: Buffer): string {
 }
 
 // Helper function to generate and save PDF to disk
-async function generateAndSavePDF(document: any): Promise<string | null> {
+async function generateAndSavePDF(document: any, analysisText?: string): Promise<string | null> {
   try {
     const pdfsDir = path.join(import.meta.dirname, "..", "pdfs");
     if (!fs.existsSync(pdfsDir)) {
@@ -68,9 +68,10 @@ async function generateAndSavePDF(document: any): Promise<string | null> {
     const MAX_CONTENT_Y = PAGE_HEIGHT - FOOTER_HEIGHT;
     let yPosition = 160;
     
-    // Safety check for analysis
-    console.log("[PDF Save] Document ID:", document.id, "aiAnalysis type:", typeof document.aiAnalysis, "aiAnalysis value:", document.aiAnalysis?.substring(0, 100) || "EMPTY/NULL");
-    if (!document.aiAnalysis) {
+    // Use passed analysis text, fall back to document.aiAnalysis, or use empty
+    const finalAnalysis = analysisText || document.aiAnalysis || "";
+    console.log("[PDF Save] Document ID:", document.id, "Analysis source:", analysisText ? "parameter" : "document.aiAnalysis", "length:", finalAnalysis.length);
+    if (!finalAnalysis) {
       console.error("[PDF Save] No AI analysis found for document:", document.id);
       doc.end();
       return new Promise((resolve) => {
@@ -81,7 +82,7 @@ async function generateAndSavePDF(document: any): Promise<string | null> {
       });
     }
     
-    const lines = document.aiAnalysis.split("\n");
+    const lines = finalAnalysis.split("\n");
     let isFirstSection = true;
 
     for (const line of lines) {
@@ -839,8 +840,8 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
       
       console.log("[Document Upload] Updated doc aiAnalysis length:", updatedDoc.aiAnalysis?.length || 0, "preview:", updatedDoc.aiAnalysis?.substring(0, 100));
       
-      // Generate and save PDF for admin resending
-      const pdfFileName = await generateAndSavePDF(updatedDoc);
+      // Generate and save PDF for admin resending - pass analysisText directly to ensure it's included
+      const pdfFileName = await generateAndSavePDF(updatedDoc, analysisText);
       if (pdfFileName) {
         await storage.updateDocumentPdfPath(updatedDoc.id, pdfFileName);
       }
