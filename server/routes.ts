@@ -28,16 +28,9 @@ async function generateAndSavePDF(document: any): Promise<string | null> {
       fs.mkdirSync(pdfsDir, { recursive: true });
     }
 
-    // Format TODAY's date using visitor's timezone for filename (MM-DD-YYYY)
-    const fileFormatter = new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      timeZone: document.visitorTimezone || 'UTC'
-    });
-    const formattedDate = fileFormatter.format(new Date()); // Use TODAY in visitor's timezone
-    const dateStr = formattedDate.replace(/\//g, '-'); // Convert to MM-DD-YYYY for filename
-    console.log("[PDF Save] Visitor timezone:", document.visitorTimezone, "Formatted date:", dateStr);
+    // Use the date sent from frontend (already in correct visitor timezone)
+    const dateStr = (document as any).visitorDateForFilename || new Date().toISOString().split('T')[0].replace(/-/g, '-');
+    console.log("[PDF Save] Using visitor date:", dateStr);
     
     const pdfFileName = `${document.id}-${dateStr}.pdf`;
     const pdfFilePath = path.join(pdfsDir, pdfFileName);
@@ -61,14 +54,11 @@ async function generateAndSavePDF(document: any): Promise<string | null> {
     doc.fontSize(9).font("Helvetica").fillColor("#e0e7ff");
     doc.text(`Client Name: ${document.visitorName}`, 50, 102);
     
-    // Format TODAY's date using visitor's timezone for report
-    const displayFormatter = new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      timeZone: document.visitorTimezone || 'UTC'
-    });
-    const reportDate = displayFormatter.format(new Date()); // Use TODAY in visitor's timezone
+    // Format report date from visitor's submitted date
+    const dateFromFilename = (document as any).visitorDateForFilename || new Date().toISOString().split('T')[0];
+    const [month, day, year] = dateFromFilename.split('-');
+    const monthNames = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const reportDate = `${monthNames[parseInt(month)]} ${parseInt(day)}, ${year}`;
     doc.text(`Report Date: ${reportDate}`, 50, 115);
     doc.moveTo(0, 145).lineTo(612, 145).strokeColor("#f3f4f6").lineWidth(0.75).stroke();
 
@@ -477,7 +467,7 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         return res.status(500).json({ error: "AI service not configured" });
       }
 
-      const { visitorEmail, visitorName, fileName, fileType, fileContent, visitorTimezone } = req.body;
+      const { visitorEmail, visitorName, fileName, fileType, fileContent, visitorTimezone, visitorDateForFilename } = req.body;
       
       if (!visitorEmail || !visitorName || !fileName || !fileType || !fileContent) {
         return res.status(400).json({ error: "Missing required fields" });
@@ -502,6 +492,7 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         fileType,
         filePath: fileId,
         visitorTimezone: visitorTimezone || "UTC",
+        visitorDateForFilename: visitorDateForFilename || new Date().toISOString().split('T')[0],
       });
 
       // Analyze document with OpenAI
@@ -744,15 +735,8 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         return res.status(404).json({ error: "PDF file not found" });
       }
 
-      // Format TODAY's date using visitor's timezone for filename (MM-DD-YYYY)
-      const viewFormatter = new Intl.DateTimeFormat('en-US', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        timeZone: document.visitorTimezone || 'UTC'
-      });
-      const formattedViewDate = viewFormatter.format(new Date()); // Use TODAY in visitor's timezone
-      const dateOnly = formattedViewDate.replace(/\//g, '-'); // Convert to MM-DD-YYYY
+      // Use the date sent from frontend (already in correct visitor timezone)
+      const dateOnly = (document as any).visitorDateForFilename || new Date().toISOString().split('T')[0];
 
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `inline; filename=credit-analysis-${dateOnly}.pdf`);
@@ -794,15 +778,8 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         return res.status(400).json({ error: "No analysis available for PDF generation" });
       }
 
-      // Format TODAY's date using visitor's timezone for filename (MM-DD-YYYY)
-      const genFormatter = new Intl.DateTimeFormat('en-US', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        timeZone: document.visitorTimezone || 'UTC'
-      });
-      const formattedGenDate = genFormatter.format(new Date()); // Use TODAY in visitor's timezone
-      const dateOnlyStr = formattedGenDate.replace(/\//g, '-'); // Convert to MM-DD-YYYY
+      // Use the date sent from frontend (already in correct visitor timezone)
+      const dateOnlyStr = (document as any).visitorDateForFilename || new Date().toISOString().split('T')[0];
 
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `attachment; filename="credit-analysis-${dateOnlyStr}.pdf"`);

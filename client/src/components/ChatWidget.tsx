@@ -79,8 +79,16 @@ export default function ChatWidget() {
       return new Promise((resolve, reject) => {
         reader.onload = async () => {
           try {
-            // Get visitor's timezone
+            // Get visitor's timezone and format today's date
             const visitorTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const formatter = new Intl.DateTimeFormat('en-US', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              timeZone: visitorTimezone
+            });
+            const todayFormatted = formatter.format(new Date()); // MM/DD/YYYY
+            const visitorDateForFilename = todayFormatted.replace(/\//g, '-'); // MM-DD-YYYY
             
             const response = await apiRequest("POST", "/api/documents", {
               visitorEmail: email,
@@ -89,6 +97,7 @@ export default function ChatWidget() {
               fileType: file.type,
               fileContent: reader.result as string,
               visitorTimezone,
+              visitorDateForFilename,
             });
             const document = await response.json();
             resolve(document);
