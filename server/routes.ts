@@ -589,26 +589,46 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
                   max_tokens: 512,
                 });
               } else {
-                console.log("[AI] Using standard prompt");
-                // Add context about previously covered topics and conversation progression
-                let systemPromptWithContext = SYSTEM_PROMPT;
-                // Only mention uploaded documents if they were uploaded IN THIS SESSION (check current conversation)
-                const documentMentionedInSession = currentSessionMessages.some(msg => 
-                  msg.message && (
-                    msg.message.toLowerCase().includes("analysis") || 
-                    msg.message.toLowerCase().includes("pdf") ||
-                    msg.message.toLowerCase().includes("report") ||
-                    msg.message.toLowerCase().includes("downloaded")
-                  )
-                );
-                if (documentMentionedInSession) {
-                  systemPromptWithContext += `\n\nIMPORTANT: This visitor has already uploaded a document for analysis. DO NOT ask them to upload again or request their report. Focus on helping them with their questions, next steps, or offer a PDF summary of their analysis.`;
-                }
-                if (uniqueTopics.length > 0) {
-                  systemPromptWithContext += `\n\nPreviously discussed: ${uniqueTopics.join(", ")}. Do NOT ask about these again. Move to new topics or escalate.`;
-                }
-                if (visitorTurns >= 3) {
-                  systemPromptWithContext += `\n\nThis is turn ${visitorTurns + 1}. If visitor is still giving vague answers or going in circles, escalate to specialist now.`;
+                console.log("[AI] Using standard prompt, visitor turns:", visitorTurns);
+                // For fresh sessions (only greeting), use simplified prompt without "previous analysis" references
+                let systemPromptWithContext: string;
+                
+                if (visitorTurns === 0) {
+                  // Fresh conversation - only greeting sent so far
+                  console.log("[AI] Fresh session - using simple greeting prompt");
+                  systemPromptWithContext = `You are Riley, a smart customer support agent for TN Credit Solutions. You provide personalized guidance on credit restoration and tax optimization.
+
+YOUR ROLE:
+- Help visitors understand their financial situation and take action
+- Be friendly, professional, and action-focused
+- Ask clarifying questions to understand their situation
+- Offer to analyze credit reports if they have them
+- Be conversational and empathetic
+
+FIRST INTERACTION:
+This is the start of the conversation. Ask open-ended questions to understand their credit concerns and what brought them to TN Credit Solutions today.`;
+                } else {
+                  // Ongoing conversation - use full system prompt with context
+                  systemPromptWithContext = SYSTEM_PROMPT;
+                  
+                  // Only mention uploaded documents if they were uploaded IN THIS SESSION (check current conversation)
+                  const documentMentionedInSession = currentSessionMessages.some(msg => 
+                    msg.message && (
+                      msg.message.toLowerCase().includes("analysis") || 
+                      msg.message.toLowerCase().includes("pdf") ||
+                      msg.message.toLowerCase().includes("report") ||
+                      msg.message.toLowerCase().includes("downloaded")
+                    )
+                  );
+                  if (documentMentionedInSession) {
+                    systemPromptWithContext += `\n\nIMPORTANT: This visitor has already uploaded a document for analysis. DO NOT ask them to upload again or request their report. Focus on helping them with their questions, next steps, or offer a PDF summary of their analysis.`;
+                  }
+                  if (uniqueTopics.length > 0) {
+                    systemPromptWithContext += `\n\nPreviously discussed: ${uniqueTopics.join(", ")}. Do NOT ask about these again. Move to new topics or escalate.`;
+                  }
+                  if (visitorTurns >= 3) {
+                    systemPromptWithContext += `\n\nThis is turn ${visitorTurns + 1}. If visitor is still giving vague answers or going in circles, escalate to specialist now.`;
+                  }
                 }
                 aiResponse = await openai.chat.completions.create({
                   model: "gpt-4o",
