@@ -27,7 +27,10 @@ export interface IStorage {
 }
 
 // Initialize database connection
-const db = drizzle(process.env.DATABASE_URL || "");
+if (!process.env.DATABASE_URL) {
+  console.error("[DbStorage] WARNING: DATABASE_URL environment variable is not set!");
+}
+const db = drizzle(process.env.DATABASE_URL!);
 
 export class DbStorage implements IStorage {
   private contactSubmissions: Map<string, ContactSubmission>;
