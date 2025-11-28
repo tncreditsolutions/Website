@@ -292,8 +292,6 @@ export default function ChatWidget() {
       name: name.trim(),
       email: email.trim(),
       message: messageToSend,
-      sender: "visitor",
-      isEscalated: "false",
     });
   };
 
