@@ -50,9 +50,9 @@ async function generateAndSavePDF(document: any): Promise<string | null> {
     doc.text(`Client Name: ${document.visitorName}`, 50, 102);
     
     const date = document.createdAt instanceof Date ? document.createdAt : new Date(document.createdAt);
-    const year = date.getUTCFullYear();
-    const month = date.getUTCMonth() + 1;
-    const day = date.getUTCDate();
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
     const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const reportDate = `${monthNames[month - 1]} ${day}, ${year}`;
     doc.text(`Report Date: ${reportDate}`, 50, 115);
@@ -790,11 +790,11 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
       doc.fontSize(9).font("Helvetica").fillColor("#e0e7ff");
       doc.text(`Client Name: ${document.visitorName}`, 50, 102);
       
-      // Format date using UTC time
+      // Format date using local time
       const date = document.createdAt instanceof Date ? document.createdAt : new Date(document.createdAt);
-      const year = date.getUTCFullYear();
-      const month = date.getUTCMonth() + 1;
-      const day = date.getUTCDate();
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
       const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
       const reportDate = `${monthNames[month - 1]} ${day}, ${year}`;
       
