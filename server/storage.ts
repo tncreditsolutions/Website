@@ -47,62 +47,89 @@ export class DbStorage implements IStorage {
   private chatMessages: Map<string, ChatMessage>;
   private newsletterSubscriptions: Set<string>;
   private documents: Map<string, Document>;
+  private inMemoryUsers: Map<string, User>; // Fallback storage for users when database isn't available
 
   constructor() {
     this.contactSubmissions = new Map();
     this.chatMessages = new Map();
     this.newsletterSubscriptions = new Set();
     this.documents = new Map();
+    this.inMemoryUsers = new Map();
   }
 
   async getUser(id: string): Promise<User | undefined> {
-    if (!dbInitialized || !db) return undefined;
-    try {
-      const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
-      return result[0];
-    } catch (error) {
-      console.error("[DbStorage] Error getting user by id:", error);
-      return undefined;
+    // Try database first
+    if (dbInitialized && db) {
+      try {
+        const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+        return result[0];
+      } catch (error) {
+        console.error("[DbStorage] Error getting user by id:", error);
+      }
     }
+    // Fall back to in-memory storage
+    return this.inMemoryUsers.get(id);
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    if (!dbInitialized || !db) return undefined;
-    try {
-      const result = await db.select().from(users).where(eq(users.username, username)).limit(1);
-      return result[0];
-    } catch (error) {
-      console.error("[DbStorage] Error getting user by username:", error);
-      return undefined;
+    // Try database first
+    if (dbInitialized && db) {
+      try {
+        const result = await db.select().from(users).where(eq(users.username, username)).limit(1);
+        return result[0];
+      } catch (error) {
+        console.error("[DbStorage] Error getting user by username:", error);
+      }
     }
+    // Fall back to in-memory storage
+    for (const user of this.inMemoryUsers.values()) {
+      if (user.username === username) {
+        return user;
+      }
+    }
+    return undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    if (!dbInitialized || !db) {
-      console.warn("[DbStorage] Database not available, skipping user creation");
-      throw new Error("Database not initialized");
+    const id = randomUUID();
+    const user: User = { ...insertUser, id };
+    
+    // Try database first
+    if (dbInitialized && db) {
+      try {
+        await db.insert(users).values(user);
+        console.log("[DbStorage] User created in database:", id);
+        return user;
+      } catch (error) {
+        console.error("[DbStorage] Error creating user in database:", error);
+        // Fall through to in-memory storage
+      }
     }
-    try {
-      const id = randomUUID();
-      const user: User = { ...insertUser, id };
-      await db.insert(users).values(user);
-      return user;
-    } catch (error) {
-      console.error("[DbStorage] Error creating user:", error);
-      throw error;
-    }
+    
+    // Fall back to in-memory storage
+    console.log("[DbStorage] Using in-memory storage for user:", id);
+    this.inMemoryUsers.set(id, user);
+    return user;
   }
 
   async updateUserPassword(id: string, hashedPassword: string): Promise<void> {
-    if (!dbInitialized || !db) {
-      console.warn("[DbStorage] Database not available, skipping password update");
-      throw new Error("Database not initialized");
+    // Try database first
+    if (dbInitialized && db) {
+      try {
+        await db.update(users).set({ password: hashedPassword }).where(eq(users.id, id));
+        console.log("[DbStorage] Password updated in database for user:", id);
+        return;
+      } catch (error) {
+        console.error("[DbStorage] Error updating user password in database:", error);
+        // Fall through to in-memory storage
+      }
     }
-    try {
-      await db.update(users).set({ password: hashedPassword }).where(eq(users.id, id));
-    } catch (error) {
-      console.error("[DbStorage] Error updating user password:", error);
-      throw error;
+    
+    // Fall back to in-memory storage
+    const user = this.inMemoryUsers.get(id);
+    if (user) {
+      user.password = hashedPassword;
+      console.log("[DbStorage] Password updated in memory for user:", id);
     }
   }
 
