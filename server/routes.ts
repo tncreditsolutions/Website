@@ -28,15 +28,15 @@ async function generateAndSavePDF(document: any): Promise<string | null> {
       fs.mkdirSync(pdfsDir, { recursive: true });
     }
 
-    // Format date using visitor's timezone
-    const date = document.createdAt instanceof Date ? document.createdAt : new Date(document.createdAt);
-    const formatter = new Intl.DateTimeFormat('en-CA', {
+    // Format date using visitor's timezone for filename (MM/DD/YYYY)
+    const fileDate = document.createdAt instanceof Date ? document.createdAt : new Date(document.createdAt);
+    const fileFormatter = new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
       timeZone: document.visitorTimezone || 'UTC'
     });
-    const dateStr = formatter.format(date);
+    const dateStr = fileFormatter.format(fileDate);
     
     const pdfFileName = `${document.id}-${dateStr}.pdf`;
     const pdfFilePath = path.join(pdfsDir, pdfFileName);
@@ -737,15 +737,15 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         return res.status(404).json({ error: "PDF file not found" });
       }
 
-      // Format date using visitor's timezone
+      // Format date using visitor's timezone for filename (MM/DD/YYYY)
       const viewDate = document.createdAt instanceof Date ? document.createdAt : new Date(document.createdAt);
-      const formatter = new Intl.DateTimeFormat('en-CA', {
+      const viewFormatter = new Intl.DateTimeFormat('en-US', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
         timeZone: document.visitorTimezone || 'UTC'
       });
-      const dateOnly = formatter.format(viewDate); // "2025-11-28" format (YYYY-MM-DD)
+      const dateOnly = viewFormatter.format(viewDate); // "11/28/2025" format (MM/DD/YYYY)
 
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `inline; filename=credit-analysis-${dateOnly}.pdf`);
@@ -787,15 +787,15 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         return res.status(400).json({ error: "No analysis available for PDF generation" });
       }
 
-      // Format date using visitor's timezone
+      // Format date using visitor's timezone for filename (MM/DD/YYYY)
       const genDate = document.createdAt instanceof Date ? document.createdAt : new Date(document.createdAt);
-      const genFormatter = new Intl.DateTimeFormat('en-CA', {
+      const genFormatter = new Intl.DateTimeFormat('en-US', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
         timeZone: document.visitorTimezone || 'UTC'
       });
-      const dateOnlyStr = genFormatter.format(genDate); // "2025-11-28" format (YYYY-MM-DD)
+      const dateOnlyStr = genFormatter.format(genDate); // "11/28/2025" format (MM/DD/YYYY)
 
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `attachment; filename="credit-analysis-${dateOnlyStr}.pdf"`);
