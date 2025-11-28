@@ -625,7 +625,7 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
 
       doc.fontSize(9).font("Helvetica").fillColor("#e0e7ff");
       doc.text(`Client Name: ${document.visitorName}`, 50, 102);
-      doc.text(`Report Date: ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`, 50, 115);
+      doc.text(`Report Date: ${new Date(document.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`, 50, 115);
 
       doc.moveTo(0, 145).lineTo(612, 145).strokeColor("#f3f4f6").lineWidth(0.75).stroke();
       
