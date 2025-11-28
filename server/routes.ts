@@ -794,10 +794,15 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         return res.status(400).json({ error: "No analysis available for PDF generation" });
       }
 
-      // Use the date sent from frontend (already in correct visitor timezone)
-      console.log("[PDF Endpoint] Document retrieved:", { id: document.id, visitorDateForFilename: (document as any).visitorDateForFilename, visitorTimezone: (document as any).visitorTimezone });
-      const dateOnlyStr = (document as any).visitorDateForFilename || new Date().toISOString().split('T')[0];
-      console.log("[PDF Endpoint] Using dateOnlyStr:", dateOnlyStr);
+      // Extract date from pdfPath filename (format: id-MM-DD-YYYY.pdf)
+      let dateOnlyStr = new Date().toISOString().split('T')[0];
+      if (document.pdfPath) {
+        const dateMatch = document.pdfPath.match(/(\d{2}-\d{2}-\d{4})/);
+        if (dateMatch) {
+          dateOnlyStr = dateMatch[1];
+        }
+      }
+      console.log("[PDF Endpoint] Using dateOnlyStr from pdfPath:", dateOnlyStr, "pdfPath:", document.pdfPath);
 
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `attachment; filename="credit-analysis-${dateOnlyStr}.pdf"`);
