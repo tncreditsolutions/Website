@@ -49,8 +49,11 @@ async function generateAndSavePDF(document: any): Promise<string | null> {
     doc.text("TN CREDIT SOLUTIONS", 50, 28);
     doc.fontSize(10).font("Helvetica").fillColor("#c5d3ff");
     doc.text("Professional Credit Restoration & Tax Optimization Services", 50, 65);
+    // Format date for title display
+    const dateForTitle = (document as any).visitorDateForFilename || new Date().toISOString().split('T')[0];
+    
     doc.fontSize(14).font("Helvetica-Bold").fillColor("#fbbf24");
-    doc.text("CREDIT ANALYSIS REPORT", 50, 82);
+    doc.text(`CREDIT ANALYSIS REPORT - ${dateForTitle}`, 50, 82);
     doc.fontSize(9).font("Helvetica").fillColor("#e0e7ff");
     doc.text(`Client Name: ${document.visitorName}`, 50, 102);
     
