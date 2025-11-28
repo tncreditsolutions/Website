@@ -293,6 +293,7 @@ export default function ChatWidget() {
       email: email.trim(),
       message: messageToSend,
       sender: "visitor",
+      isEscalated: "false",
     });
   };
 
