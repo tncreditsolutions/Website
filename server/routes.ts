@@ -507,6 +507,32 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
     }
   });
 
+  app.delete("/api/documents/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const document = await storage.getDocumentById(id);
+      if (!document) {
+        return res.status(404).json({ error: "Document not found" });
+      }
+
+      // Delete the physical file if it exists
+      const filePath = path.join(import.meta.dirname, "..", "uploads", document.filePath);
+      if (fs.existsSync(filePath)) {
+        try {
+          fs.unlinkSync(filePath);
+        } catch (e) {
+          console.log("[Documents] Could not delete file:", filePath);
+        }
+      }
+
+      // Delete from database
+      await storage.deleteDocumentById(id);
+      res.json({ success: true, message: "Document deleted permanently" });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   app.get("/api/documents/:id/pdf", async (req, res) => {
     try {
       const { id } = req.params;

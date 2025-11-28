@@ -19,6 +19,7 @@ export interface IStorage {
   updateDocumentAnalysis(id: string, analysis: string): Promise<void>;
   updateDocumentStatus(id: string, status: string): Promise<void>;
   deleteDocumentsByEmail(email: string): Promise<void>;
+  deleteDocumentById(id: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -173,6 +174,10 @@ export class MemStorage implements IStorage {
     if (doc) {
       doc.status = status;
     }
+  }
+
+  async deleteDocumentById(id: string): Promise<void> {
+    this.documents.delete(id);
   }
 }
 

@@ -22,7 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowLeft, Mail, Phone, Calendar, User, MessageSquare, X, MessageCircle, AlertCircle, FileText, Download, Eye } from "lucide-react";
+import { ArrowLeft, Mail, Phone, Calendar, User, MessageSquare, X, MessageCircle, AlertCircle, FileText, Download, Eye, Trash2 } from "lucide-react";
 import { Link } from "wouter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PDFViewer } from "@/components/PDFViewer";
@@ -37,6 +37,7 @@ export default function Admin() {
   const [isReplying, setIsReplying] = useState(false);
   const [adminReplyMessage, setAdminReplyMessage] = useState("");
   const [activeTab, setActiveTab] = useState("submissions");
+  const [deleteConfirmDocId, setDeleteConfirmDocId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleViewDocument = async (doc: Document) => {
@@ -110,6 +111,27 @@ export default function Admin() {
       toast({
         title: "Error",
         description: error.message || "Failed to send reply",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteDocumentMutation = useMutation({
+    mutationFn: async (docId: string) => {
+      return apiRequest("DELETE", `/api/documents/${docId}`);
+    },
+    onSuccess: () => {
+      setDeleteConfirmDocId(null);
+      queryClient.invalidateQueries({ queryKey: ["/api/documents"] });
+      toast({
+        title: "Success",
+        description: "Document deleted permanently from database",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete document",
         variant: "destructive",
       });
     },
@@ -475,6 +497,15 @@ export default function Admin() {
                             >
                               <Download className="w-4 h-4" />
                             </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setDeleteConfirmDocId(doc.id)}
+                              data-testid={`button-delete-document-${doc.id}`}
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           </div>
                         </div>
                       </Card>
@@ -620,6 +651,46 @@ export default function Admin() {
               </form>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Document Confirmation Dialog */}
+      <Dialog open={!!deleteConfirmDocId} onOpenChange={() => setDeleteConfirmDocId(null)}>
+        <DialogContent className="max-w-md" data-testid="dialog-delete-document">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertCircle className="w-5 h-5" />
+              Delete Document Permanently?
+            </DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. Once deleted, this document will be gone forever from the database.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="bg-destructive/10 border border-destructive/30 p-3 rounded-md">
+            <p className="text-sm text-destructive font-medium">
+              ⚠️ WARNING: Permanent deletion - no recovery possible
+            </p>
+          </div>
+          <div className="flex gap-3 justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteConfirmDocId(null)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (deleteConfirmDocId) {
+                  deleteDocumentMutation.mutate(deleteConfirmDocId);
+                }
+              }}
+              disabled={deleteDocumentMutation.isPending}
+              data-testid="button-confirm-delete-document"
+            >
+              {deleteDocumentMutation.isPending ? "Deleting..." : "Delete Forever"}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 
