@@ -51,6 +51,7 @@ async function generateAndSavePDF(document: any): Promise<string | null> {
     doc.text("Professional Credit Restoration & Tax Optimization Services", 50, 65);
     // Format date for title display
     const dateForTitle = (document as any).visitorDateForFilename || new Date().toISOString().split('T')[0];
+    console.log("[PDF Save] Document fields - visitorDateForFilename:", (document as any).visitorDateForFilename, "dateForTitle:", dateForTitle);
     
     doc.fontSize(14).font("Helvetica-Bold").fillColor("#fbbf24");
     doc.text(`CREDIT ANALYSIS REPORT - ${dateForTitle}`, 50, 82);
