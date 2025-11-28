@@ -497,6 +497,24 @@ export default function Admin() {
                             >
                               <Download className="w-4 h-4" />
                             </Button>
+                            {doc.pdfPath && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  const link = document.createElement('a');
+                                  link.href = `/api/documents/${doc.id}/pdf-download`;
+                                  link.download = `credit-analysis-${doc.id}.pdf`;
+                                  document.body.appendChild(link);
+                                  link.click();
+                                  document.body.removeChild(link);
+                                }}
+                                data-testid={`button-download-pdf-${doc.id}`}
+                                title="Download saved PDF summary"
+                              >
+                                <FileText className="w-4 h-4" />
+                              </Button>
+                            )}
                             <Button
                               variant="outline"
                               size="sm"

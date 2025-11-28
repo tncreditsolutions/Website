@@ -131,6 +131,7 @@ export class MemStorage implements IStorage {
       aiAnalysis: null,
       adminReview: null,
       status: "pending",
+      pdfPath: null,
       createdAt: new Date(),
     };
     this.documents.set(id, document);

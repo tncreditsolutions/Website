@@ -20,6 +20,120 @@ function encodeToBase64(buffer: Buffer): string {
   return buffer.toString("base64");
 }
 
+// Helper function to generate and save PDF to disk
+async function generateAndSavePDF(document: any): Promise<string | null> {
+  try {
+    const pdfsDir = path.join(import.meta.dirname, "..", "pdfs");
+    if (!fs.existsSync(pdfsDir)) {
+      fs.mkdirSync(pdfsDir, { recursive: true });
+    }
+
+    const pdfFileName = `${document.id}-${Date.now()}.pdf`;
+    const pdfFilePath = path.join(pdfsDir, pdfFileName);
+
+    // Create PDF document
+    const doc = new PDFDocument({ margin: 0, size: "A4" });
+    const writeStream = fs.createWriteStream(pdfFilePath);
+    doc.pipe(writeStream);
+
+    // Header
+    doc.rect(0, 0, 612, 145).fill("#0f2d6e");
+    doc.rect(0, 0, 612, 6).fill("#fbbf24");
+    doc.rect(0, 139, 612, 6).fill("#fbbf24");
+    doc.fontSize(32).font("Helvetica-Bold").fillColor("#ffffff");
+    doc.text("TN CREDIT SOLUTIONS", 50, 28);
+    doc.fontSize(10).font("Helvetica").fillColor("#c5d3ff");
+    doc.text("Professional Credit Restoration & Tax Optimization Services", 50, 65);
+    doc.fontSize(14).font("Helvetica-Bold").fillColor("#fbbf24");
+    doc.text("CREDIT ANALYSIS REPORT", 50, 82);
+    doc.fontSize(9).font("Helvetica").fillColor("#e0e7ff");
+    doc.text(`Client Name: ${document.visitorName}`, 50, 102);
+    
+    const dateStr = document.createdAt instanceof Date ? document.createdAt.toISOString() : String(document.createdAt);
+    const datePart = dateStr.split('T')[0];
+    const [year, monthStr, dayStr] = datePart.split('-');
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const reportDate = `${monthNames[parseInt(monthStr) - 1]} ${parseInt(dayStr)}, ${year}`;
+    doc.text(`Report Date: ${reportDate}`, 50, 115);
+    doc.moveTo(0, 145).lineTo(612, 145).strokeColor("#f3f4f6").lineWidth(0.75).stroke();
+
+    // Content
+    const PAGE_HEIGHT = 792;
+    const FOOTER_HEIGHT = 60;
+    const MAX_CONTENT_Y = PAGE_HEIGHT - FOOTER_HEIGHT;
+    let yPosition = 160;
+    const lines = document.aiAnalysis.split("\n");
+    let isFirstSection = true;
+
+    for (const line of lines) {
+      if (yPosition > MAX_CONTENT_Y - 20) {
+        doc.addPage();
+        yPosition = 40;
+      }
+      if (line.includes("CREDIT ANALYSIS SUMMARY") || line.includes("═") || line.includes("━") || line.includes("Summary Analysis") || line.includes("**Summary") || line.includes("---") || line.includes("Certainly!")) {
+        continue;
+      }
+      if (line.match(/^#+\s+[A-Z]/)) {
+        if (!isFirstSection) yPosition += 10;
+        const sectionTitle = line.replace(/^#+\s+/, "").trim();
+        doc.rect(40, yPosition, 4, 20).fill("#fbbf24");
+        doc.fontSize(12).font("Helvetica-Bold").fillColor("#0f2d6e");
+        doc.text(sectionTitle, 50, yPosition + 2);
+        doc.moveTo(50, yPosition + 20).lineTo(560, yPosition + 20).strokeColor("#e5e7eb").lineWidth(0.75).stroke();
+        yPosition += 32;
+        isFirstSection = false;
+      } else if (line.match(/^\s*[-•▪*]\s+/) || line.match(/^\s*\d+\.\s+/)) {
+        const cleanContent = line.replace(/^\s*[-•▪*\d.]\s+/, "").replace(/\*\*/g, "").trim();
+        if (!cleanContent) continue;
+        doc.fontSize(9).fillColor("#fbbf24").font("Helvetica-Bold");
+        doc.text("●", 48, yPosition);
+        doc.fontSize(10).fillColor("#374151").font("Helvetica");
+        const wrappedHeight = doc.heightOfString(cleanContent, { width: 500 });
+        doc.text(cleanContent, 62, yPosition, { width: 500 });
+        yPosition += wrappedHeight + 6;
+      } else if (line.includes(":") && !line.match(/^#+/) && line.trim().length > 0) {
+        const parts = line.split(":").map(p => p.trim());
+        if (parts.length === 2) {
+          const cleanLabel = parts[0].replace(/^\s*[-•▪*]\s+/, "").replace(/\*\*/g, "");
+          const cleanValue = parts[1].replace(/\*\*/g, "");
+          doc.fontSize(9).font("Helvetica-Bold").fillColor("#0f2d6e");
+          doc.text(cleanLabel + ":", 55, yPosition);
+          doc.fontSize(9).font("Helvetica").fillColor("#1e40af");
+          doc.text(cleanValue, 320, yPosition);
+          yPosition += 14;
+        }
+      } else if (line.trim().length > 0 && !line.match(/^###/)) {
+        const cleanLine = line.replace(/\*\*/g, "").trim();
+        doc.fontSize(10).fillColor("#4b5563").font("Helvetica");
+        const wrappedHeight = doc.heightOfString(cleanLine, { width: 520 });
+        doc.text(cleanLine, 48, yPosition, { width: 520 });
+        yPosition += wrappedHeight + 5;
+      } else if (yPosition > 200) {
+        yPosition += 3;
+      }
+    }
+
+    // Footer
+    doc.rect(0, 750, 612, 6).fill("#fbbf24");
+    doc.moveTo(50, 735).lineTo(560, 735).strokeColor("#d1d5db").lineWidth(0.75).stroke();
+    doc.fontSize(8).fillColor("#6b7280").font("Helvetica");
+    doc.text("This analysis is confidential and for personal use only.", 50, 705, { align: "center" });
+    doc.fontSize(7).fillColor("#9ca3af").font("Helvetica");
+    doc.text("© 2025 TN Credit Solutions | Confidential & Proprietary", 50, 718, { align: "center" });
+    doc.text("For professional financial advice, please consult with a qualified advisor.", 50, 727, { align: "center" });
+
+    doc.end();
+
+    return new Promise((resolve) => {
+      writeStream.on('finish', () => resolve(pdfFileName));
+      writeStream.on('error', () => resolve(null));
+    });
+  } catch (error) {
+    console.error("[PDF Save] Error:", error);
+    return null;
+  }
+}
+
 // Helper function to clean AI analysis text
 function cleanAnalysisText(rawText: string): string {
   // Remove code blocks
@@ -487,6 +601,12 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         return res.status(500).json({ error: "Failed to retrieve updated document" });
       }
       
+      // Generate and save PDF for admin resending
+      const pdfFileName = await generateAndSavePDF(updatedDoc);
+      if (pdfFileName) {
+        await storage.updateDocumentPdfPath(updatedDoc.id, pdfFileName);
+      }
+      
       // Construct response with all fields, converting Date to ISO string
       const responseBody = {
         id: updatedDoc.id,
@@ -498,6 +618,7 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
         aiAnalysis: updatedDoc.aiAnalysis,
         adminReview: updatedDoc.adminReview,
         status: updatedDoc.status,
+        pdfPath: pdfFileName,
         createdAt: updatedDoc.createdAt instanceof Date ? updatedDoc.createdAt.toISOString() : updatedDoc.createdAt,
       };
       
@@ -582,6 +703,26 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
       // Delete from database
       await storage.deleteDocumentById(id);
       res.json({ success: true, message: "Document deleted permanently" });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Retrieve saved PDF for resending
+  app.get("/api/documents/:id/pdf-download", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const document = await storage.getDocumentById(id);
+      if (!document || !document.pdfPath) {
+        return res.status(404).json({ error: "No saved PDF available" });
+      }
+
+      const pdfFilePath = path.join(import.meta.dirname, "..", "pdfs", document.pdfPath);
+      if (!fs.existsSync(pdfFilePath)) {
+        return res.status(404).json({ error: "PDF file not found" });
+      }
+
+      res.download(pdfFilePath, `credit-analysis-${document.id}.pdf`);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
