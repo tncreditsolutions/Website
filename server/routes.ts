@@ -69,6 +69,7 @@ async function generateAndSavePDF(document: any): Promise<string | null> {
     let yPosition = 160;
     
     // Safety check for analysis
+    console.log("[PDF Save] Document ID:", document.id, "aiAnalysis type:", typeof document.aiAnalysis, "aiAnalysis value:", document.aiAnalysis?.substring(0, 100) || "EMPTY/NULL");
     if (!document.aiAnalysis) {
       console.error("[PDF Save] No AI analysis found for document:", document.id);
       doc.end();
@@ -826,6 +827,7 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
       }
 
       // Update storage with analysis
+      console.log("[Document Upload] Saving analysis, length:", analysisText.length, "text preview:", analysisText.substring(0, 100));
       await storage.updateDocumentAnalysis(document.id, analysisText);
       
       // Fetch the updated document from storage to ensure aiAnalysis is included
@@ -834,6 +836,8 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
       if (!updatedDoc) {
         return res.status(500).json({ error: "Failed to retrieve updated document" });
       }
+      
+      console.log("[Document Upload] Updated doc aiAnalysis length:", updatedDoc.aiAnalysis?.length || 0, "preview:", updatedDoc.aiAnalysis?.substring(0, 100));
       
       // Generate and save PDF for admin resending
       const pdfFileName = await generateAndSavePDF(updatedDoc);
