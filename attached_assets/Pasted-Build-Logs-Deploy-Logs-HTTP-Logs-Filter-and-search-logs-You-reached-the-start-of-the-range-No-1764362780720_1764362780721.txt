@@ -1,0 +1,111 @@
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+You reached the start of the range
+Nov 28, 2025, 3:45 PM
+Starting Container
+vite v5.4.20 building for production...
+transforming...
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 build
+> vite build && esbuild server/index-prod.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/index.js
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+✓ 1742 modules transformed.
+rendering chunks...
+computing gzip size...
+✓ built in 4.41s
+../dist/public/assets/index-B2cAoITb.css                            96.33 kB │ gzip:  14.74 kB
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+../dist/public/assets/index-BumSpYfU.js                            873.23 kB │ gzip: 260.98 kB
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+../dist/public/index.html                                            2.37 kB │ gzip:   0.95 kB
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+../dist/public/assets/ready_for_better_future_hero-C6oVMAMg.png    945.56 kB
+../dist/public/assets/client_testimonial_photo_2-B8UX-XkM.png    1,312.17 kB
+../dist/public/assets/client_testimonial_photo_1-C49icyGe.png    1,313.43 kB
+../dist/public/assets/client_testimonial_photo_3-BHvJgOFH.png    1,457.77 kB
+../dist/public/assets/pdf.worker-zxMdjS_u.mjs                    1,916.05 kB
+  dist/index.js  56.3kb
+⚡ Done in 6ms
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+[DbStorage] ✅ Database connected successfully - User credentials will PERSIST
+[AI] OpenAI initialized: true API key available: true
+[DbStorage] Error getting user by username: NeonDbError: Error connecting to database: fetch failed
+    at execute (file:///app/node_modules/@neondatabase/serverless/index.mjs:1549:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonHttpPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-http/session.js:40:20)
+    at async DbStorage.getUserByUsername (file:///app/dist/index.js:147:24)
+    at async initializeDefaultAdmin (file:///app/dist/index.js:530:27)
+    at async registerRoutes (file:///app/dist/index.js:544:3)
+    at async runApp (file:///app/dist/index.js:1336:18)
+    at async file:///app/dist/index.js:1367:3 {
+  severity: undefined,
+  code: undefined,
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined,
+  sourceError: TypeError: fetch failed
+      at node:internal/deps/undici/undici:14900:13
+      at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+      at async execute (file:///app/node_modules/@neondatabase/serverless/index.mjs:1548:15)
+      at async NeonHttpPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-http/session.js:40:20)
+      at async DbStorage.getUserByUsername (file:///app/dist/index.js:147:24)
+      at async initializeDefaultAdmin (file:///app/dist/index.js:530:27)
+      at async registerRoutes (file:///app/dist/index.js:544:3)
+      at async runApp (file:///app/dist/index.js:1336:18)
+      at async file:///app/dist/index.js:1367:3 {
+    [cause]: Error: getaddrinfo ENOTFOUND api.railway.internal
+        at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+      errno: -3008,
+      code: 'ENOTFOUND',
+      syscall: 'getaddrinfo',
+      hostname: 'api.railway.internal'
+    }
+  }
+}
+[Auth] Creating default admin user...
+  line: undefined,
+  position: undefined,
+[DbStorage] Error creating user in database: NeonDbError: Error connecting to database: fetch failed
+  routine: undefined,
+  internalPosition: undefined,
+    at execute (file:///app/node_modules/@neondatabase/serverless/index.mjs:1549:24)
+  sourceError: TypeError: fetch failed
+  internalQuery: undefined,
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+  where: undefined,
+    at async DbStorage.createUser (file:///app/dist/index.js:165:9)
+  schema: undefined,
+  table: undefined,
+    at async initializeDefaultAdmin (file:///app/dist/index.js:537:22)
+  column: undefined,
+    at async registerRoutes (file:///app/dist/index.js:544:3)
+  dataType: undefined,
+  constraint: undefined,
+    at async runApp (file:///app/dist/index.js:1336:18)
+  file: undefined,
+    at async file:///app/dist/index.js:1367:3 {
+  severity: undefined,
+  code: undefined,
+  detail: undefined,
+  hint: undefined,
+      at node:internal/deps/undici/undici:14900:13
+      at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+      at async execute (file:///app/node_modules/@neondatabase/serverless/index.mjs:1548:15)
+      at async DbStorage.createUser (file:///app/dist/index.js:165:9)
