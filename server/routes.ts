@@ -266,20 +266,28 @@ function authMiddleware(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-// Initialize default admin user on startup
+// Initialize default admin user on startup - only runs ONCE
+let adminInitialized = false;
 async function initializeDefaultAdmin() {
+  if (adminInitialized) {
+    console.log("[Auth] Admin initialization already completed this session");
+    return;
+  }
   try {
     const existingAdmin = await storage.getUserByUsername("admin");
     if (existingAdmin) {
-      console.log("[Auth] Admin user already exists");
+      console.log("[Auth] ✅ Admin user already exists in database. ID:", existingAdmin.id);
+      adminInitialized = true;
       return;
     }
     console.log("[Auth] Creating default admin user...");
     const hashedPassword = await bcrypt.hash("admin123", 10);
     const newAdmin = await storage.createUser({ username: "admin", password: hashedPassword });
-    console.log("[Auth] Default admin user created. ID:", newAdmin.id, "Username: admin, Password: admin123");
+    console.log("[Auth] ✅ Default admin user created. ID:", newAdmin.id, "Username: admin, Password: admin123");
+    adminInitialized = true;
   } catch (error) {
-    console.warn("[Auth] Could not initialize default admin user (database may not be available):", error);
+    console.error("[Auth] ❌ CRITICAL: Could not initialize default admin user:", error);
+    console.error("[Auth] This is likely a database connection issue. Check DATABASE_URL environment variable.");
     // Don't crash the app - just warn and continue. The database can be set up later.
   }
 }
@@ -878,16 +886,23 @@ This is the start of the conversation. Ask open-ended questions to understand th
 
       // Update storage with analysis
       console.log("[Document Upload] Saving analysis, length:", analysisText.length, "text preview:", analysisText.substring(0, 100));
-      await storage.updateDocumentAnalysis(document.id, analysisText);
+      try {
+        await storage.updateDocumentAnalysis(document.id, analysisText);
+        console.log("[Document Upload] ✅ Analysis saved to database successfully");
+      } catch (dbError) {
+        console.error("[Document Upload] ❌ Failed to save analysis to database:", dbError);
+        return res.status(500).json({ error: "Failed to save analysis to database: " + String(dbError) });
+      }
       
       // Fetch the updated document from storage to ensure aiAnalysis is included
       const updatedDoc = await storage.getDocumentById(document.id);
       
       if (!updatedDoc) {
+        console.error("[Document Upload] ❌ Failed to retrieve updated document after saving analysis");
         return res.status(500).json({ error: "Failed to retrieve updated document" });
       }
       
-      console.log("[Document Upload] Updated doc aiAnalysis length:", updatedDoc.aiAnalysis?.length || 0, "preview:", updatedDoc.aiAnalysis?.substring(0, 100));
+      console.log("[Document Upload] ✅ Updated doc aiAnalysis length:", updatedDoc.aiAnalysis?.length || 0, "preview:", updatedDoc.aiAnalysis?.substring(0, 100) || "NO ANALYSIS");
       console.log("[Document Upload] About to generate PDF - analysisText length:", analysisText.length, "analysisText preview:", analysisText.substring(0, 150));
       
       // Generate and save PDF for admin resending - pass analysisText directly to ensure it's included

@@ -177,8 +177,8 @@ export class DbStorage implements IStorage {
   async getAllChatMessages(): Promise<ChatMessage[]> {
     if (dbInitialized && db) {
       try {
-        const result = await db.select().from(chatMessages).orderBy((t) => []);
-        return result.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        const result = await db.select().from(chatMessages);
+        return result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       } catch (error) {
         console.error("[DbStorage] Error fetching chat messages from database:", error);
       }
@@ -269,8 +269,8 @@ export class DbStorage implements IStorage {
   async getAllDocuments(): Promise<Document[]> {
     if (dbInitialized && db) {
       try {
-        const result = await db.select().from(documents).orderBy((t) => []);
-        return result.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        const result = await db.select().from(documents);
+        return result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       } catch (error) {
         console.error("[DbStorage] Error fetching documents from database:", error);
       }
@@ -284,8 +284,8 @@ export class DbStorage implements IStorage {
   async getDocumentsByEmail(email: string): Promise<Document[]> {
     if (dbInitialized && db) {
       try {
-        const result = await db.select().from(documents).where(eq(documents.visitorEmail, email)).orderBy((t) => []);
-        return result.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        const result = await db.select().from(documents).where(eq(documents.visitorEmail, email));
+        return result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       } catch (error) {
         console.error("[DbStorage] Error fetching documents by email from database:", error);
       }
@@ -331,10 +331,15 @@ export class DbStorage implements IStorage {
   async updateDocumentAnalysis(id: string, analysis: string): Promise<void> {
     if (dbInitialized && db) {
       try {
-        await db.update(documents).set({ aiAnalysis: analysis }).where(eq(documents.id, id));
+        const result = await db.update(documents).set({ aiAnalysis: analysis }).where(eq(documents.id, id)).returning();
+        console.log("[DbStorage] Document analysis updated in database. ID:", id, "Analysis length:", analysis.length, "DB result:", !!result?.length);
+        if (!result || !result.length) {
+          throw new Error("Update returned no rows - document may not exist");
+        }
         return;
       } catch (error) {
         console.error("[DbStorage] Error updating document analysis in database:", error);
+        throw error;
       }
     }
     // Fallback to in-memory
@@ -376,10 +381,15 @@ export class DbStorage implements IStorage {
   async updateDocumentPdfPath(id: string, pdfPath: string): Promise<void> {
     if (dbInitialized && db) {
       try {
-        await db.update(documents).set({ pdfPath }).where(eq(documents.id, id));
+        const result = await db.update(documents).set({ pdfPath }).where(eq(documents.id, id)).returning();
+        console.log("[DbStorage] Document PDF path updated in database. ID:", id, "PDF:", pdfPath, "DB result:", !!result?.length);
+        if (!result || !result.length) {
+          throw new Error("Update returned no rows - document may not exist");
+        }
         return;
       } catch (error) {
         console.error("[DbStorage] Error updating document pdf path in database:", error);
+        throw error;
       }
     }
     // Fallback to in-memory
