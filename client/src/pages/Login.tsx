@@ -27,15 +27,18 @@ export default function Login() {
 
     setIsLoading(true);
     try {
-      await apiRequest("POST", "/api/auth/login", {
+      const response = await apiRequest("POST", "/api/auth/login", {
         username: username.trim(),
         password: password.trim(),
       });
-
-      setTimeout(() => {
-        setLocation("/admin");
-      }, 100);
+      
+      const data = await response.json();
+      if (data.success) {
+        // Use window.location for more reliable navigation
+        window.location.href = "/admin";
+      }
     } catch (error: any) {
+      console.error("Login error:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to log in",
