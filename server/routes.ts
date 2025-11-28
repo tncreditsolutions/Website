@@ -49,15 +49,12 @@ async function generateAndSavePDF(document: any): Promise<string | null> {
     doc.fontSize(9).font("Helvetica").fillColor("#e0e7ff");
     doc.text(`Client Name: ${document.visitorName}`, 50, 102);
     
-    const date = document.createdAt instanceof Date ? document.createdAt : new Date(document.createdAt);
-    // Adjust for timezone offset to get correct local date
-    const offset = date.getTimezoneOffset();
-    const localDate = new Date(date.getTime() - offset * 60000);
-    const year = localDate.getUTCFullYear();
-    const month = localDate.getUTCMonth() + 1;
-    const day = localDate.getUTCDate();
+    // Extract date directly from ISO string to avoid timezone conversion
+    const isoString = document.createdAt instanceof Date ? document.createdAt.toISOString() : String(document.createdAt);
+    const dateOnlyPart = isoString.split('T')[0]; // "2025-11-28"
+    const [yearStr, monthStr, dayStr] = dateOnlyPart.split('-');
     const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    const reportDate = `${monthNames[month - 1]} ${day}, ${year}`;
+    const reportDate = `${monthNames[parseInt(monthStr) - 1]} ${parseInt(dayStr)}, ${yearStr}`;
     doc.text(`Report Date: ${reportDate}`, 50, 115);
     doc.moveTo(0, 145).lineTo(612, 145).strokeColor("#f3f4f6").lineWidth(0.75).stroke();
 
@@ -793,16 +790,12 @@ URGENT SITUATION DETECTED: This involves debt collection/lawsuit threats. Respon
       doc.fontSize(9).font("Helvetica").fillColor("#e0e7ff");
       doc.text(`Client Name: ${document.visitorName}`, 50, 102);
       
-      // Format date using local time with timezone offset correction
-      const date = document.createdAt instanceof Date ? document.createdAt : new Date(document.createdAt);
-      // Adjust for timezone offset to get correct local date
-      const offset = date.getTimezoneOffset();
-      const localDate = new Date(date.getTime() - offset * 60000);
-      const year = localDate.getUTCFullYear();
-      const month = localDate.getUTCMonth() + 1;
-      const day = localDate.getUTCDate();
+      // Extract date directly from ISO string to avoid timezone conversion
+      const isoString = document.createdAt instanceof Date ? document.createdAt.toISOString() : String(document.createdAt);
+      const dateOnlyPart = isoString.split('T')[0]; // "2025-11-28"
+      const [yearStr, monthStr, dayStr] = dateOnlyPart.split('-');
       const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-      const reportDate = `${monthNames[month - 1]} ${day}, ${year}`;
+      const reportDate = `${monthNames[parseInt(monthStr) - 1]} ${parseInt(dayStr)}, ${yearStr}`;
       
       doc.text(`Report Date: ${reportDate}`, 50, 115);
 
