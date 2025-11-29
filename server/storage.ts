@@ -252,19 +252,31 @@ export class DbStorage implements IStorage {
   }
 
   async createDocument(insertDocument: InsertDocument): Promise<Document> {
+    console.log("[DbStorage] createDocument called with fileContent length:", insertDocument.fileContent?.length || 0);
+    
     if (dbInitialized && db) {
       try {
+        console.log("[DbStorage] Inserting document into database...");
         const result = await db.insert(documents).values({
-          ...insertDocument,
+          visitorEmail: insertDocument.visitorEmail,
+          visitorName: insertDocument.visitorName,
+          fileName: insertDocument.fileName,
+          fileType: insertDocument.fileType,
+          filePath: insertDocument.filePath,
+          fileContent: insertDocument.fileContent,
           visitorTimezone: insertDocument.visitorTimezone || "UTC",
           visitorDateForFilename: insertDocument.visitorDateForFilename || new Date().toISOString().split('T')[0],
         }).returning();
+        console.log("[DbStorage] Document inserted successfully, id:", result[0]?.id);
         return result[0];
-      } catch (error) {
-        console.error("[DbStorage] Error creating document in database:", error);
+      } catch (error: any) {
+        console.error("[DbStorage] Error creating document in database:", error?.message || String(error));
+        console.error("[DbStorage] Full error:", error);
       }
     }
+    
     // Fallback to in-memory
+    console.log("[DbStorage] Falling back to in-memory storage for document");
     const id = randomUUID();
     const document: Document = {
       visitorEmail: insertDocument.visitorEmail,
@@ -272,6 +284,7 @@ export class DbStorage implements IStorage {
       fileName: insertDocument.fileName,
       fileType: insertDocument.fileType,
       filePath: insertDocument.filePath,
+      fileContent: insertDocument.fileContent || undefined,
       id,
       aiAnalysis: null,
       adminReview: null,

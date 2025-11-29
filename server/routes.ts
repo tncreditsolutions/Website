@@ -813,6 +813,8 @@ This is the start of the conversation. Ask open-ended questions to understand th
 
       // Create document record with file content stored in database (for Railway compatibility)
       const base64Data = fileContent.split(",")[1] || fileContent;
+      console.log("[Document Upload] Creating document record, base64Data length:", base64Data.length);
+      
       const document = await storage.createDocument({
         visitorEmail,
         visitorName,
@@ -823,10 +825,13 @@ This is the start of the conversation. Ask open-ended questions to understand th
         visitorTimezone: visitorTimezone || "UTC",
         visitorDateForFilename: visitorDateForFilename || new Date().toISOString().split('T')[0],
       });
+      
+      console.log("[Document Upload] Document created successfully, id:", document.id);
 
       // Analyze document with OpenAI
       let analysisText = "No analysis available";
       try {
+        console.log("[Document Upload] Starting analysis, fileType:", fileType);
         const isImage = ["image/png", "image/jpeg", "image/jpg"].includes(fileType);
         const isPdf = fileType === "application/pdf";
         
