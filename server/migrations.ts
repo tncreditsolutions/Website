@@ -9,7 +9,7 @@ export async function ensureTablesExist(db: NeonHttpDatabase) {
     // This is safe - it won't error if tables already exist
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS "users" (
-        "id" varchar PRIMARY KEY,
+        "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
         "username" text NOT NULL UNIQUE,
         "password" text NOT NULL
       );
@@ -18,7 +18,7 @@ export async function ensureTablesExist(db: NeonHttpDatabase) {
 
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS "contact_submissions" (
-        "id" varchar PRIMARY KEY,
+        "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
         "name" text NOT NULL,
         "phone" text NOT NULL,
         "email" text NOT NULL,
@@ -32,7 +32,7 @@ export async function ensureTablesExist(db: NeonHttpDatabase) {
 
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS "chat_messages" (
-        "id" varchar PRIMARY KEY,
+        "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
         "name" text NOT NULL,
         "email" text NOT NULL,
         "message" text NOT NULL,
@@ -45,7 +45,7 @@ export async function ensureTablesExist(db: NeonHttpDatabase) {
 
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS "newsletter_subscriptions" (
-        "id" varchar PRIMARY KEY,
+        "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
         "email" text NOT NULL UNIQUE,
         "created_at" timestamp DEFAULT now()
       );
@@ -54,7 +54,7 @@ export async function ensureTablesExist(db: NeonHttpDatabase) {
 
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS "documents" (
-        "id" varchar PRIMARY KEY,
+        "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
         "visitor_email" text NOT NULL,
         "visitor_name" text NOT NULL,
         "file_name" text NOT NULL,
