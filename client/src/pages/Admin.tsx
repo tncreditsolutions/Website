@@ -462,20 +462,21 @@ export default function Admin() {
               <div className="space-y-4">
                 {Array.from(
                   chatMessages?.reduce((acc, msg) => {
-                    // Include both visitor messages and Riley AI responses
-                    if (msg.sender === "visitor" || msg.sender === "ai") {
-                      // Group by visitor email (not Riley's support email)
-                      const email = msg.sender === "visitor" ? msg.email : 
-                        chatMessages.find((m: ChatMessage) => m.sender === "visitor" && 
-                          new Date(m.createdAt).getTime() <= new Date(msg.createdAt).getTime())?.email || msg.email;
-                      
-                      if (email && email !== "support@tncreditsolutions.com") {
-                        if (!acc.has(email)) {
-                          acc.set(email, []);
-                        }
-                        acc.get(email)?.push(msg);
+                    // Include both visitor messages and Riley AI responses, but not system messages
+                    if (msg.sender === "visitor") {
+                      // Visitor message - group by their email
+                      if (!acc.has(msg.email)) {
+                        acc.set(msg.email, []);
                       }
+                      acc.get(msg.email)?.push(msg);
+                    } else if (msg.sender === "ai" && msg.email !== "support@tncreditsolutions.com") {
+                      // AI message from Riley - include with group (unlikely case but handle it)
+                      if (!acc.has(msg.email)) {
+                        acc.set(msg.email, []);
+                      }
+                      acc.get(msg.email)?.push(msg);
                     }
+                    // If AI message has support email, we'll skip it as Riley's responses are tied to visitor conversations
                     return acc;
                   }, new Map<string, ChatMessage[]>()) || new Map()
                 )
