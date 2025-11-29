@@ -278,6 +278,9 @@ export default function ChatWidget() {
       return;
     }
     
+    // Update state FIRST so the message filter will work
+    setName(trimmedName);
+    setEmail(trimmedEmail);
     localStorage.setItem(VISITOR_INFO_KEY, JSON.stringify({ name: trimmedName, email: trimmedEmail }));
     
     // CRITICAL: Clear any previous chat history AND documents for this email from the backend
