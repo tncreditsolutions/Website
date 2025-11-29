@@ -1,0 +1,581 @@
+2025-11-29T14:11:50.000000000Z [inf]  Starting Container
+2025-11-29T14:11:51.874874458Z [err]  npm warn config production Use `--omit=dev` instead.
+2025-11-29T14:11:51.874883091Z [inf]  
+2025-11-29T14:11:51.874891886Z [inf]  > rest-express@1.0.0 build
+2025-11-29T14:11:51.874898710Z [inf]  > vite build && esbuild server/index-prod.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/index.js
+2025-11-29T14:11:51.874904962Z [inf]  
+2025-11-29T14:11:51.874916629Z [inf]  [36mvite v5.4.20 [32mbuilding for production...[36m[39m
+2025-11-29T14:11:51.874923059Z [inf]  transforming...
+2025-11-29T14:11:53.074712530Z [err]  
+2025-11-29T14:11:53.074726812Z [err]  A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+2025-11-29T14:11:58.177349363Z [inf]  [32m✓[39m 1742 modules transformed.
+2025-11-29T14:11:59.179466399Z [err]  - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+2025-11-29T14:11:59.179541807Z [inf]  [2m../dist/public/[22m[2massets/[22m[32mclient_testimonial_photo_3-BHvJgOFH.png    [39m[1m[2m1,457.77 kB[22m[1m[22m
+2025-11-29T14:11:59.179596421Z [inf]  rendering chunks...
+2025-11-29T14:11:59.179604419Z [inf]  computing gzip size...
+2025-11-29T14:11:59.179616386Z [inf]  [2m../dist/public/[22m[32mindex.html                                        [39m[1m[2m    2.37 kB[22m[1m[22m[2m │ gzip:   0.96 kB[22m
+2025-11-29T14:11:59.179624554Z [inf]  [2m../dist/public/[22m[2massets/[22m[32mready_for_better_future_hero-C6oVMAMg.png  [39m[1m[2m  945.56 kB[22m[1m[22m
+2025-11-29T14:11:59.179632558Z [inf]  [2m../dist/public/[22m[2massets/[22m[32mclient_testimonial_photo_2-B8UX-XkM.png    [39m[1m[2m1,312.17 kB[22m[1m[22m
+2025-11-29T14:11:59.179639126Z [inf]  [2m../dist/public/[22m[2massets/[22m[32mclient_testimonial_photo_1-C49icyGe.png    [39m[1m[2m1,313.43 kB[22m[1m[22m
+2025-11-29T14:11:59.179648995Z [inf]  [2m../dist/public/[22m[2massets/[22m[32mpdf.worker-zxMdjS_u.mjs                    [39m[1m[2m1,916.05 kB[22m[1m[22m
+2025-11-29T14:11:59.179662419Z [inf]  [2m../dist/public/[22m[2massets/[22m[35mindex-C0_Bq35A.css                         [39m[1m[2m   96.41 kB[22m[1m[22m[2m │ gzip:  14.76 kB[22m
+2025-11-29T14:11:59.179670975Z [inf]  [2m../dist/public/[22m[2massets/[22m[36mindex-Ba-U6CPz.js                          [39m[1m[33m  875.25 kB[39m[22m[2m │ gzip: 261.41 kB[22m
+2025-11-29T14:11:59.179682739Z [err]  [33m
+2025-11-29T14:11:59.179689410Z [err]  (!) Some chunks are larger than 500 kB after minification. Consider:
+2025-11-29T14:11:59.179698176Z [err]  - Using dynamic import() to code-split the application
+2025-11-29T14:11:59.179704366Z [err]  - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2025-11-29T14:12:00.209427160Z [inf]  [32m✓ built in 7.72s[39m
+2025-11-29T14:12:00.209434872Z [err]  
+2025-11-29T14:12:00.209442384Z [err]    dist/index.js  78.2kb
+2025-11-29T14:12:00.209449988Z [err]  
+2025-11-29T14:12:00.209457818Z [err]  ⚡ Done in 13ms
+2025-11-29T14:12:00.209466268Z [err]  npm warn config production Use `--omit=dev` instead.
+2025-11-29T14:12:00.209482453Z [inf]  
+2025-11-29T14:12:00.209490548Z [inf]  > rest-express@1.0.0 start
+2025-11-29T14:12:00.209504967Z [inf]  > NODE_ENV=production node dist/index.js
+2025-11-29T14:12:00.209513070Z [inf]  
+2025-11-29T14:12:01.386305096Z [inf]  2:12:00 PM [express] serving on port 8080
+2025-11-29T14:12:01.386405495Z [inf]  [DbStorage] ✅ Database connected successfully
+2025-11-29T14:12:01.386413273Z [inf]  [Migration] Checking if database tables exist...
+2025-11-29T14:12:01.386424966Z [inf]  [AI] Claude initialized: true API key available: true
+2025-11-29T14:12:01.386435157Z [inf]  [AI] OpenAI initialized: true API key available: true
+2025-11-29T14:12:01.386449096Z [inf]  [Migration] ✅ users table ready
+2025-11-29T14:12:01.386462836Z [inf]  [Migration] ✅ contact_submissions table ready
+2025-11-29T14:12:01.386475487Z [inf]  [Migration] ✅ chat_messages table ready
+2025-11-29T14:12:01.386485621Z [inf]  [Migration] ✅ newsletter_subscriptions table ready
+2025-11-29T14:12:01.386494328Z [inf]  [Migration] ✅ documents table ready
+2025-11-29T14:12:01.386502581Z [inf]  [Migration] Ensuring file_content column exists on documents table...
+2025-11-29T14:12:01.386512537Z [inf]  [Migration] ✅ file_content column ensured on documents table
+2025-11-29T14:12:01.386526118Z [inf]  [Migration] ✅ chat_messages email index ready
+2025-11-29T14:12:01.387719939Z [inf]  [Migration] ✅ All database tables and indices created successfully
+2025-11-29T14:12:01.387726998Z [inf]  [DbStorage] ✅ Database schema verified - User credentials will PERSIST
+2025-11-29T14:12:01.387732974Z [inf]  [Auth] ✅ Admin user already exists in database. ID: be4efa52-d502-4745-8a85-df401416e2ad
+2025-11-29T14:12:01.390603604Z [inf]  [Migration] ✅ documents email index ready
+2025-11-29T14:12:01.390614816Z [inf]  [Migration] ✅ users username index ready
+2025-11-29T14:13:02.120642821Z [inf]  2:13:00 PM [express] GET /api/chat 200 in 31ms :: [{"id":"3b180627-976c-4134-b2ef-f34650b7b039","nam…
+2025-11-29T14:13:02.120650356Z [inf]  2:13:00 PM [express] GET /api/chat 200 in 9ms :: [{"id":"3b180627-976c-4134-b2ef-f34650b7b039","name…
+2025-11-29T14:13:02.120657509Z [inf]  2:13:00 PM [express] GET /api/chat 200 in 9ms :: [{"id":"3b180627-976c-4134-b2ef-f34650b7b039","name…
+2025-11-29T14:13:02.120667668Z [inf]  2:13:00 PM [express] GET /api/chat 200 in 8ms :: [{"id":"3b180627-976c-4134-b2ef-f34650b7b039","name…
+2025-11-29T14:13:02.120674806Z [inf]  2:13:00 PM [express] GET /api/chat 200 in 7ms :: [{"id":"3b180627-976c-4134-b2ef-f34650b7b039","name…
+2025-11-29T14:13:02.120682322Z [inf]  2:13:01 PM [express] GET /api/chat 200 in 9ms :: [{"id":"3b180627-976c-4134-b2ef-f34650b7b039","name…
+2025-11-29T14:13:02.120689652Z [inf]  2:13:01 PM [express] GET /api/chat 200 in 7ms :: [{"id":"3b180627-976c-4134-b2ef-f34650b7b039","name…
+2025-11-29T14:13:02.120695690Z [inf]  2:13:01 PM [express] GET /api/chat 200 in 7ms :: [{"id":"3b180627-976c-4134-b2ef-f34650b7b039","name…
+2025-11-29T14:13:02.120703026Z [inf]  2:13:01 PM [express] GET /api/chat 200 in 6ms :: [{"id":"3b180627-976c-4134-b2ef-f34650b7b039","name…
+2025-11-29T14:13:02.120710517Z [inf]  2:13:02 PM [express] GET /api/chat 200 in 6ms :: [{"id":"3b180627-976c-4134-b2ef-f34650b7b039","name…
+2025-11-29T14:13:02.900979715Z [inf]  2:13:02 PM [express] GET /api/chat 200 in 7ms :: [{"id":"3b180627-976c-4134-b2ef-f34650b7b039","name…
+2025-11-29T14:13:02.900992022Z [inf]  2:13:02 PM [express] GET /api/chat 304 in 7ms :: [{"id":"3b180627-976c-4134-b2ef-f34650b7b039","name…
+2025-11-29T14:13:02.901001136Z [inf]  2:13:02 PM [express] GET /api/chat 304 in 7ms :: [{"id":"3b180627-976c-4134-b2ef-f34650b7b039","name…
+2025-11-29T14:13:02.963998719Z [inf]  2:13:02 PM [express] GET /api/chat 304 in 8ms :: [{"id":"3b180627-976c-4134-b2ef-f34650b7b039","name…
+2025-11-29T14:13:03.066327042Z [inf]  2:13:03 PM [express] GET /api/chat 304 in 6ms :: [{"id":"3b180627-976c-4134-b2ef-f34650b7b039","name…
+2025-11-29T14:13:04.021302075Z [inf]  2:13:03 PM [express] GET /api/chat 200 in 7ms :: [{"id":"3b180627-976c-4134-b2ef-f34650b7b039","name…
+2025-11-29T14:13:06.413293604Z [inf]  2:13:05 PM [express] GET /api/chat 200 in 8ms :: [{"id":"3b180627-976c-4134-b2ef-f34650b7b039","name…
+2025-11-29T14:13:06.413302944Z [inf]  2:13:05 PM [express] GET /api/chat 200 in 8ms :: [{"id":"3b180627-976c-4134-b2ef-f34650b7b039","name…
+2025-11-29T14:13:06.413312619Z [inf]  2:13:05 PM [express] GET /api/chat 200 in 7ms :: [{"id":"3b180627-976c-4134-b2ef-f34650b7b039","name…
+2025-11-29T14:13:06.413846648Z [inf]  2:13:04 PM [express] GET /api/chat 200 in 8ms :: [{"id":"3b180627-976c-4134-b2ef-f34650b7b039","name…
+2025-11-29T14:13:06.413851702Z [inf]  2:13:04 PM [express] GET /api/chat 200 in 9ms :: [{"id":"3b180627-976c-4134-b2ef-f34650b7b039","name…
+2025-11-29T14:13:06.413857264Z [inf]  2:13:04 PM [express] GET /api/chat 200 in 6ms :: [{"id":"3b180627-976c-4134-b2ef-f34650b7b039","name…
+2025-11-29T14:13:06.413862105Z [inf]  2:13:04 PM [express] GET /api/chat 200 in 8ms :: [{"id":"3b180627-976c-4134-b2ef-f34650b7b039","name…
+2025-11-29T14:13:06.413866440Z [inf]  2:13:05 PM [express] GET /api/chat 200 in 6ms :: [{"id":"3b180627-976c-4134-b2ef-f34650b7b039","name…
+2025-11-29T14:13:06.413874280Z [inf]  2:13:05 PM [express] GET /api/chat 200 in 7ms :: [{"id":"3b180627-976c-4134-b2ef-f34650b7b039","name…
+2025-11-29T14:13:06.413879200Z [inf]  2:13:05 PM [express] GET /api/chat 200 in 7ms :: [{"id":"3b180627-976c-4134-b2ef-f34650b7b039","name…
+2025-11-29T14:13:07.542408914Z [inf]  [Chat POST] Message saved successfully: {
+2025-11-29T14:13:07.542421876Z [inf]    id: 'de03393f-9e3d-4cf9-af4d-d95877845b75',
+2025-11-29T14:13:07.542430790Z [inf]    email: 'support@tncreditsolutions.com',
+2025-11-29T14:13:07.542439423Z [inf]    sender: 'ai',
+2025-11-29T14:13:07.542446884Z [inf]    message: 'Hi Sergie! How can I help you today?'
+2025-11-29T14:13:07.542455298Z [inf]  }
+2025-11-29T14:13:07.542463852Z [inf]  2:13:07 PM [express] POST /api/chat 200 in 25ms :: {"id":"de03393f-9e3d-4cf9-af4d-d95877845b75","nam…
+2025-11-29T14:13:07.542500675Z [inf]  2:13:06 PM [express] GET /api/chat 304 in 7ms :: [{"id":"3b180627-976c-4134-b2ef-f34650b7b039","name…
+2025-11-29T14:13:07.542510598Z [inf]  [Chat POST] CRITICAL: Received request body: { sender: 'ai', email: 'support@tncreditsolutions.com', name: 'Riley' }
+2025-11-29T14:13:07.542520158Z [inf]  [Chat POST] Database ready, proceeding with validation
+2025-11-29T14:13:07.542528953Z [inf]  [Chat POST] Validation successful: { sender: 'ai', email: 'support@tncreditsolutions.com' }
+2025-11-29T14:13:08.365612080Z [inf]  2:13:07 PM [express] GET /api/chat 200 in 7ms :: [{"id":"de03393f-9e3d-4cf9-af4d-d95877845b75","name…
+2025-11-29T14:13:09.278110563Z [inf]  2:13:08 PM [express] GET /api/chat 304 in 7ms :: [{"id":"de03393f-9e3d-4cf9-af4d-d95877845b75","name…
+2025-11-29T14:13:10.179431706Z [inf]  2:13:10 PM [express] GET /api/chat 304 in 7ms :: [{"id":"de03393f-9e3d-4cf9-af4d-d95877845b75","name…
+2025-11-29T14:13:11.295169671Z [inf]  2:13:11 PM [express] GET /api/chat 304 in 7ms :: [{"id":"de03393f-9e3d-4cf9-af4d-d95877845b75","name…
+2025-11-29T14:13:13.474655213Z [inf]  2:13:12 PM [express] GET /api/chat 304 in 7ms :: [{"id":"de03393f-9e3d-4cf9-af4d-d95877845b75","name…
+2025-11-29T14:13:13.474662001Z [inf]  2:13:13 PM [express] GET /api/chat 304 in 8ms :: [{"id":"de03393f-9e3d-4cf9-af4d-d95877845b75","name…
+2025-11-29T14:13:14.435328070Z [inf]  2:13:14 PM [express] GET /api/chat 304 in 6ms :: [{"id":"de03393f-9e3d-4cf9-af4d-d95877845b75","name…
+2025-11-29T14:13:15.481147441Z [inf]  2:13:15 PM [express] GET /api/chat 304 in 7ms :: [{"id":"de03393f-9e3d-4cf9-af4d-d95877845b75","name…
+2025-11-29T14:13:16.517583848Z [inf]  2:13:16 PM [express] GET /api/chat 304 in 10ms :: [{"id":"de03393f-9e3d-4cf9-af4d-d95877845b75","nam…
+2025-11-29T14:13:17.334793195Z [inf]  [Chat POST] CRITICAL: Received request body: { sender: undefined, email: 'sergie822@gmail.com', name: 'Sergie' }
+2025-11-29T14:13:17.334799338Z [inf]  [Chat POST] Database ready, proceeding with validation
+2025-11-29T14:13:17.334805089Z [inf]  [Chat POST] Validation successful: { sender: 'visitor', email: 'sergie822@gmail.com' }
+2025-11-29T14:13:17.334811002Z [inf]  [Chat POST] Message saved successfully: {
+2025-11-29T14:13:17.334817127Z [inf]    id: '239f550d-e1c8-4a36-87d2-82857e3116c8',
+2025-11-29T14:13:17.334822434Z [inf]    email: 'sergie822@gmail.com',
+2025-11-29T14:13:17.334827872Z [inf]    sender: 'visitor',
+2025-11-29T14:13:17.334834431Z [inf]    message: 'analyze credit report and provide me insights'
+2025-11-29T14:13:17.334841802Z [inf]  }
+2025-11-29T14:13:17.334848292Z [inf]  [AI] Visitor message received. OpenAI ready: true Email: sergie822@gmail.com
+2025-11-29T14:13:17.334856154Z [inf]  [AI] Starting AI response generation...
+2025-11-29T14:13:17.334868069Z [inf]  [AI] Detected urgent situation: false
+2025-11-29T14:13:17.334875414Z [inf]  2:13:17 PM [express] POST /api/chat 200 in 12ms :: {"id":"239f550d-e1c8-4a36-87d2-82857e3116c8","nam…
+2025-11-29T14:13:17.334882414Z [inf]  [AI] User has uploaded documents: false Count: 0
+2025-11-29T14:13:17.334888452Z [inf]  [AI] Current session only - total messages: 6 current session: 6
+2025-11-29T14:13:17.334894612Z [inf]  [AI] Conversation turns: 6 Previous topics: []
+2025-11-29T14:13:17.334901215Z [inf]  [AI] Using standard prompt, visitor turns: 6 session message count: 6
+2025-11-29T14:13:17.334907649Z [inf]  2:13:17 PM [express] GET /api/chat 200 in 8ms :: [{"id":"239f550d-e1c8-4a36-87d2-82857e3116c8","name…
+2025-11-29T14:13:18.691919151Z [inf]  2:13:18 PM [express] GET /api/chat 304 in 8ms :: [{"id":"239f550d-e1c8-4a36-87d2-82857e3116c8","name…
+2025-11-29T14:13:19.655795177Z [inf]  2:13:19 PM [express] GET /api/chat 304 in 9ms :: [{"id":"239f550d-e1c8-4a36-87d2-82857e3116c8","name…
+2025-11-29T14:13:20.494602945Z [inf]          "annotations": []
+2025-11-29T14:13:20.494614715Z [inf]        },
+2025-11-29T14:13:20.494624923Z [inf]        "logprobs": null,
+2025-11-29T14:13:20.494630289Z [inf]        "finish_reason": "stop"
+2025-11-29T14:13:20.494635047Z [inf]      }
+2025-11-29T14:13:20.494640794Z [inf]    ],
+2025-11-29T14:13:20.494645866Z [inf]    "usage": {
+2025-11-29T14:13:20.494653110Z [inf]      "prompt_tokens": 675,
+2025-11-29T14:13:20.494657886Z [inf]      "completion_tokens": 138,
+2025-11-29T14:13:20.494707554Z [inf]    "choices": [
+2025-11-29T14:13:20.494716035Z [inf]      {
+2025-11-29T14:13:20.494725905Z [inf]        "index": 0,
+2025-11-29T14:13:20.494736040Z [inf]        "message": {
+2025-11-29T14:13:20.494737734Z [inf]          "refusal": null,
+2025-11-29T14:13:20.494747812Z [inf]  [AI] Full response: {
+2025-11-29T14:13:20.494750579Z [inf]          "role": "assistant",
+2025-11-29T14:13:20.494761098Z [inf]          "content": "Hi, it looks like we've already provided an analysis of your credit report earlier. Let’s focus on moving forward with the insights from your existing analysis.\n\nBased on your report, here's what we should focus on:\n\n1. **Credit Utilization**: Aim to reduce your utilization to 30% or below.\n2. **Payment History**: Ensure all future payments are on-time to improve your score.\n3. **Collections**: Address any outstanding collections by negotiating payment plans or settlements.\n\nIf you wish, I can create a beautiful PDF summary of your analysis that you can download and save. Would you like me to prepare that for you? Let me know how you'd like to proceed!",
+2025-11-29T14:13:20.494767154Z [inf]    "id": "chatcmpl-ChFzJWcbEhk6ysu138QyuAdgZPVGv",
+2025-11-29T14:13:20.494792497Z [inf]    "object": "chat.completion",
+2025-11-29T14:13:20.494801853Z [inf]    "created": 1764425597,
+2025-11-29T14:13:20.494810483Z [inf]    "model": "gpt-4o-2024-08-06",
+2025-11-29T14:13:20.501696899Z [inf]      "total_tokens": 813,
+2025-11-29T14:13:20.501701621Z [inf]      "prompt_tokens_details": {
+2025-11-29T14:13:20.501707275Z [inf]        "cached_tokens": 0,
+2025-11-29T14:13:20.501712815Z [inf]        "audio_tokens": 0
+2025-11-29T14:13:20.501717954Z [inf]      },
+2025-11-29T14:13:20.501728991Z [inf]      "completion_tokens_details": {
+2025-11-29T14:13:20.501733851Z [inf]        "reasoning_tokens": 0,
+2025-11-29T14:13:20.501789651Z [inf]        "audio_tokens": 0,
+2025-11-29T14:13:20.501797936Z [inf]        "accepted_prediction_tokens": 0,
+2025-11-29T14:13:20.501804303Z [inf]        "rejected_prediction_tokens": 0
+2025-11-29T14:13:20.501810887Z [inf]      }
+2025-11-29T14:13:20.501818183Z [inf]    },
+2025-11-29T14:13:20.501824720Z [inf]    "service_tier": "default",
+2025-11-29T14:13:20.501832925Z [inf]    "system_fingerprint": "fp_ed643dde95"
+2025-11-29T14:13:20.501840739Z [inf]  }
+2025-11-29T14:13:20.501848400Z [inf]  [AI] AI response received: Hi, it looks like we've already provided an analys
+2025-11-29T14:13:20.501855832Z [inf]  [AI] AI message saved successfully: 8a329c9a-8012-4b2f-b397-eb4962621e71 Escalated: false
+2025-11-29T14:13:20.501863482Z [inf]  2:13:20 PM [express] GET /api/chat 200 in 8ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:21.864884109Z [inf]  2:13:21 PM [express] GET /api/chat 304 in 6ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:22.735138436Z [inf]  2:13:22 PM [express] GET /api/chat 304 in 9ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:23.573469627Z [inf]  2:13:23 PM [express] GET /api/chat 304 in 10ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","nam…
+2025-11-29T14:13:24.640758531Z [inf]  2:13:24 PM [express] GET /api/chat 304 in 6ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:25.678334582Z [inf]  2:13:25 PM [express] GET /api/chat 304 in 6ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:27.927822428Z [inf]  2:13:26 PM [express] GET /api/chat 304 in 7ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:27.927835097Z [inf]  2:13:27 PM [express] GET /api/chat 304 in 8ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:29.070867035Z [inf]  2:13:28 PM [express] GET /api/chat 304 in 10ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","nam…
+2025-11-29T14:13:29.943705067Z [inf]  2:13:29 PM [express] GET /api/chat 304 in 8ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:31.062314172Z [inf]  2:13:31 PM [express] GET /api/chat 304 in 9ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:33.075585541Z [inf]  2:13:32 PM [express] GET /api/chat 304 in 6ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:33.936280731Z [inf]  2:13:33 PM [express] GET /api/chat 304 in 11ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","nam…
+2025-11-29T14:13:35.173401464Z [inf]  2:13:34 PM [express] GET /api/chat 304 in 8ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:35.939096571Z [inf]  2:13:35 PM [express] GET /api/chat 304 in 7ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:37.133884010Z [inf]  2:13:36 PM [express] GET /api/chat 304 in 7ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:37.838540826Z [inf]  2:13:37 PM [express] GET /api/chat 304 in 10ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","nam…
+2025-11-29T14:13:38.879062130Z [inf]  2:13:38 PM [express] GET /api/chat 304 in 9ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:40.211264326Z [inf]  2:13:39 PM [express] GET /api/chat 304 in 15ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","nam…
+2025-11-29T14:13:41.072076435Z [inf]  2:13:40 PM [express] GET /api/chat 304 in 7ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:43.758197849Z [inf]  [AI] Sending PDF to Claude for analysis with claude-haiku-4-5...
+2025-11-29T14:13:43.758209469Z [inf]  2:13:41 PM [express] GET /api/chat 304 in 6ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:43.758217958Z [inf]  2:13:42 PM [express] GET /api/chat 304 in 7ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:43.758241426Z [inf]  [Document Upload] visitorDateForFilename: 11-29-2025 visitorTimezone: America/New_York
+2025-11-29T14:13:43.758248068Z [inf]  [Document Upload] Creating document record, base64Data length: 520936
+2025-11-29T14:13:43.758255929Z [inf]  [DbStorage] createDocument called with fileContent length: 520936
+2025-11-29T14:13:43.758257372Z [inf]  [DbStorage] Inserting document into database...
+2025-11-29T14:13:43.758265651Z [inf]  [DbStorage] Document inserted successfully, id: 6a060dd7-7158-4c19-9633-aef58574c38f
+2025-11-29T14:13:43.758273298Z [inf]  [Document Upload] Document created successfully, id: 6a060dd7-7158-4c19-9633-aef58574c38f
+2025-11-29T14:13:43.758282416Z [inf]  [Document Upload] Starting analysis, fileType: application/pdf
+2025-11-29T14:13:43.758290599Z [inf]  [AI] 🚀 Starting PDF analysis via Claude...
+2025-11-29T14:13:43.758298989Z [inf]  [AI] PDF buffer size: 390702 bytes
+2025-11-29T14:13:43.758307021Z [inf]  [AI] Starting PDF analysis via Claude API
+2025-11-29T14:13:43.758319753Z [inf]  [AI] PDF file: Experian.pdf size: 390702 bytes
+2025-11-29T14:13:43.758327963Z [inf]  [AI] PDF encoded to base64, length: 520936 chars
+2025-11-29T14:13:44.737737547Z [inf]  2:13:43 PM [express] GET /api/chat 304 in 7ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:45.986514758Z [inf]  2:13:44 PM [express] GET /api/chat 304 in 7ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:46.845468889Z [inf]  2:13:46 PM [express] GET /api/chat 304 in 7ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:47.755691169Z [inf]  2:13:47 PM [express] GET /api/chat 304 in 7ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:48.806820980Z [inf]  2:13:48 PM [express] GET /api/chat 304 in 6ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:49.920566814Z [inf]  2:13:49 PM [express] GET /api/chat 304 in 7ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:50.831855722Z [inf]  2:13:50 PM [express] GET /api/chat 304 in 11ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","nam…
+2025-11-29T14:13:51.826614623Z [inf]  2:13:51 PM [express] GET /api/chat 304 in 7ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:52.963844759Z [inf]  2:13:52 PM [express] GET /api/chat 304 in 8ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:54.181855017Z [inf]  2:13:53 PM [express] GET /api/chat 304 in 8ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:54.879694422Z [inf]  2:13:54 PM [express] GET /api/chat 304 in 7ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:55.729508490Z [inf]  2:13:55 PM [express] GET /api/chat 304 in 6ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:56.822749215Z [inf]  2:13:56 PM [express] GET /api/chat 304 in 8ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:58.202834227Z [inf]  2:13:57 PM [express] GET /api/chat 304 in 6ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:13:59.474938631Z [inf]  2:13:58 PM [express] GET /api/chat 304 in 9ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:14:03.464708046Z [inf]  2:14:03 PM [express] GET /api/auth/check 401 in 3ms :: {"authenticated":false}
+2025-11-29T14:14:05.418463433Z [inf]  2:14:05 PM [express] GET /api/chat 304 in 36ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","nam…
+2025-11-29T14:14:06.464090992Z [inf]  [AI] First 300 chars: # CREDIT REPORT ANALYSIS FOR OLGA STOLIARCHUK
+2025-11-29T14:14:06.464107710Z [inf]  **Report Date: June 14, 2022**
+2025-11-29T14:14:06.464122164Z [inf]  
+2025-11-29T14:14:06.464134944Z [inf]  ---
+2025-11-29T14:14:06.464142624Z [inf]  
+2025-11-29T14:14:06.464151086Z [inf]  ## 1) KEY FINANCIAL FINDINGS
+2025-11-29T14:14:06.464157876Z [inf]  
+2025-11-29T14:14:06.464164217Z [inf]  ### Critical Issues Identified:
+2025-11-29T14:14:06.464176095Z [inf]  
+2025-11-29T14:14:06.464183491Z [inf]  • **Two Active Collections Accounts** ($1,919 total)
+2025-11-29T14:14:06.464290398Z [inf]  [AI] Claude response status: max_tokens
+2025-11-29T14:14:06.464317747Z [inf]  [AI] Response content array length: 1
+2025-11-29T14:14:06.464327278Z [inf]  [AI] First content block type: text
+2025-11-29T14:14:06.464333851Z [inf]  [AI] Received analysis length: 6247
+2025-11-29T14:14:06.464384288Z [inf]    - Hannouche Family Chiropractic: $1,364 (assigned to collection agency)
+2025-11-29T14:14:06.464398092Z [inf]    - Piedmont Imaging Inc: $
+2025-11-29T14:14:06.464420147Z [inf]  [AI] ✅ PDF analysis successful
+2025-11-29T14:14:06.464429196Z [inf]  [AI] ✅ PDF analysis complete, length: 6202
+2025-11-29T14:14:06.464500364Z [inf]  [Document Upload] Saving analysis, length: 6202 text preview: # CREDIT REPORT ANALYSIS FOR OLGA STOLIARCHUK
+2025-11-29T14:14:06.464509771Z [inf]  **Report Date: June 14, 2022**
+2025-11-29T14:14:06.464516149Z [inf]  ---
+2025-11-29T14:14:06.464524010Z [inf]  ## 1) KEY FINANCIAL
+2025-11-29T14:14:06.464531287Z [inf]  [DbStorage] Document analysis updated in database. ID: 6a060dd7-7158-4c19-9633-aef58574c38f Analysis length: 6202
+2025-11-29T14:14:06.464538752Z [inf]  [Document Upload] ✅ Analysis saved to storage
+2025-11-29T14:14:06.464546262Z [inf]  [Document Upload] Retrieved document - ID: 6a060dd7-7158-4c19-9633-aef58574c38f
+2025-11-29T14:14:06.469588037Z [inf]  [Document Upload] Document aiAnalysis field length: 6202
+2025-11-29T14:14:06.469594449Z [inf]  [Document Upload] Document aiAnalysis preview: # CREDIT REPORT ANALYSIS FOR OLGA STOLIARCHUK
+2025-11-29T14:14:06.469600909Z [inf]  **Report Date: June 14, 2022**
+2025-11-29T14:14:06.469608024Z [inf]  ---
+2025-11-29T14:14:06.469614552Z [inf]  ## 1) KEY FINANCIAL FINDINGS
+2025-11-29T14:14:06.469621449Z [inf]  ### Critical Issues Identified:
+2025-11-29T14:14:06.469630895Z [inf]  • **Two 
+2025-11-29T14:14:06.469637744Z [inf]  [Document Upload] Document aiAnalysis full content:
+2025-11-29T14:14:06.469646120Z [inf]   # CREDIT REPORT ANALYSIS FOR OLGA STOLIARCHUK
+2025-11-29T14:14:06.469653169Z [inf]  **Report Date: June 14, 2022**
+2025-11-29T14:14:06.469659532Z [inf]  ---
+2025-11-29T14:14:06.469666939Z [inf]  ## 1) KEY FINANCIAL FINDINGS
+2025-11-29T14:14:06.469673190Z [inf]  ### Critical Issues Identified:
+2025-11-29T14:14:06.469684892Z [inf]  • **Two Active Collections Accounts** ($1,919 total)
+2025-11-29T14:14:06.469694899Z [inf]    - Hannouche Family Chiropractic: $1,364 (assigned to collection agency)
+2025-11-29T14:14:06.469703252Z [inf]    - Piedmont Imaging Inc: $555 (recently assigned, February 2022)
+2025-11-29T14:14:06.469714821Z [inf]  • **Significant Loan Delinquency History**
+2025-11-29T14:14:06.469723403Z [inf]    - NUVISION FCU Auto Loan: 7 late payments with 120+ days past due status
+2025-11-29T14:14:06.469731056Z [inf]    - Most recent missed payment occurred 6 months ago
+2025-11-29T14:14:06.469739999Z [inf]  • **High Total Debt Load**
+2025-11-29T14:14:06.469748771Z [inf]    - Total debt: $126,788
+2025-11-29T14:14:06.469755765Z [inf]    - Loan debt dominates at $120,395 (95% of total debt)
+2025-11-29T14:14:06.469764195Z [inf]    - Credit card debt relatively controlled at $4,474
+2025-11-29T14:14:06.469770896Z [inf]  • **Multiple Closed Accounts**
+2025-11-29T14:14:06.470688825Z [inf]    - 13 closed accounts (primarily by creditor request or inactivity)
+2025-11-29T14:14:06.470696396Z [inf]    - Suggests history of account management issues or reduced creditworthiness
+2025-11-29T14:14:06.470703796Z [inf]  ---
+2025-11-29T14:14:06.470711748Z [inf]  ## 2) CREDIT SCORE ASSESSMENT
+2025-11-29T14:14:06.470719544Z [inf]  ### FICO Score 8: **672** (Good Range)
+2025-11-29T14:14:06.470725827Z [inf]  **Score Classification:**
+2025-11-29T14:14:06.470729852Z [inf]  - Range: 670-739 = "Good"
+2025-11-29T14:14:06.470734873Z [inf]  - U.S. Average: Slightly below average
+2025-11-29T14:14:06.470740717Z [inf]  - Acceptable for conventional lending but limited to moderate terms
+2025-11-29T14:14:06.470746299Z [inf]  **Score Trajectory:**
+2025-11-29T14:14:06.470751404Z [inf]  - Score is recovering but constrained by recent negative items
+2025-11-29T14:14:06.470756517Z [inf]  - Collections and recent missed payment significantly limiting factor
+2025-11-29T14:14:06.470762284Z [inf]  - Recent mortgage inquiries (Feb-Jan 2022) suggest refinance attempts
+2025-11-29T14:14:06.470768345Z [inf]  **Comparative Context:**
+2025-11-29T14:14:06.470774239Z [inf]  - FICO High Achievers average: 740+
+2025-11-29T14:14:06.470778662Z [inf]  - Current score leaves ~70+ points gap to "Very Good" range
+2025-11-29T14:14:06.470783461Z [inf]  ---
+2025-11-29T14:14:06.470788721Z [inf]  ## 3) ACCOUNT BREAKDOWN
+2025-11-29T14:14:06.470793976Z [inf]  ### **OPEN ACCOUNTS (10 total)**
+2025-11-29T14:14:06.470805772Z [inf]  | Account Name | Type | Balance | Credit Limit | Usage | Status |
+2025-11-29T14:14:06.470812439Z [inf]  |---|---|---|---|---|---|
+2025-11-29T14:14:06.470820049Z [inf]  | AMEX | Credit Card | $0 | $2,000 | 0% | Current |
+2025-11-29T14:14:06.470826435Z [inf]  | BK OF AMER | Mortgage | $75,625 | N/A | 33% paid | Current |
+2025-11-29T14:14:06.470877873Z [inf]  | CAPITAL ONE | Credit Card | $0 | $7,000 | 0% | Current |
+2025-11-29T14:14:06.474784358Z [inf]  | COMENITY/VICTORIA | Charge Card | $0 | $750 | 0% | Current |
+2025-11-29T14:14:06.474789676Z [inf]  | COMENITY/CARTER | Charge Card | $0 | $500 | 0% | Current |
+2025-11-29T14:14:06.474795429Z [inf]  | NAVY FEDERAL CR UNION (Card 1) | Credit Card | $3,909 | $13,200 | 29% | Current |
+2025-11-29T14:14:06.474799362Z [inf]  | NAVY FEDERAL CR UNION (Auto) | Auto Loan | $44,770 | N/A | 5% paid | Current |
+2025-11-29T14:14:06.474804101Z [inf]  | NAVY FEDERAL CR UNION (Card 2) | Credit Card | $0 | $24,500 | 0% | Current |
+2025-11-29T14:14:06.474808611Z [inf]  | SYNCB/PPC | Credit Card | $0 | $1,500 | 0% | Current |
+2025-11-29T14:14:06.474812817Z [inf]  | SYNCB/TJX COS DC | Credit Card | $565 | $2,600 | 21% | Current |
+2025-11-29T14:14:06.474816987Z [inf]  **Open Account Summary:**
+2025-11-29T14:14:06.474821200Z [inf]  - Revolving utilization: 9% (GOOD - well below 30% threshold)
+2025-11-29T14:14:06.474826266Z [inf]  - 9 of 10 accounts current and paid as agreed
+2025-11-29T14:14:06.474830883Z [inf]  - One auto loan with recent late payments now current
+2025-11-29T14:14:06.474837220Z [inf]  ---
+2025-11-29T14:14:06.474842778Z [inf]  ### **CLOSED ACCOUNTS (13 total)**
+2025-11-29T14:14:06.474847868Z [inf]  **Accounts Closed by Creditor Request/Inactivity:**
+2025-11-29T14:14:06.474852494Z [inf]  - AMEX (2 accounts) - Closed Mar/Jul 2021
+2025-11-29T14:14:06.474857325Z [inf]  - CITICARDS - Closed Oct 2019
+2025-11-29T14:14:06.474862303Z [inf]  - COMENITY/WESTELM - Closed Mar 2021
+2025-11-29T14:14:06.474873702Z [inf]  - JPMCB CARD (3 accounts) - Closed Apr/Jul/Sep 2019
+2025-11-29T14:14:06.474878079Z [inf]  - SYNCB/GAP - Closed Mar 2022
+2025-11-29T14:14:06.474884075Z [inf]  - THD/CBNA - Closed Feb 2021
+2025-11-29T14:14:06.474888469Z [inf]  **Auto Loans (3 accounts - all paid satisfactorily):**
+2025-11-29T14:14:06.474892464Z [inf]  - NAVY FEDERAL CR UNION - Closed Nov 2021 ($12,151 - paid)
+2025-11-29T14:14:06.478474908Z [inf]  | Creditor | Original Amount | Current Balance | Status | Date Opened | Recent Activity |
+2025-11-29T14:14:06.478491471Z [inf]  |---|---|---|---|---|---|
+2025-11-29T14:14:06.478499842Z [inf]  | Hannouche Family Chiropractic | $1,364 | $1,364 | Assigned to Attorney/Collection | Jun 2019 | Jun 2022 |
+2025-11-29T14:14:06.478506658Z [inf]  | Piedmont Imaging Inc | $546 | $555 | Assigned to Collection | Feb 2022 | Jun 2022 |
+2025-11-29T14:14:06.478511868Z [inf]  **Critical Notes:**
+2025-11-29T14:14:06.478518212Z [inf]  - Both accounts in active collection status
+2025-11-29T14:14:06.478523718Z [inf]  - CHIROPRACTIC: 3-year-old debt still unresolved
+2025-11-29T14:14:06.478528973Z [inf]  - IMAGING: Recent collection (4 months old) - highly damaging to score
+2025-11-29T14:14:06.478535751Z [inf]  - Both are medical/healthcare collections (common but still derogatory)
+2025-11-29T14:14:06.478542397Z [inf]  ---
+2025-11-29T14:14:06.478547630Z [inf]  ## 4) RISK FACTORS
+2025-11-29T14:14:06.478557021Z [inf]  ### **SEVERE RISKS** 🔴
+2025-11-29T14:14:06.478562327Z [inf]  1. **Active Collections ($1,919)**
+2025-11-29T14:14:06.478572071Z [inf]     - Unresolved medical debt signals payment priority issues
+2025-11-29T14:14:06.478578178Z [inf]     - Recent collection (Feb 2022) shows ongoing financial stress
+2025-11-29T14:14:06.478597375Z [inf]     - Collections expected to age off in 2026-2027 (7-year reporting period)
+2025-11-29T14:14:06.478706512Z [inf]  - NUVISION FCU (Good) - Closed Dec 2019 ($46,648 - paid)
+2025-11-29T14:14:06.478714446Z [inf]  - NUVISION FCU (Problem) - Closed Dec 2021 ($51,664 - 7 late payments)
+2025-11-29T14:14:06.478721287Z [inf]  - WESTLAKE FINANCIAL - Closed Jul 2020 ($12,617 - paid)
+2025-11-29T14:14:06.478728793Z [inf]  **Risk Indicator:** Closure of multiple accounts by creditors suggests past performance concerns
+2025-11-29T14:14:06.478736108Z [inf]  ---
+2025-11-29T14:14:06.478742944Z [inf]  ### **COLLECTION ACCOUNTS (2 total - $1,919)**
+2025-11-29T14:14:06.481288790Z [inf]  2. **Significant Auto Loan Delinquency**
+2025-11-29T14:14:06.481302757Z [inf]     - NUVISION FCU: 7 documented late payments (30/60/90/120+ days)
+2025-11-29T14:14:06.481314808Z [inf]     - Now closed but shows ~2-year payment struggle (2019-2021)
+2025-11-29T14:14:06.481324122Z [inf]     - Recently missed payment (6 months ago) on current auto loan
+2025-11-29T14:14:06.481333659Z [inf]  3. **Recent Payment Delinquency**
+2025-11-29T14:14:06.481344833Z [inf]     - Most recent missed payment: December 2021 (6 months prior to report)
+2025-11-29T14:14:06.481353800Z [inf]     - Suggests ongoing cash flow issues
+2025-11-29T14:14:06.481361512Z [inf]     - Severely impacts score ceiling
+2025-11-29T14:14:06.481367888Z [inf]  ### **MODERATE RISKS** 🟠
+2025-11-29T14:14:06.481375005Z [inf]  4. **High Absolute Debt Load**
+2025-11-29T14:14:06.481381213Z [inf]     - $126,788 total debt is substantial
+2025-11-29T14:14:06.481386890Z [inf]     - Debt-to-income ratio unknown but concerning with indicated income sources
+2025-11-29T14:14:06.481393684Z [inf]     - Auto loans comprise 95% of total debt
+2025-11-29T14:14:06.481399131Z [inf]  5. **Mortgage Complexity**
+2025-11-29T14:14:06.481406041Z [inf]     - $75,625 remaining balance on 16-year mortgage
+2025-11-29T14:14:06.481412990Z [inf]     - Payment status current but older mortgage may indicate refinancing challenges
+2025-11-29T14:14:06.481421065Z [inf]     - Recent refinance inquiries (Feb 2022) unsuccessful
+2025-11-29T14:14:06.481429454Z [inf]  6. **Short Average Account Age**
+2025-11-29T14:14:06.481436385Z [inf]     - Average account age: 4 years 2 months (vs. FICO achievers: 9+ years)
+2025-11-29T14:14:06.481443192Z [inf]     - Oldest account: 16 years 2 months
+2025-11-29T14:14:06.481450470Z [inf]     - Suggests aggressive new account opening or account closures
+2025-11-29T14:14:06.481460021Z [inf]  7. **Multiple Account Closures**
+2025-11-29T14:14:06.485344732Z [inf]     - 13 closed accounts vs. 10 open
+2025-11-29T14:14:06.485358928Z [inf]     - Primarily closed by creditor request (red flag)
+2025-11-29T14:14:06.485362209Z [inf]     - **ACTION:** Contact both collection agencies immediately
+2025-11-29T14:14:06.485365649Z [inf]     - Indicates credit grantors reduced confidence
+2025-11-29T14:14:06.485371040Z [inf]  ### **MODERATE POSITIVES** 🟢
+2025-11-29T14:14:06.485379118Z [inf]     - **HANNOUCHE:** Attempt settlement negotiation for $1,364 debt
+2025-11-29T14:14:06.485386633Z [inf]  8. **Exceptional Payment History on Current Accounts**
+2025-11-29T14:14:06.485393447Z [inf]     - **PIEDMONT:** High priority - attempt rapid settlement on 4-month-old collection
+2025-11-29T14:14:06.485399678Z [inf]     - 9 of 10 open accounts paid as agreed
+2025-11-29T14:14:06.485403700Z [inf]     - **BENEFIT:** Can remove from collections if paid; improves score by 50-100 points
+2025-11-29T14:14:06.485411803Z [inf]     - **ALTERNATIVE:** Negotiate "pay-for-delete" arrangement (
+2025-11-29T14:14:06.485421565Z [inf]  [Document Upload] analysisText parameter length: 6202
+2025-11-29T14:14:06.485424002Z [inf]     - Mortgage: Perfect payment history (all green icons 2015-2022)
+2025-11-29T14:14:06.485429951Z [inf]     - Demonstrates current commitment to payments
+2025-11-29T14:14:06.485434966Z [inf]  9. **Low Credit Utilization**
+2025-11-29T14:14:06.485443076Z [inf]     - 9% revolving utilization (below 7% threshold for excellent scores)
+2025-11-29T14:14:06.485447263Z [inf]     - $4,474 used of $52,050 available
+2025-11-29T14:14:06.485451645Z [inf]     - Shows current restraint on credit card spending
+2025-11-29T14:14:06.485456398Z [inf]  ---
+2025-11-29T14:14:06.485460649Z [inf]  ## 5) ACTION ITEMS - PRIORITY RECOMMENDATIONS
+2025-11-29T14:14:06.485465348Z [inf]  ### **IMMEDIATE ACTIONS (0-3 months)** 🎯
+2025-11-29T14:14:06.485473197Z [inf]  1. **Resolve Collection Accounts**
+2025-11-29T14:14:06.489560145Z [inf]  [Document Upload] analysisText parameter preview: # CREDIT REPORT ANALYSIS FOR OLGA STOLIARCHUK
+2025-11-29T14:14:06.489578105Z [inf]  **Report Date: June 14, 2022**
+2025-11-29T14:14:06.489579017Z [inf]    - 13 closed accounts (primarily by creditor request or inactivity)
+2025-11-29T14:14:06.489587811Z [inf]  ---
+2025-11-29T14:14:06.489593917Z [inf]  ## 1) KEY FINANCIAL FINDINGS
+2025-11-29T14:14:06.489599857Z [inf]  ### Critical Issues Identified:
+2025-11-29T14:14:06.489604890Z [inf]  • **Two 
+2025-11-29T14:14:06.489611839Z [inf]  [Document Upload] analysisText full content:
+2025-11-29T14:14:06.489619220Z [inf]   # CREDIT REPORT ANALYSIS FOR OLGA STOLIARCHUK
+2025-11-29T14:14:06.489625163Z [inf]  **Report Date: June 14, 2022**
+2025-11-29T14:14:06.489630674Z [inf]  ---
+2025-11-29T14:14:06.489637694Z [inf]  ## 1) KEY FINANCIAL FINDINGS
+2025-11-29T14:14:06.489643886Z [inf]  ### Critical Issues Identified:
+2025-11-29T14:14:06.489651353Z [inf]  • **Two Active Collections Accounts** ($1,919 total)
+2025-11-29T14:14:06.489657584Z [inf]    - Hannouche Family Chiropractic: $1,364 (assigned to collection agency)
+2025-11-29T14:14:06.489663639Z [inf]    - Piedmont Imaging Inc: $555 (recently assigned, February 2022)
+2025-11-29T14:14:06.489668719Z [inf]  • **Significant Loan Delinquency History**
+2025-11-29T14:14:06.489673941Z [inf]    - NUVISION FCU Auto Loan: 7 late payments with 120+ days past due status
+2025-11-29T14:14:06.489679726Z [inf]    - Most recent missed payment occurred 6 months ago
+2025-11-29T14:14:06.489686780Z [inf]  • **High Total Debt Load**
+2025-11-29T14:14:06.489697923Z [inf]    - Total debt: $126,788
+2025-11-29T14:14:06.489704161Z [inf]    - Loan debt dominates at $120,395 (95% of total debt)
+2025-11-29T14:14:06.489710466Z [inf]    - Credit card debt relatively controlled at $4,474
+2025-11-29T14:14:06.489716685Z [inf]  • **Multiple Closed Accounts**
+2025-11-29T14:14:06.492421152Z [inf]    - Suggests history of account management issues or reduced creditworthiness
+2025-11-29T14:14:06.492435360Z [inf]  ---
+2025-11-29T14:14:06.492445245Z [inf]  ## 2) CREDIT SCORE ASSESSMENT
+2025-11-29T14:14:06.492454428Z [inf]  ### FICO Score 8: **672** (Good Range)
+2025-11-29T14:14:06.492471175Z [inf]  **Score Classification:**
+2025-11-29T14:14:06.492495601Z [inf]  - Range: 670-739 = "Good"
+2025-11-29T14:14:06.492506741Z [inf]  - U.S. Average: Slightly below average
+2025-11-29T14:14:06.492515318Z [inf]  - Acceptable for conventional lending but limited to moderate terms
+2025-11-29T14:14:06.492522818Z [inf]  **Score Trajectory:**
+2025-11-29T14:14:06.492530845Z [inf]  - Score is recovering but constrained by recent negative items
+2025-11-29T14:14:06.492537868Z [inf]  - Collections and recent missed payment significantly limiting factor
+2025-11-29T14:14:06.492547768Z [inf]  - Recent mortgage inquiries (Feb-Jan 2022) suggest refinance attempts
+2025-11-29T14:14:06.492554400Z [inf]  **Comparative Context:**
+2025-11-29T14:14:06.492565901Z [inf]  - FICO High Achievers average: 740+
+2025-11-29T14:14:06.492574566Z [inf]  - Current score leaves ~70+ points gap to "Very Good" range
+2025-11-29T14:14:06.492581638Z [inf]  ---
+2025-11-29T14:14:06.492589380Z [inf]  ## 3) ACCOUNT BREAKDOWN
+2025-11-29T14:14:06.492597589Z [inf]  ### **OPEN ACCOUNTS (10 total)**
+2025-11-29T14:14:06.492605225Z [inf]  | Account Name | Type | Balance | Credit Limit | Usage | Status |
+2025-11-29T14:14:06.492613173Z [inf]  |---|---|---|---|---|---|
+2025-11-29T14:14:06.492621458Z [inf]  | AMEX | Credit Card | $0 | $2,000 | 0% | Current |
+2025-11-29T14:14:06.492628468Z [inf]  | BK OF AMER | Mortgage | $75,625 | N/A | 33% paid | Current |
+2025-11-29T14:14:06.492635471Z [inf]  | CAPITAL ONE | Credit Card | $0 | $7,000 | 0% | Current |
+2025-11-29T14:14:06.492643063Z [inf]  | COMENITY/VICTORIA | Charge Card | $0 | $750 | 0% | Current |
+2025-11-29T14:14:06.496823089Z [inf]  | COMENITY/CARTER | Charge Card | $0 | $500 | 0% | Current |
+2025-11-29T14:14:06.496845110Z [inf]  | NAVY FEDERAL CR UNION (Card 1) | Credit Card | $3,909 | $13,200 | 29% | Current |
+2025-11-29T14:14:06.496859022Z [inf]  | NAVY FEDERAL CR UNION (Auto) | Auto Loan | $44,770 | N/A | 5% paid | Current |
+2025-11-29T14:14:06.496873354Z [inf]  | NAVY FEDERAL CR UNION (Card 2) | Credit Card | $0 | $24,500 | 0% | Current |
+2025-11-29T14:14:06.496888165Z [inf]  | SYNCB/PPC | Credit Card | $0 | $1,500 | 0% | Current |
+2025-11-29T14:14:06.496896266Z [inf]  | SYNCB/TJX COS DC | Credit Card | $565 | $2,600 | 21% | Current |
+2025-11-29T14:14:06.496906867Z [inf]  **Open Account Summary:**
+2025-11-29T14:14:06.496915935Z [inf]  - Revolving utilization: 9% (GOOD - well below 30% threshold)
+2025-11-29T14:14:06.496925464Z [inf]  - 9 of 10 accounts current and paid as agreed
+2025-11-29T14:14:06.496936908Z [inf]  - One auto loan with recent late payments now current
+2025-11-29T14:14:06.496947745Z [inf]  ---
+2025-11-29T14:14:06.496957637Z [inf]  ### **CLOSED ACCOUNTS (13 total)**
+2025-11-29T14:14:06.496965474Z [inf]  **Accounts Closed by Creditor Request/Inactivity:**
+2025-11-29T14:14:06.496976447Z [inf]  - AMEX (2 accounts) - Closed Mar/Jul 2021
+2025-11-29T14:14:06.496987542Z [inf]  - CITICARDS - Closed Oct 2019
+2025-11-29T14:14:06.496996504Z [inf]  - COMENITY/WESTELM - Closed Mar 2021
+2025-11-29T14:14:06.497007263Z [inf]  - JPMCB CARD (3 accounts) - Closed Apr/Jul/Sep 2019
+2025-11-29T14:14:06.497017355Z [inf]  - SYNCB/GAP - Closed Mar 2022
+2025-11-29T14:14:06.497030243Z [inf]  - THD/CBNA - Closed Feb 2021
+2025-11-29T14:14:06.497037943Z [inf]  **Auto Loans (3 accounts - all paid satisfactorily):**
+2025-11-29T14:14:06.497047964Z [inf]  - NAVY FEDERAL CR UNION - Closed Nov 2021 ($12,151 - paid)
+2025-11-29T14:14:06.497057412Z [inf]  - NUVISION FCU (Good) - Closed Dec 2019 ($46,648 - paid)
+2025-11-29T14:14:06.500518010Z [inf]  - NUVISION FCU (Problem) - Closed Dec 2021 ($51,664 - 7 late payments)
+2025-11-29T14:14:06.500530274Z [inf]  - WESTLAKE FINANCIAL - Closed Jul 2020 ($12,617 - paid)
+2025-11-29T14:14:06.500538563Z [inf]  **Risk Indicator:** Closure of multiple accounts by creditors suggests past performance concerns
+2025-11-29T14:14:06.500545866Z [inf]  ---
+2025-11-29T14:14:06.500559715Z [inf]  ### **COLLECTION ACCOUNTS (2 total - $1,919)**
+2025-11-29T14:14:06.500566294Z [inf]  | Creditor | Original Amount | Current Balance | Status | Date Opened | Recent Activity |
+2025-11-29T14:14:06.500572555Z [inf]  |---|---|---|---|---|---|
+2025-11-29T14:14:06.500579538Z [inf]  | Hannouche Family Chiropractic | $1,364 | $1,364 | Assigned to Attorney/Collection | Jun 2019 | Jun 2022 |
+2025-11-29T14:14:06.500594650Z [inf]  | Piedmont Imaging Inc | $546 | $555 | Assigned to Collection | Feb 2022 | Jun 2022 |
+2025-11-29T14:14:06.500606404Z [inf]  **Critical Notes:**
+2025-11-29T14:14:06.500617617Z [inf]  - Both accounts in active collection status
+2025-11-29T14:14:06.500628390Z [inf]  - CHIROPRACTIC: 3-year-old debt still unresolved
+2025-11-29T14:14:06.500635970Z [inf]  - IMAGING: Recent collection (4 months old) - highly damaging to score
+2025-11-29T14:14:06.500641601Z [inf]  - Both are medical/healthcare collections (common but still derogatory)
+2025-11-29T14:14:06.500647525Z [inf]  ---
+2025-11-29T14:14:06.500657322Z [inf]  ## 4) RISK FACTORS
+2025-11-29T14:14:06.500663835Z [inf]  ### **SEVERE RISKS** 🔴
+2025-11-29T14:14:06.500674245Z [inf]  1. **Active Collections ($1,919)**
+2025-11-29T14:14:06.500683661Z [inf]     - Unresolved medical debt signals payment priority issues
+2025-11-29T14:14:06.500689631Z [inf]     - Recent collection (Feb 2022) shows ongoing financial stress
+2025-11-29T14:14:06.500698574Z [inf]     - Collections expected to age off in 2026-2027 (7-year reporting period)
+2025-11-29T14:14:06.503972564Z [inf]     - Suggests aggressive new account opening or account closures
+2025-11-29T14:14:06.503988538Z [inf]  7. **Multiple Account Closures**
+2025-11-29T14:14:06.503990042Z [inf]  2. **Significant Auto Loan Delinquency**
+2025-11-29T14:14:06.504007601Z [inf]     - NUVISION FCU: 7 documented late payments (30/60/90/120+ days)
+2025-11-29T14:14:06.504017642Z [inf]     - Now closed but shows ~2-year payment struggle (2019-2021)
+2025-11-29T14:14:06.504029597Z [inf]     - Recently missed payment (6 months ago) on current auto loan
+2025-11-29T14:14:06.504038309Z [inf]  3. **Recent Payment Delinquency**
+2025-11-29T14:14:06.504046191Z [inf]     - Most recent missed payment: December 2021 (6 months prior to report)
+2025-11-29T14:14:06.504054652Z [inf]     - Suggests ongoing cash flow issues
+2025-11-29T14:14:06.504063069Z [inf]     - Severely impacts score ceiling
+2025-11-29T14:14:06.504073756Z [inf]  ### **MODERATE RISKS** 🟠
+2025-11-29T14:14:06.504083789Z [inf]  4. **High Absolute Debt Load**
+2025-11-29T14:14:06.504091448Z [inf]     - $126,788 total debt is substantial
+2025-11-29T14:14:06.504103498Z [inf]     - Debt-to-income ratio unknown but concerning with indicated income sources
+2025-11-29T14:14:06.504111763Z [inf]     - Auto loans comprise 95% of total debt
+2025-11-29T14:14:06.504120692Z [inf]  5. **Mortgage Complexity**
+2025-11-29T14:14:06.504128274Z [inf]     - $75,625 remaining balance on 16-year mortgage
+2025-11-29T14:14:06.504138077Z [inf]     - Payment status current but older mortgage may indicate refinancing challenges
+2025-11-29T14:14:06.504153265Z [inf]     - Recent refinance inquiries (Feb 2022) unsuccessful
+2025-11-29T14:14:06.504165563Z [inf]  6. **Short Average Account Age**
+2025-11-29T14:14:06.504174302Z [inf]     - Average account age: 4 years 2 months (vs. FICO achievers: 9+ years)
+2025-11-29T14:14:06.504182735Z [inf]     - Oldest account: 16 years 2 months
+2025-11-29T14:14:06.508458789Z [inf]  ### **IMMEDIATE ACTIONS (0-3 months)** 🎯
+2025-11-29T14:14:06.508474725Z [inf]  1. **Resolve Collection Accounts**
+2025-11-29T14:14:06.508482710Z [inf]     - 13 closed accounts vs. 10 open
+2025-11-29T14:14:06.508487946Z [inf]     - **ACTION:** Contact both collection agencies immediately
+2025-11-29T14:14:06.508493255Z [inf]     - Primarily closed by creditor request (red flag)
+2025-11-29T14:14:06.508499356Z [inf]     - **HANNOUCHE:** Attempt settlement negotiation for $1,364 debt
+2025-11-29T14:14:06.508504378Z [inf]     - Indicates credit grantors reduced confidence
+2025-11-29T14:14:06.508511132Z [inf]     - **PIEDMONT:** High priority - attempt rapid settlement on 4-month-old collection
+2025-11-29T14:14:06.508515540Z [inf]  ### **MODERATE POSITIVES** 🟢
+2025-11-29T14:14:06.508521932Z [inf]     - **BENEFIT:** Can remove from collections if paid; improves score by 50-100 points
+2025-11-29T14:14:06.508526944Z [inf]  8. **Exceptional Payment History on Current Accounts**
+2025-11-29T14:14:06.508532558Z [inf]     - **ALTERNATIVE:** Negotiate "pay-for-delete" arrangement (
+2025-11-29T14:14:06.508538572Z [inf]     - 9 of 10 open accounts paid as agreed
+2025-11-29T14:14:06.508543720Z [inf]  [Document Upload] About to call generateAndSavePDF with analysisText
+2025-11-29T14:14:06.508549700Z [inf]     - Mortgage: Perfect payment history (all green icons 2015-2022)
+2025-11-29T14:14:06.508556996Z [inf]     - Demonstrates current commitment to payments
+2025-11-29T14:14:06.508564650Z [inf]  9. **Low Credit Utilization**
+2025-11-29T14:14:06.508573122Z [inf]     - 9% revolving utilization (below 7% threshold for excellent scores)
+2025-11-29T14:14:06.508580873Z [inf]     - $4,474 used of $52,050 available
+2025-11-29T14:14:06.508588839Z [inf]     - Shows current restraint on credit card spending
+2025-11-29T14:14:06.508596711Z [inf]  ---
+2025-11-29T14:14:06.508604181Z [inf]  ## 5) ACTION ITEMS - PRIORITY RECOMMENDATIONS
+2025-11-29T14:14:06.512735610Z [inf]  [PDF Save] Successfully saved with all 7 formatting improvements: 6a060dd7-7158-4c19-9633-aef58574c38f-11-29-2025.pdf
+2025-11-29T14:14:06.512741716Z [inf]  [Document Upload] PDF generation complete - file: 6a060dd7-7158-4c19-9633-aef58574c38f-11-29-2025.pdf
+2025-11-29T14:14:06.512748191Z [inf]  2:14:06 PM [express] GET /api/chat 304 in 8ms :: [{"id":"8a329c9a-8012-4b2f-b397-eb4962621e71","name…
+2025-11-29T14:14:06.512754575Z [inf]  [DbStorage] Document PDF path updated in database. ID: 6a060dd7-7158-4c19-9633-aef58574c38f PDF: 6a060dd7-7158-4c19-9633-aef58574c38f-11-29-2025.pdf
+2025-11-29T14:14:06.512760939Z [inf]  2:14:06 PM [express] POST /api/documents 200 in 24926ms :: {"id":"6a060dd7-7158-4c19-9633-aef58574c3…
+2025-11-29T14:14:07.310401508Z [inf]  [Chat POST] CRITICAL: Received request body: { sender: 'ai', email: 'sergie822@gmail.com', name: 'Riley' }
+2025-11-29T14:14:07.310407880Z [inf]  [Chat POST] Database ready, proceeding with validation
+2025-11-29T14:14:07.310415040Z [inf]  [Chat POST] Validation successful: { sender: 'ai', email: 'sergie822@gmail.com' }
+2025-11-29T14:14:07.310420939Z [inf]  [Chat POST] Message saved successfully: {
+2025-11-29T14:14:07.310427706Z [inf]    id: '9d537084-e684-41b5-916f-05e30833443b',
+2025-11-29T14:14:07.310434406Z [inf]    email: 'sergie822@gmail.com',
+2025-11-29T14:14:07.310441015Z [inf]    sender: 'ai',
+2025-11-29T14:14:07.310447294Z [inf]    message: "I've completed my analysis of your Experian.pdf. Y"
+2025-11-29T14:14:07.310452936Z [inf]  }
+2025-11-29T14:14:07.310460977Z [inf]  2:14:06 PM [express] POST /api/chat 200 in 10ms :: {"id":"9d537084-e684-41b5-916f-05e30833443b","nam…
+2025-11-29T14:14:07.507358124Z [inf]  2:14:07 PM [express] GET /api/chat 200 in 8ms :: [{"id":"9d537084-e684-41b5-916f-05e30833443b","name…
+2025-11-29T14:14:09.319241270Z [inf]  2:14:08 PM [express] GET /api/chat 304 in 7ms :: [{"id":"9d537084-e684-41b5-916f-05e30833443b","name…
+2025-11-29T14:14:10.381791711Z [inf]  2:14:09 PM [express] GET /api/chat 304 in 9ms :: [{"id":"9d537084-e684-41b5-916f-05e30833443b","name…
+2025-11-29T14:14:11.248369776Z [inf]  2:14:10 PM [express] GET /api/chat 304 in 6ms :: [{"id":"9d537084-e684-41b5-916f-05e30833443b","name…
+2025-11-29T14:14:11.553562544Z [inf]  [PDF Endpoint] Using dateOnlyStr from pdfPath: 11-29-2025 pdfPath: 6a060dd7-7158-4c19-9633-aef58574c38f-11-29-2025.pdf
+2025-11-29T14:14:11.553573290Z [inf]  [PDF Endpoint] Setting Content-Disposition with dateOnlyStr: 11-29-2025 final header: attachment; filename*=UTF-8''credit-analysis-11-29-2025.pdf
+2025-11-29T14:14:11.588246692Z [inf]  2:14:11 PM [express] GET /api/documents/6a060dd7-7158-4c19-9633-aef58574c38f/pdf 200 in 62ms
+2025-11-29T14:14:12.265363409Z [inf]  2:14:11 PM [express] GET /api/chat 304 in 7ms :: [{"id":"9d537084-e684-41b5-916f-05e30833443b","name…
+2025-11-29T14:14:13.449596700Z [inf]  2:14:12 PM [express] GET /api/chat 304 in 8ms :: [{"id":"9d537084-e684-41b5-916f-05e30833443b","name…
+2025-11-29T14:14:14.863079460Z [inf]  2:14:14 PM [express] GET /api/chat 304 in 8ms :: [{"id":"9d537084-e684-41b5-916f-05e30833443b","name…
+2025-11-29T14:14:44.197668169Z [inf]  2:14:39 PM [express] GET /api/chat 200 in 11ms :: [{"id":"9d537084-e684-41b5-916f-05e30833443b","nam…
+2025-11-29T14:14:44.197678527Z [inf]  [Auth] Login successful
+2025-11-29T14:14:44.197682331Z [inf]  2:14:39 PM [express] GET /api/newsletter 200 in 36ms :: []
+2025-11-29T14:14:44.197690434Z [inf]  2:14:39 PM [express] GET /api/documents 200 in 27ms :: [{"id":"6a060dd7-7158-4c19-9633-aef58574c38f"…
+2025-11-29T14:14:44.197693110Z [inf]  2:14:39 PM [express] POST /api/auth/login 200 in 107ms :: {"success":true,"user":{"id":"be4efa52-d50…
+2025-11-29T14:14:44.197701074Z [inf]  2:14:39 PM [express] GET /api/auth/check 200 in 3ms :: {"authenticated":true}
+2025-11-29T14:14:44.197707974Z [inf]  2:14:39 PM [express] GET /api/contact 200 in 20ms :: []
+2025-11-29T14:14:44.197939712Z [inf]  [Auth] Login attempt
+2025-11-29T14:14:44.197945187Z [inf]  [Auth] Received username: admin
+2025-11-29T14:14:44.197952226Z [inf]  [Auth] User lookup result: Found
+2025-11-29T14:14:44.197959353Z [inf]  [Auth] Password check: Valid
+2025-11-29T14:14:44.197966064Z [inf]  [Auth] Session set, userId: be4efa52-d502-4745-8a85-df401416e2ad
+2025-11-29T14:14:45.675024852Z [inf]  2:14:45 PM [express] GET /api/newsletter 304 in 27ms :: []
+2025-11-29T14:14:45.675146703Z [inf]  2:14:44 PM [express] GET /api/documents 304 in 17ms :: [{"id":"6a060dd7-7158-4c19-9633-aef58574c38f"…
+2025-11-29T14:14:45.675154853Z [inf]  2:14:45 PM [express] GET /api/chat 304 in 36ms :: [{"id":"9d537084-e684-41b5-916f-05e30833443b","nam…
+2025-11-29T14:14:50.374707447Z [inf]  2:14:50 PM [express] GET /api/documents 304 in 19ms :: [{"id":"6a060dd7-7158-4c19-9633-aef58574c38f"…
+2025-11-29T14:14:50.374723301Z [inf]  2:14:50 PM [express] GET /api/chat 304 in 17ms :: [{"id":"9d537084-e684-41b5-916f-05e30833443b","nam…
+2025-11-29T14:14:50.374734400Z [inf]  2:14:50 PM [express] GET /api/newsletter 304 in 18ms :: []
+2025-11-29T14:14:55.405585387Z [inf]  2:14:55 PM [express] GET /api/chat 304 in 19ms :: [{"id":"9d537084-e684-41b5-916f-05e30833443b","nam…
+2025-11-29T14:14:55.405593637Z [inf]  2:14:55 PM [express] GET /api/newsletter 304 in 16ms :: []
+2025-11-29T14:14:55.405601286Z [inf]  2:14:55 PM [express] GET /api/documents 304 in 21ms :: [{"id":"6a060dd7-7158-4c19-9633-aef58574c38f"…
+2025-11-29T14:15:00.891568946Z [inf]  2:15:00 PM [express] GET /api/chat 304 in 30ms :: [{"id":"9d537084-e684-41b5-916f-05e30833443b","nam…
+2025-11-29T14:15:00.891576489Z [inf]  2:15:00 PM [express] GET /api/documents 304 in 29ms :: [{"id":"6a060dd7-7158-4c19-9633-aef58574c38f"…
+2025-11-29T14:15:00.891584875Z [inf]  2:15:00 PM [express] GET /api/newsletter 304 in 30ms :: []
+2025-11-29T14:15:05.542224446Z [inf]  2:15:05 PM [express] GET /api/chat 304 in 14ms :: [{"id":"9d537084-e684-41b5-916f-05e30833443b","nam…
+2025-11-29T14:15:05.542230542Z [inf]  2:15:05 PM [express] GET /api/documents 304 in 6ms :: [{"id":"6a060dd7-7158-4c19-9633-aef58574c38f",…
+2025-11-29T14:15:05.542235697Z [inf]  2:15:05 PM [express] GET /api/newsletter 304 in 16ms :: []
+2025-11-29T14:15:10.633807610Z [inf]  2:15:10 PM [express] GET /api/documents/6a060dd7-7158-4c19-9633-aef58574c38f/view 404 in 15ms :: {"e…
+2025-11-29T14:15:10.633815148Z [inf]  2:15:10 PM [express] GET /api/chat 304 in 7ms :: [{"id":"9d537084-e684-41b5-916f-05e30833443b","name…
+2025-11-29T14:15:10.633823233Z [inf]  2:15:10 PM [express] GET /api/newsletter 304 in 7ms :: []
+2025-11-29T14:15:10.633830703Z [inf]  2:15:10 PM [express] GET /api/documents 304 in 23ms :: [{"id":"6a060dd7-7158-4c19-9633-aef58574c38f"…
+2025-11-29T14:15:14.901354557Z [inf]  2:15:14 PM [express] GET /api/documents/6a060dd7-7158-4c19-9633-aef58574c38f/pdf-view 200 in 9ms
+2025-11-29T14:15:16.199985127Z [inf]  2:15:15 PM [express] GET /api/documents/6a060dd7-7158-4c19-9633-aef58574c38f/pdf-view 200 in 15ms
+2025-11-29T14:15:16.199992867Z [inf]  2:15:15 PM [express] GET /api/documents/6a060dd7-7158-4c19-9633-aef58574c38f/pdf-view 206 in 28ms
+2025-11-29T14:16:06.245227935Z [inf]  2:16:00 PM [express] GET /api/chat 304 in 21ms :: [{"id":"9d537084-e684-41b5-916f-05e30833443b","nam…
+2025-11-29T14:16:06.245238286Z [inf]  2:16:00 PM [express] GET /api/newsletter 304 in 28ms :: []
+2025-11-29T14:16:06.245246146Z [inf]  2:16:00 PM [express] GET /api/documents 304 in 27ms :: [{"id":"6a060dd7-7158-4c19-9633-aef58574c38f"…
+2025-11-29T14:16:06.245252261Z [inf]  2:16:04 PM [express] GET /api/documents/6a060dd7-7158-4c19-9633-aef58574c38f/pdf-download 200 in 9ms
+2025-11-29T14:16:06.245259687Z [inf]  2:16:05 PM [express] GET /api/chat 304 in 7ms :: [{"id":"9d537084-e684-41b5-916f-05e30833443b","name…
+2025-11-29T14:16:06.245265596Z [inf]  2:16:05 PM [express] GET /api/newsletter 304 in 6ms :: []
+2025-11-29T14:16:06.245271372Z [inf]  2:16:05 PM [express] GET /api/documents 304 in 21ms :: [{"id":"6a060dd7-7158-4c19-9633-aef58574c38f"…
+2025-11-29T14:16:11.215161631Z [inf]  2:16:10 PM [express] GET /api/chat 304 in 15ms :: [{"id":"9d537084-e684-41b5-916f-05e30833443b","nam…
+2025-11-29T14:16:11.215171901Z [inf]  2:16:10 PM [express] GET /api/newsletter 304 in 15ms :: []
+2025-11-29T14:16:11.215179026Z [inf]  2:16:10 PM [express] GET /api/documents 304 in 6ms :: [{"id":"6a060dd7-7158-4c19-9633-aef58574c38f",…
+2025-11-29T14:16:15.786253572Z [inf]  2:16:15 PM [express] GET /api/chat 304 in 18ms :: [{"id":"9d537084-e684-41b5-916f-05e30833443b","nam…
+2025-11-29T14:16:15.786263933Z [inf]  2:16:15 PM [express] GET /api/newsletter 304 in 17ms :: []
+2025-11-29T14:16:16.427712633Z [inf]  2:16:15 PM [express] GET /api/documents 304 in 9ms :: [{"id":"6a060dd7-7158-4c19-9633-aef58574c38f",…
+2025-11-29T14:16:20.839436018Z [inf]  2:16:20 PM [express] GET /api/chat 304 in 16ms :: [{"id":"9d537084-e684-41b5-916f-05e30833443b","nam…
+2025-11-29T14:16:20.842235085Z [inf]  2:16:20 PM [express] GET /api/newsletter 304 in 6ms :: []
+2025-11-29T14:16:21.521243676Z [inf]  2:16:20 PM [express] GET /api/documents 304 in 7ms :: [{"id":"6a060dd7-7158-4c19-9633-aef58574c38f",…
