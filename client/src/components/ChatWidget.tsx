@@ -408,33 +408,6 @@ export default function ChatWidget() {
     }
   };
 
-  // Poll for new AI responses from Riley (added by background process on server)
-  useEffect(() => {
-    if (!email || isNewVisitor) return;
-
-    const pollInterval = setInterval(async () => {
-      try {
-        const response = await fetch("/api/chat");
-        if (!response.ok) return;
-        const allMessages = (await response.json()) as ChatMessage[];
-        
-        // Add any AI/admin messages from this email that aren't already in sessionMessages
-        setSessionMessages(prev => {
-          const newMessages = allMessages.filter(msg => 
-            msg.email === email && 
-            msg.sender === "ai" || msg.sender === "admin" &&
-            !prev.some(sm => sm.id === msg.id)
-          );
-          return newMessages.length > 0 ? [...prev, ...newMessages] : prev;
-        });
-      } catch (error) {
-        // Silently fail - don't spam errors if polling fails
-      }
-    }, 2000); // Poll every 2 seconds for new responses
-    
-    return () => clearInterval(pollInterval);
-  }, [email, isNewVisitor]);
-
   const handleDownloadPDF = async () => {
     if (!lastDocumentId) {
       return;
