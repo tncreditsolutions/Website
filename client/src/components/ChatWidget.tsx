@@ -293,19 +293,27 @@ export default function ChatWidget() {
     
     // Send greeting message from AI agent
     try {
-      await apiRequest("POST", "/api/chat", {
+      console.log("[Chat] Sending greeting to:", trimmedEmail);
+      const greetingResponse = await apiRequest("POST", "/api/chat", {
         name: "Riley",
         email: trimmedEmail,
         message: `Hi ${trimmedName}! How can I help you today?`,
         sender: "ai",
         isEscalated: "false",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
-    } catch (error) {
-      console.error("Failed to send greeting:", error);
+      console.log("[Chat] Greeting sent successfully:", greetingResponse);
+      // Force refresh immediately
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
+      setIsNewVisitor(false);
+    } catch (error: any) {
+      console.error("[Chat] Failed to send greeting:", error);
+      toast({
+        title: "Chat Error",
+        description: "Failed to start chat. Please try again.",
+        variant: "destructive",
+      });
     }
-    
-    setIsNewVisitor(false);
   };
 
   const handleSend = (e: React.FormEvent) => {
