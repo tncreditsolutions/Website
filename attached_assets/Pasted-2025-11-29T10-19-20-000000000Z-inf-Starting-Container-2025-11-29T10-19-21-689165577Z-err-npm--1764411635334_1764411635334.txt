@@ -1,0 +1,53 @@
+2025-11-29T10:19:20.000000000Z [inf]  Starting Container
+2025-11-29T10:19:21.689165577Z [err]  npm warn config production Use `--omit=dev` instead.
+2025-11-29T10:19:21.689172938Z [inf]  
+2025-11-29T10:19:21.689178936Z [inf]  > rest-express@1.0.0 build
+2025-11-29T10:19:21.689186431Z [inf]  > vite build && esbuild server/index-prod.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/index.js
+2025-11-29T10:19:21.689192060Z [inf]  
+2025-11-29T10:19:21.689198726Z [inf]  [36mvite v5.4.20 [32mbuilding for production...[36m[39m
+2025-11-29T10:19:21.689204640Z [inf]  transforming...
+2025-11-29T10:19:22.117379557Z [err]  
+2025-11-29T10:19:22.117391315Z [err]  A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+2025-11-29T10:19:24.935333161Z [inf]  [32m✓[39m 1742 modules transformed.
+2025-11-29T10:19:25.258788033Z [inf]  rendering chunks...
+2025-11-29T10:19:25.262943557Z [inf]  computing gzip size...
+2025-11-29T10:19:25.299992318Z [inf]  [2m../dist/public/[22m[32mindex.html                                        [39m[1m[2m    2.37 kB[22m[1m[22m[2m │ gzip:   0.95 kB[22m
+2025-11-29T10:19:25.299992972Z [err]  (!) Some chunks are larger than 500 kB after minification. Consider:
+2025-11-29T10:19:25.300001473Z [err]  - Using dynamic import() to code-split the application
+2025-11-29T10:19:25.300002042Z [inf]  [2m../dist/public/[22m[2massets/[22m[32mready_for_better_future_hero-C6oVMAMg.png  [39m[1m[2m  945.56 kB[22m[1m[22m
+2025-11-29T10:19:25.300009616Z [inf]  [2m../dist/public/[22m[2massets/[22m[32mclient_testimonial_photo_2-B8UX-XkM.png    [39m[1m[2m1,312.17 kB[22m[1m[22m
+2025-11-29T10:19:25.300009902Z [err]  - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2025-11-29T10:19:25.300017193Z [inf]  [2m../dist/public/[22m[2massets/[22m[32mclient_testimonial_photo_1-C49icyGe.png    [39m[1m[2m1,313.43 kB[22m[1m[22m
+2025-11-29T10:19:25.300020782Z [err]  - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+2025-11-29T10:19:25.300025107Z [inf]  [2m../dist/public/[22m[2massets/[22m[32mclient_testimonial_photo_3-BHvJgOFH.png    [39m[1m[2m1,457.77 kB[22m[1m[22m
+2025-11-29T10:19:25.300028359Z [inf]  [32m✓ built in 4.07s[39m
+2025-11-29T10:19:25.300031462Z [inf]  [2m../dist/public/[22m[2massets/[22m[32mpdf.worker-zxMdjS_u.mjs                    [39m[1m[2m1,916.05 kB[22m[1m[22m
+2025-11-29T10:19:25.300037714Z [inf]  [2m../dist/public/[22m[2massets/[22m[35mindex-B2cAoITb.css                         [39m[1m[2m   96.33 kB[22m[1m[22m[2m │ gzip:  14.74 kB[22m
+2025-11-29T10:19:25.300043973Z [inf]  [2m../dist/public/[22m[2massets/[22m[36mindex-CPa9H5E2.js                          [39m[1m[33m  874.31 kB[39m[22m[2m │ gzip: 261.31 kB[22m
+2025-11-29T10:19:25.300051052Z [err]  [33m
+2025-11-29T10:19:25.368903769Z [err]  
+2025-11-29T10:19:25.368914648Z [err]    dist/index.js  72.1kb
+2025-11-29T10:19:25.368921428Z [err]  
+2025-11-29T10:19:25.368927151Z [err]  ⚡ Done in 7ms
+2025-11-29T10:19:25.505285833Z [err]  npm warn config production Use `--omit=dev` instead.
+2025-11-29T10:19:25.505292866Z [inf]  
+2025-11-29T10:19:25.505298273Z [inf]  > rest-express@1.0.0 start
+2025-11-29T10:19:25.505303495Z [inf]  > NODE_ENV=production node dist/index.js
+2025-11-29T10:19:25.505309161Z [inf]  
+2025-11-29T10:19:26.078777627Z [inf]  [DbStorage] ✅ Database connected successfully
+2025-11-29T10:19:26.078782543Z [inf]  [Migration] Checking if database tables exist...
+2025-11-29T10:19:26.078787564Z [inf]  [AI] OpenAI initialized: true API key available: true
+2025-11-29T10:19:26.491498555Z [inf]  [Migration] ✅ users table ready
+2025-11-29T10:19:26.491504611Z [inf]  [Migration] ✅ contact_submissions table ready
+2025-11-29T10:19:26.491508156Z [inf]  [Migration] ✅ chat_messages table ready
+2025-11-29T10:19:26.491511762Z [inf]  [Migration] ✅ newsletter_subscriptions table ready
+2025-11-29T10:19:26.501157623Z [inf]  [Migration] ✅ documents table ready
+2025-11-29T10:19:26.501167821Z [inf]  [Migration] Ensuring file_content column exists on documents table...
+2025-11-29T10:19:26.520194320Z [inf]  [Migration] ✅ file_content column ensured on documents table
+2025-11-29T10:19:26.524399610Z [inf]  [Migration] ✅ chat_messages email index ready
+2025-11-29T10:19:26.528371767Z [inf]  [Migration] ✅ documents email index ready
+2025-11-29T10:19:26.538047008Z [inf]  [Migration] ✅ users username index ready
+2025-11-29T10:19:26.538052717Z [inf]  [Migration] ✅ All database tables and indices created successfully
+2025-11-29T10:19:26.538057166Z [inf]  [DbStorage] ✅ Database schema verified - User credentials will PERSIST
+2025-11-29T10:19:26.573874454Z [inf]  [Auth] ✅ Admin user already exists in database. ID: be4efa52-d502-4745-8a85-df401416e2ad
+2025-11-29T10:19:26.577832324Z [inf]  10:19:26 AM [express] serving on port 8080
