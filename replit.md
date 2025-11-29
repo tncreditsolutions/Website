@@ -6,7 +6,15 @@ TN Credit Solutions is a professional financial services web application offerin
 
 ## User Preferences
 
-Preferred communication style: Simple, everyday language.
+**Preferred communication style:** Simple, everyday language.
+
+**Database & API Integrity (CRITICAL):**
+- All code changes must respect Neon PostgreSQL schema - no ID column type changes
+- Verify database operations complete before dependent logic runs
+- Ensure all API calls (OpenAI, etc.) use correct data formats
+- Always use `npm run db:push` for migrations - never manual SQL
+- Test data persistence through full client → server → database cycle
+- Log all database and API operations for debugging
 
 ## Current Status
 
