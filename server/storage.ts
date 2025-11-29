@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type ContactSubmission, type InsertContactSubmission, type ChatMessage, type InsertChatMessage, type NewsletterSubscription, type InsertNewsletterSubscription, type Document, type InsertDocument, users, chatMessages, documents } from "@shared/schema";
+import { type User, type InsertUser, type ContactSubmission, type InsertContactSubmission, type ChatMessage, type InsertChatMessage, type NewsletterSubscription, type InsertNewsletterSubscription, type Document, type InsertDocument, users, chatMessages, documents, contactSubmissions, newsletterSubscriptions } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { drizzle } from "drizzle-orm/neon-http";
 import { eq, or } from "drizzle-orm";
@@ -155,6 +155,16 @@ export class DbStorage implements IStorage {
   }
 
   async createContactSubmission(insertSubmission: InsertContactSubmission): Promise<ContactSubmission> {
+    if (dbInitialized && db) {
+      try {
+        const result = await db.insert(contactSubmissions).values(insertSubmission).returning();
+        console.log("[DbStorage] Contact submission saved to database:", result[0]?.id);
+        return result[0];
+      } catch (error) {
+        console.error("[DbStorage] Error saving contact submission to database:", error);
+      }
+    }
+    // Fallback to in-memory
     const id = randomUUID();
     const submission: ContactSubmission = {
       ...insertSubmission,
@@ -168,6 +178,15 @@ export class DbStorage implements IStorage {
   }
 
   async getAllContactSubmissions(): Promise<ContactSubmission[]> {
+    if (dbInitialized && db) {
+      try {
+        const result = await db.select().from(contactSubmissions);
+        return result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      } catch (error) {
+        console.error("[DbStorage] Error fetching contact submissions from database:", error);
+      }
+    }
+    // Fallback to in-memory
     return Array.from(this.contactSubmissions.values()).sort(
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     );
@@ -230,6 +249,21 @@ export class DbStorage implements IStorage {
   }
 
   async subscribeNewsletter(insertSubscription: InsertNewsletterSubscription): Promise<NewsletterSubscription | null> {
+    if (dbInitialized && db) {
+      try {
+        const result = await db.insert(newsletterSubscriptions).values(insertSubscription).returning();
+        console.log("[DbStorage] Newsletter subscription saved to database:", result[0]?.id);
+        return result[0];
+      } catch (error: any) {
+        // Unique constraint violation means email already subscribed
+        if (error.message?.includes("unique")) {
+          console.log("[DbStorage] Email already subscribed");
+          return null;
+        }
+        console.error("[DbStorage] Error saving newsletter subscription to database:", error);
+      }
+    }
+    // Fallback to in-memory
     if (this.newsletterSubscriptions.has(insertSubscription.email)) {
       return null;
     }
@@ -244,6 +278,15 @@ export class DbStorage implements IStorage {
   }
 
   async getAllNewsletterSubscriptions(): Promise<NewsletterSubscription[]> {
+    if (dbInitialized && db) {
+      try {
+        const result = await db.select().from(newsletterSubscriptions);
+        return result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      } catch (error) {
+        console.error("[DbStorage] Error fetching newsletter subscriptions from database:", error);
+      }
+    }
+    // Fallback to in-memory
     return Array.from(this.newsletterSubscriptions).map((email) => ({
       id: randomUUID(),
       email,
