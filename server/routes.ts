@@ -1128,14 +1128,24 @@ This is the start of the conversation. Ask open-ended questions to understand th
         return res.status(404).json({ error: "Document not found" });
       }
 
-      const filePath = path.join(import.meta.dirname, "..", "uploads", document.filePath);
-      if (!fs.existsSync(filePath)) {
-        return res.status(404).json({ error: "File not found on server" });
+      // CRITICAL: Use base64 from database (works on Railway where filesystem is ephemeral)
+      if (!document.fileContent) {
+        // Fallback to filesystem if base64 not in database
+        const filePath = path.join(import.meta.dirname, "..", "uploads", document.filePath);
+        if (!fs.existsSync(filePath)) {
+          return res.status(404).json({ error: "File not found in database or on server" });
+        }
+        res.set("Content-Type", document.fileType);
+        res.sendFile(filePath);
+      } else {
+        // Return file from database as binary
+        const buffer = Buffer.from(document.fileContent, "base64");
+        res.set("Content-Type", document.fileType);
+        res.set("Content-Disposition", `inline; filename="${document.fileName}"`);
+        res.send(buffer);
       }
-
-      res.set("Content-Type", document.fileType);
-      res.sendFile(filePath);
     } catch (error: any) {
+      console.error("[Documents View] Error:", error);
       res.status(500).json({ error: error.message });
     }
   });
@@ -1148,13 +1158,23 @@ This is the start of the conversation. Ask open-ended questions to understand th
         return res.status(404).json({ error: "Document not found" });
       }
 
-      const filePath = path.join(import.meta.dirname, "..", "uploads", document.filePath);
-      if (!fs.existsSync(filePath)) {
-        return res.status(404).json({ error: "File not found on server" });
+      // CRITICAL: Use base64 from database (works on Railway where filesystem is ephemeral)
+      if (!document.fileContent) {
+        // Fallback to filesystem if base64 not in database
+        const filePath = path.join(import.meta.dirname, "..", "uploads", document.filePath);
+        if (!fs.existsSync(filePath)) {
+          return res.status(404).json({ error: "File not found in database or on server" });
+        }
+        res.download(filePath, document.fileName);
+      } else {
+        // Return file from database as binary
+        const buffer = Buffer.from(document.fileContent, "base64");
+        res.set("Content-Type", document.fileType);
+        res.set("Content-Disposition", `attachment; filename="${document.fileName}"`);
+        res.send(buffer);
       }
-
-      res.download(filePath, document.fileName);
     } catch (error: any) {
+      console.error("[Documents Download] Error:", error);
       res.status(500).json({ error: error.message });
     }
   });

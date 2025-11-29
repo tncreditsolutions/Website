@@ -728,23 +728,34 @@ export default function Admin() {
         </DialogContent>
       </Dialog>
 
-      {/* Admin Reply Dialog */}
-      <Dialog open={!!selectedChatMessage && isReplying && (selectedChatMessage.sender === "visitor" || !selectedChatMessage.sender)} onOpenChange={() => {
+      {/* Admin Reply Dialog - Full Conversation View */}
+      <Dialog open={!!selectedChatMessage && isReplying} onOpenChange={() => {
         setIsReplying(false);
         setSelectedChatMessage(null);
       }}>
-        <DialogContent className="max-w-2xl" data-testid="dialog-admin-reply">
+        <DialogContent className="max-w-2xl max-h-96 overflow-y-auto" data-testid="dialog-admin-reply">
           <DialogHeader>
-            <DialogTitle>Reply to Chat Message</DialogTitle>
+            <DialogTitle>Full Conversation with {selectedChatMessage?.name}</DialogTitle>
             <DialogDescription>
-              Send a message to {selectedChatMessage?.name} at {selectedChatMessage?.email}
+              Email: {selectedChatMessage?.email}
             </DialogDescription>
           </DialogHeader>
-          {selectedChatMessage && (selectedChatMessage.sender === "visitor" || !selectedChatMessage.sender) && (
+          {selectedChatMessage && (
             <div className="space-y-4">
-              <div className="bg-muted p-4 rounded-md">
-                <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Their Message</p>
-                <p className="text-sm whitespace-pre-wrap break-words">{selectedChatMessage.message}</p>
+              {/* Show all messages in this conversation */}
+              <div className="bg-muted p-4 rounded-md max-h-48 overflow-y-auto space-y-3">
+                {chatMessages
+                  ?.filter(m => m.email === selectedChatMessage.email)
+                  .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+                  .map((msg) => (
+                    <div key={msg.id} className="border-l-2 border-primary pl-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="text-xs font-semibold">{msg.sender === "visitor" ? "Visitor" : "Riley"}:</span>
+                        <span className="text-xs text-muted-foreground">{formatDate(msg.createdAt)}</span>
+                      </div>
+                      <p className="text-sm whitespace-pre-wrap break-words mt-1">{msg.message.replace(/\s*\[ESCALATE:(YES|NO)\]\s*$/, "")}</p>
+                    </div>
+                  ))}
               </div>
 
               <form onSubmit={handleSendAdminReply} className="space-y-3">
