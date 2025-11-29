@@ -9,94 +9,54 @@ import path from "path";
 import PDFDocument from "pdfkit";
 import bcrypt from "bcrypt";
 
-// Convert PDF pages to images and analyze with OpenAI vision API
+// For PDFs: Since they're scanned documents with no extractable text, we need the PDF to be 
+// uploaded as an image (PNG/JPG) instead for proper analysis via OpenAI's vision API.
+// This function returns empty string, triggering the fallback message.
 async function analyzePdfWithVision(pdfBuffer: Buffer): Promise<string> {
   try {
-    console.log("[AI] Starting PDF vision analysis, buffer size:", pdfBuffer.length);
+    console.log("[AI] PDF analysis: Scanned PDFs require image format for vision analysis");
+    console.log("[AI] Trying text extraction first...");
     
+    // Try to extract any text from PDF (works for born-digital PDFs, not scanned)
     const pdfjsLib = await import('pdfjs-dist');
-    console.log("[AI] pdfjs-dist imported successfully");
-    
-    const { createCanvas } = await import('canvas');
-    console.log("[AI] canvas imported successfully");
-    
     const pdf = await pdfjsLib.getDocument(pdfBuffer).promise;
-    console.log("[AI] PDF loaded successfully, pages:", pdf.numPages);
+    console.log("[AI] PDF loaded, pages:", pdf.numPages);
     
-    let combinedAnalysis = "";
+    let extractedText = "";
+    const pagesToCheck = Math.min(2, pdf.numPages);
     
-    // Process first 3 pages max (to avoid token limits)
-    const pagesToProcess = Math.min(3, pdf.numPages);
-    console.log("[AI] Processing", pagesToProcess, "pages");
+    for (let i = 1; i <= pagesToCheck; i++) {
+      const page = await pdf.getPage(i);
+      const textContent = await page.getTextContent();
+      const pageText = textContent.items.map((item: any) => item.str).join(" ");
+      extractedText += pageText + " ";
+    }
     
-    for (let i = 1; i <= pagesToProcess; i++) {
-      try {
-        console.log("[AI] Getting page", i);
-        const page = await pdf.getPage(i);
-        
-        const viewport = page.getViewport({ scale: 2 });
-        console.log("[AI] Page", i, "viewport size:", viewport.width, 'x', viewport.height);
-        
-        // Create canvas and render PDF page
-        const canvas = createCanvas(Math.ceil(viewport.width), Math.ceil(viewport.height));
-        const context = canvas.getContext('2d');
-        console.log("[AI] Canvas created for page", i);
-        
-        const renderTask = page.render({
-          canvasContext: context,
-          viewport: viewport,
-        });
-        
-        await renderTask.promise;
-        console.log("[AI] Page", i, "rendered to canvas");
-        
-        // Convert canvas to base64 PNG
-        const imageBuffer = canvas.toBuffer('image/png');
-        const imageBase64 = imageBuffer.toString('base64');
-        console.log("[AI] Page", i, "converted to base64, size:", imageBase64.length, "bytes");
-        
-        // Send to OpenAI vision API
-        console.log("[AI] Sending page", i, "to OpenAI vision API...");
-        const response = await openai.chat.completions.create({
-          model: "gpt-4o",
-          messages: [
-            {
-              role: "user",
-              content: [
-                {
-                  type: "text",
-                  text: "Analyze this credit report page and extract the key financial information. Provide ONLY the professional analysis with sections marked with #### headers, bullet points starting with -, and key-value pairs with colons. Start immediately with the analysis.",
-                },
-                {
-                  type: "image_url",
-                  image_url: {
-                    url: `data:image/png;base64,${imageBase64}`,
-                  },
-                },
-              ],
-            },
-          ],
-          max_tokens: 800,
-        });
-        
-        const pageAnalysis = response.choices[0].message.content || "";
-        if (pageAnalysis) {
-          combinedAnalysis += pageAnalysis + "\n\n";
-          console.log("[AI] Page", i, "analysis complete, content length:", pageAnalysis.length);
-        } else {
-          console.log("[AI] Page", i, "analysis was empty");
-        }
-      } catch (pageError: any) {
-        console.error("[AI] Error analyzing page", i, ":", pageError?.message);
-        console.error("[AI] Full page error:", pageError);
+    if (extractedText.trim().length > 100) {
+      console.log("[AI] Text extraction successful, length:", extractedText.trim().length);
+      // Send extracted text to OpenAI for analysis
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "user",
+            content: `Analyze this credit report and provide ONLY professional financial analysis. Format with #### headers, bullet points with -, and key-value pairs with colons. Start immediately with analysis.\n\nReport text:\n${extractedText}`,
+          },
+        ],
+        max_tokens: 1500,
+      });
+      
+      const analysis = response.choices[0].message.content || "";
+      if (analysis.trim().length > 10) {
+        console.log("[AI] PDF analysis successful via text extraction");
+        return cleanAnalysisText(analysis);
       }
     }
     
-    console.log("[AI] PDF vision analysis complete, total length:", combinedAnalysis.trim().length);
-    return combinedAnalysis.trim();
+    console.log("[AI] PDF is scanned document (no extractable text). For best results, please upload credit report as an image (PNG/JPG).");
+    return "";
   } catch (e: any) {
-    console.error("[AI] PDF vision analysis error:", e?.message);
-    console.error("[AI] Full vision analysis error:", e);
+    console.error("[AI] PDF processing error:", e?.message);
     return "";
   }
 }
