@@ -304,12 +304,23 @@ export default function ChatWidget() {
         email: trimmedEmail,
         message: `Hi ${trimmedName}! How can I help you today?`,
         sender: "ai",
-        isEscalated: false,
+        isEscalated: "false",
       });
-      console.log("[Chat] Greeting sent successfully:", greetingResponse);
-      // Force refresh immediately
-      await new Promise(resolve => setTimeout(resolve, 500));
-      await queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
+      console.log("[Chat] Greeting sent successfully");
+      
+      // Immediately add greeting to React Query cache so it displays instantly
+      const currentMessages = queryClient.getQueryData<any[]>(["/api/chat"]) || [];
+      const greetingMessage = {
+        id: Date.now().toString(),
+        name: "Riley",
+        email: trimmedEmail,
+        message: `Hi ${trimmedName}! How can I help you today?`,
+        sender: "ai",
+        isEscalated: "false",
+        createdAt: new Date(),
+      };
+      queryClient.setQueryData(["/api/chat"], [...currentMessages, greetingMessage]);
+      
       setIsNewVisitor(false);
     } catch (error: any) {
       console.error("[Chat] Failed to send greeting:", error);
