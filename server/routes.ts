@@ -801,24 +801,17 @@ This is the start of the conversation. Ask open-ended questions to understand th
         return res.status(400).json({ error: "Missing required fields" });
       }
 
-      // Store file temporarily
-      const uploadsDir = path.join(import.meta.dirname, "..", "uploads");
-      if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir, { recursive: true });
-      }
-
       const fileId = Math.random().toString(36).substring(2);
-      const filePath = path.join(uploadsDir, fileId);
-      const base64Data = fileContent.split(",")[1] || fileContent;
-      fs.writeFileSync(filePath, Buffer.from(base64Data, "base64"));
 
-      // Create document record
+      // Create document record with file content stored in database (for Railway compatibility)
+      const base64Data = fileContent.split(",")[1] || fileContent;
       const document = await storage.createDocument({
         visitorEmail,
         visitorName,
         fileName,
         fileType,
         filePath: fileId,
+        fileContent: base64Data,
         visitorTimezone: visitorTimezone || "UTC",
         visitorDateForFilename: visitorDateForFilename || new Date().toISOString().split('T')[0],
       });
@@ -858,17 +851,15 @@ This is the start of the conversation. Ask open-ended questions to understand th
           rawAnalysis = cleanAnalysisText(rawAnalysis);
           analysisText = rawAnalysis || "No analysis available";
         } else if (isPdf) {
-          // For PDFs, extract text and send to OpenAI for analysis
+          // For PDFs, extract text from database content and send to OpenAI for analysis
           try {
             if (!pdfParse) {
               console.error("[AI] pdf-parse not loaded - falling back to generic message");
               analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
             } else {
-              const filePath = path.join(import.meta.dirname, "..", "uploads", fileId);
-              console.log("[AI] PDF file path:", filePath);
-              
-              const pdfBuffer = fs.readFileSync(filePath);
-              console.log("[AI] PDF buffer read, size:", pdfBuffer.length);
+              // Read PDF from database (base64 encoded)
+              const pdfBuffer = Buffer.from(base64Data, "base64");
+              console.log("[AI] PDF buffer from database, size:", pdfBuffer.length);
               
               const pdfData = await pdfParse(pdfBuffer);
               const pdfText = pdfData.text || "";
