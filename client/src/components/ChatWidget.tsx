@@ -23,13 +23,14 @@ export default function ChatWidget() {
   const [uploadedFileName, setUploadedFileName] = useState<string>("");
   const [lastDocumentId, setLastDocumentId] = useState<string | null>(null);
   const [visitorDateForFilename, setVisitorDateForFilename] = useState<string>("");
+  const [sessionMessages, setSessionMessages] = useState<ChatMessage[]>([]); // CRITICAL: Only current session messages
   const escalationMessageIdRef = useRef<string | null>(null);
   const dismissedEscalationIdRef = useRef<string | null>(null);
   const escalationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  // Load visitor info from localStorage on mount
+  // Load visitor info from localStorage on mount (name/email only, NOT messages)
   useEffect(() => {
     const stored = localStorage.getItem(VISITOR_INFO_KEY);
     if (stored) {
@@ -44,17 +45,8 @@ export default function ChatWidget() {
     }
   }, []);
 
-  const { data: allMessages = [], isLoading } = useQuery<ChatMessage[]>({
-    queryKey: ["/api/chat"],
-    refetchInterval: 2000,
-  });
-
-  // Filter messages to only show this visitor's conversation
-  const messages = allMessages.filter(msg => {
-    if (!email) return false;
-    // Show visitor's own messages OR admin/AI replies
-    return msg.email === email || msg.sender === "admin" || msg.sender === "ai" || msg.email === "support@tncreditsolutions.com";
-  });
+  // Use sessionMessages for display (NOT fetched from database)
+  const messages = sessionMessages;
 
   const sendMutation = useMutation({
     mutationFn: async (data: any) => {
