@@ -280,18 +280,8 @@ export default function ChatWidget() {
     
     localStorage.setItem(VISITOR_INFO_KEY, JSON.stringify({ name: trimmedName, email: trimmedEmail }));
     
-    // CRITICAL: Clear any previous chat history AND documents for this email from the backend
-    // This ensures fresh sessions don't inherit old conversation context
-    try {
-      console.log("[Chat] Clearing previous messages and documents for fresh session");
-      // The DELETE /api/chat endpoint clears both messages AND documents for this email
-      await apiRequest("DELETE", "/api/chat", { email: trimmedEmail });
-    } catch (error) {
-      console.error("[Chat] Error clearing previous data (this is OK on first visit):", error);
-      // Don't fail - this is expected if user is new
-    }
-    
-    // Send greeting message from AI agent
+    // Send greeting message from AI agent to start conversation
+    console.log("[Chat] Sending greeting message for new visitor");
     try {
       await apiRequest("POST", "/api/chat", {
         name: "Riley",
@@ -301,8 +291,15 @@ export default function ChatWidget() {
         isEscalated: "false",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
+      console.log("[Chat] ✅ Greeting message sent successfully");
     } catch (error) {
-      console.error("Failed to send greeting:", error);
+      console.error("[Chat] ❌ Failed to send greeting:", error);
+      toast({
+        title: "Error",
+        description: "Failed to start chat. Please try again.",
+        variant: "destructive",
+      });
+      return;
     }
     
     setIsNewVisitor(false);
