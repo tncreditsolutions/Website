@@ -65,12 +65,16 @@ export default function ChatWidget() {
   });
 
   // Filter messages to only show current session (created after session started)
+  // CRITICAL: Use database messages only if session started, otherwise empty
   const filteredMessages = sessionStartTime
-    ? dbMessages.filter((msg: any) => new Date(msg.createdAt) >= sessionStartTime)
+    ? dbMessages.filter((msg: any) => {
+        const msgTime = new Date(msg.createdAt);
+        return msgTime >= sessionStartTime;
+      })
     : [];
 
-  // Merge database messages with session messages (db takes priority for AI responses)
-  const messages = filteredMessages.length > 0 ? filteredMessages : sessionMessages;
+  // Use filtered messages if we have a session, otherwise use nothing (don't show old messages)
+  const messages = filteredMessages;
 
   const sendMutation = useMutation({
     mutationFn: async (data: any) => {

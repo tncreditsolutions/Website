@@ -368,8 +368,16 @@ async function generateAndSavePDF(document: any, analysisText?: string): Promise
 
 // Helper function to clean AI analysis text
 function cleanAnalysisText(rawText: string): string {
+  // CRITICAL: Remove ALL encoding artifacts and corrupted characters
+  let cleaned = rawText
+    .replace(/[^\x20-\x7E\n\r\t]/g, "") // Remove all non-ASCII except whitespace/newlines
+    .replace(/%Ï/g, "") // Remove corrupted %Ï sequences
+    .replace(/Ø=Ý4/g, "") // Remove other corrupted sequences
+    .replace(/['\u2018\u2019]/g, "'") // Normalize quotes
+    .replace(/["\u201C\u201D]/g, '"');
+  
   // Remove code blocks
-  let cleaned = rawText.replace(/^(```.*?\n|```)/gm, "");
+  cleaned = cleaned.replace(/^(```.*?\n|```)/gm, "");
   
   // Remove unwanted PDF metadata lines
   cleaned = cleaned
@@ -379,9 +387,12 @@ function cleanAnalysisText(rawText: string): string {
       // Filter out original PDF headers and metadata
       if (trimmed.includes("CREDIT REPORT ANALYSIS FOR") ||
           trimmed.includes("Report Date:") ||
+          trimmed.includes("Confidential") ||
+          trimmed.includes("© 2025") ||
           trimmed.match(/^Report Date:.*\d{4}$/) ||
           trimmed.match(/^Date:.*\d{4}$/) ||
-          trimmed === "" && line === "") {
+          trimmed.match(/^Page \d+/) ||
+          trimmed === "") {
         return false;
       }
       return true;

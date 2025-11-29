@@ -462,21 +462,24 @@ export default function Admin() {
               <div className="space-y-4">
                 {Array.from(
                   chatMessages?.reduce((acc, msg) => {
-                    // Include both visitor messages and Riley AI responses, but not system messages
-                    if (msg.sender === "visitor") {
-                      // Visitor message - group by their email
-                      if (!acc.has(msg.email)) {
-                        acc.set(msg.email, []);
+                    // CRITICAL: Include ALL messages - both visitor and Riley AI responses
+                    // Group by the visitor email (not Riley's support email)
+                    const groupEmail = msg.sender === "visitor" ? msg.email : 
+                      // For AI messages, find the associated visitor by finding nearest visitor message before this AI message
+                      (() => {
+                        const msgsBeforeThis = chatMessages.filter((m: ChatMessage) => 
+                          new Date(m.createdAt) < new Date(msg.createdAt)
+                        );
+                        const lastVisitorMsg = msgsBeforeThis.reverse().find((m: ChatMessage) => m.sender === "visitor");
+                        return lastVisitorMsg?.email || msg.email;
+                      })();
+                    
+                    if (groupEmail && groupEmail !== "support@tncreditsolutions.com") {
+                      if (!acc.has(groupEmail)) {
+                        acc.set(groupEmail, []);
                       }
-                      acc.get(msg.email)?.push(msg);
-                    } else if (msg.sender === "ai" && msg.email !== "support@tncreditsolutions.com") {
-                      // AI message from Riley - include with group (unlikely case but handle it)
-                      if (!acc.has(msg.email)) {
-                        acc.set(msg.email, []);
-                      }
-                      acc.get(msg.email)?.push(msg);
+                      acc.get(groupEmail)?.push(msg);
                     }
-                    // If AI message has support email, we'll skip it as Riley's responses are tied to visitor conversations
                     return acc;
                   }, new Map<string, ChatMessage[]>()) || new Map()
                 )
