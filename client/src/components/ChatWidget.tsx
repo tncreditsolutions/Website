@@ -60,8 +60,8 @@ export default function ChatWidget() {
       }
     },
     enabled: !!email && isOpen,
-    refetchInterval: 2000, // Poll every 2 seconds for new AI responses
-    staleTime: 1000,
+    refetchInterval: 1000, // Poll every 1 second for new AI responses
+    staleTime: 500,
   });
 
   // Filter messages to only show current session (created after session started)
