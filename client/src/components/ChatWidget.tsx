@@ -51,11 +51,9 @@ export default function ChatWidget() {
 
   // Filter messages to only show this visitor's conversation
   const messages = allMessages.filter(msg => {
-    // Use email from state, but also check localStorage as fallback for fresh sessions
-    const visitorEmail = email || (localStorage.getItem(VISITOR_INFO_KEY) ? JSON.parse(localStorage.getItem(VISITOR_INFO_KEY)!).email : null);
-    if (!visitorEmail) return false;
+    if (!email) return false;
     // Show visitor's own messages OR admin/AI replies
-    return msg.email === visitorEmail || msg.sender === "admin" || msg.sender === "ai" || msg.email === "support@tncreditsolutions.com";
+    return msg.email === email || msg.sender === "admin" || msg.sender === "ai" || msg.email === "support@tncreditsolutions.com";
   });
 
   const sendMutation = useMutation({
@@ -280,13 +278,7 @@ export default function ChatWidget() {
       return;
     }
     
-    // Save to localStorage IMMEDIATELY so the filter works
-    // (state updates are async, so we can't rely on state for the filter)
     localStorage.setItem(VISITOR_INFO_KEY, JSON.stringify({ name: trimmedName, email: trimmedEmail }));
-    
-    // Update state for UI
-    setName(trimmedName);
-    setEmail(trimmedEmail);
     
     // CRITICAL: Clear any previous chat history AND documents for this email from the backend
     // This ensures fresh sessions don't inherit old conversation context
@@ -301,30 +293,19 @@ export default function ChatWidget() {
     
     // Send greeting message from AI agent
     try {
-      console.log("[Chat] Sending greeting to:", trimmedEmail);
       await apiRequest("POST", "/api/chat", {
         name: "Riley",
-        email: trimmedEmail,
+        email: "support@tncreditsolutions.com",
         message: `Hi ${trimmedName}! How can I help you today?`,
         sender: "ai",
         isEscalated: "false",
       });
-      console.log("[Chat] Greeting sent, waiting for database...");
-      
-      // Wait briefly for database to process, then immediately fetch
-      await new Promise(resolve => setTimeout(resolve, 200));
-      await queryClient.refetchQueries({ queryKey: ["/api/chat"] });
-      console.log("[Chat] Greeting fetched and displayed");
-      
-      setIsNewVisitor(false);
-    } catch (error: any) {
-      console.error("[Chat] Failed to send greeting:", error);
-      toast({
-        title: "Chat Error",
-        description: "Failed to start chat. Please try again.",
-        variant: "destructive",
-      });
+      queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
+    } catch (error) {
+      console.error("Failed to send greeting:", error);
     }
+    
+    setIsNewVisitor(false);
   };
 
   const handleSend = (e: React.FormEvent) => {
