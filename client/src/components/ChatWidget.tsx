@@ -45,8 +45,26 @@ export default function ChatWidget() {
     }
   }, []);
 
-  // Use sessionMessages for display (NOT fetched from database)
-  const messages = sessionMessages;
+  // Fetch chat messages from database for current session
+  const { data: dbMessages = [] } = useQuery({
+    queryKey: ["/api/chat", email],
+    queryFn: async () => {
+      if (!email) return [];
+      try {
+        const response = await apiRequest("GET", `/api/chat?email=${email}`);
+        return response.json();
+      } catch (error) {
+        console.error("[Chat] Error fetching messages:", error);
+        return [];
+      }
+    },
+    enabled: !!email && isOpen,
+    refetchInterval: 2000, // Poll every 2 seconds for new AI responses
+    staleTime: 1000,
+  });
+
+  // Merge database messages with session messages (db takes priority for AI responses)
+  const messages = dbMessages.length > 0 ? dbMessages : sessionMessages;
 
   const sendMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -65,6 +83,8 @@ export default function ChatWidget() {
       }]);
       // Save visitor info for next time
       localStorage.setItem(VISITOR_INFO_KEY, JSON.stringify({ name, email }));
+      // Refetch messages to show AI responses
+      queryClient.invalidateQueries({ queryKey: ["/api/chat", email] });
     },
     onError: (error: any) => {
       toast({
