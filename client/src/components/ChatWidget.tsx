@@ -52,25 +52,19 @@ export default function ChatWidget() {
     mutationFn: async (data: any) => {
       return apiRequest("POST", "/api/chat", data);
     },
-    onSuccess: async (responseBlob: any) => {
-      try {
-        // Parse JSON response
-        const response = await responseBlob.json();
-        // Add visitor message to session display only
-        setSessionMessages(prev => [...prev, {
-          id: response.id || `temp-${Date.now()}`,
-          name: response.name || name,
-          email: response.email || email,
-          message: response.message,
-          sender: response.sender || "visitor",
-          isEscalated: response.isEscalated || "false",
-          createdAt: response.createdAt || new Date().toISOString(),
-        }]);
-        // Save visitor info for next time
-        localStorage.setItem(VISITOR_INFO_KEY, JSON.stringify({ name, email }));
-      } catch (error) {
-        console.error("[Chat] Error parsing response:", error);
-      }
+    onSuccess: (response: any, variables: any) => {
+      // Add visitor message to session display using the data we sent
+      setSessionMessages(prev => [...prev, {
+        id: `temp-${Date.now()}`,
+        name: variables.name,
+        email: variables.email,
+        message: variables.message,
+        sender: variables.sender || "visitor",
+        isEscalated: variables.isEscalated || "false",
+        createdAt: new Date(),
+      }]);
+      // Save visitor info for next time
+      localStorage.setItem(VISITOR_INFO_KEY, JSON.stringify({ name, email }));
     },
     onError: (error: any) => {
       toast({
@@ -135,25 +129,24 @@ export default function ChatWidget() {
         console.log("[Upload] Analysis complete, directing to PDF download");
         try {
           // Send message directing user to download the PDF
-          const responseBlob = await apiRequest("POST", "/api/chat", {
+          await apiRequest("POST", "/api/chat", {
             email: document.visitorEmail,
             name: "Riley",
             message: `I've completed my analysis of your ${document.fileName}. Your detailed credit analysis report is ready for download. Click the download button below to view your professional report with all findings, metrics, and personalized recommendations.`,
             sender: "ai",
             isEscalated: "false",
           });
-          const response = await responseBlob.json();
           console.log("[Upload] Download message sent successfully");
           
           // Add AI message to session display
           setSessionMessages(prev => [...prev, {
-            id: response.id || `temp-${Date.now()}`,
+            id: `temp-${Date.now()}`,
             name: "Riley",
             email: document.visitorEmail,
-            message: response.message || `I've completed my analysis of your ${document.fileName}. Your detailed credit analysis report is ready for download.`,
+            message: `I've completed my analysis of your ${document.fileName}. Your detailed credit analysis report is ready for download. Click the download button below to view your professional report with all findings, metrics, and personalized recommendations.`,
             sender: "ai",
             isEscalated: "false",
-            createdAt: response.createdAt || new Date().toISOString(),
+            createdAt: new Date(),
           }]);
         } catch (error) {
           console.error("[Upload] Failed to send download message:", error);
@@ -312,25 +305,24 @@ export default function ChatWidget() {
     // Send greeting message from AI agent
     try {
       console.log("[Chat Form] Sending greeting message from Riley");
-      const greetingResponseBlob = await apiRequest("POST", "/api/chat", {
+      await apiRequest("POST", "/api/chat", {
         name: "Riley",
         email: "support@tncreditsolutions.com",
         message: `Hi ${trimmedName}! How can I help you today?`,
         sender: "ai",
         isEscalated: "false",
       });
-      const greetingResponse = await greetingResponseBlob.json();
       console.log("[Chat Form] Greeting sent successfully");
       
       // Add greeting to session messages for display
       setSessionMessages([{
-        id: greetingResponse.id || `temp-${Date.now()}`,
+        id: `temp-${Date.now()}`,
         name: "Riley",
         email: "support@tncreditsolutions.com",
         message: `Hi ${trimmedName}! How can I help you today?`,
         sender: "ai",
         isEscalated: "false",
-        createdAt: greetingResponse.createdAt || new Date().toISOString(),
+        createdAt: new Date(),
       }]);
       
       setIsNewVisitor(false);
@@ -380,24 +372,23 @@ export default function ChatWidget() {
   const handleEscalate = async () => {
     try {
       // Send friendly escalation message from Riley
-      const escalateBlob = await apiRequest("POST", "/api/chat", {
+      await apiRequest("POST", "/api/chat", {
         name: "Riley",
         email: "support@tncreditsolutions.com",
         message: "Perfect! I've connected you with our specialist team. They'll review your situation and get back to you shortly with personalized guidance. Thank you for choosing TN Credit Solutions!",
         sender: "ai",
         isEscalated: "true",
       });
-      const escalateResponse = await escalateBlob.json();
       
       // Add escalation message to session display
       setSessionMessages(prev => [...prev, {
-        id: escalateResponse.id || `temp-${Date.now()}`,
+        id: `temp-${Date.now()}`,
         name: "Riley",
         email: "support@tncreditsolutions.com",
         message: "Perfect! I've connected you with our specialist team. They'll review your situation and get back to you shortly with personalized guidance. Thank you for choosing TN Credit Solutions!",
         sender: "ai",
         isEscalated: "true",
-        createdAt: escalateResponse.createdAt || new Date().toISOString(),
+        createdAt: new Date(),
       }]);
       
       // Reset escalation tracking

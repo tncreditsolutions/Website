@@ -1,0 +1,119 @@
+2025-11-29T13:49:36.000000000Z [inf]  Starting Container
+2025-11-29T13:49:37.218540639Z [err]  npm warn config production Use `--omit=dev` instead.
+2025-11-29T13:49:37.218547794Z [inf]  
+2025-11-29T13:49:37.218554345Z [inf]  > rest-express@1.0.0 build
+2025-11-29T13:49:37.218561680Z [inf]  > vite build && esbuild server/index-prod.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/index.js
+2025-11-29T13:49:37.218567405Z [inf]  
+2025-11-29T13:49:37.218572656Z [inf]  [36mvite v5.4.20 [32mbuilding for production...[36m[39m
+2025-11-29T13:49:37.218577862Z [inf]  transforming...
+2025-11-29T13:49:38.394753285Z [err]  
+2025-11-29T13:49:38.394759050Z [err]  A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+2025-11-29T13:49:42.250755770Z [inf]  [32m✓[39m 1742 modules transformed.
+2025-11-29T13:49:43.385453386Z [inf]  [2m../dist/public/[22m[2massets/[22m[32mclient_testimonial_photo_3-BHvJgOFH.png    [39m[1m[2m1,457.77 kB[22m[1m[22m
+2025-11-29T13:49:43.385462984Z [inf]  [2m../dist/public/[22m[2massets/[22m[32mpdf.worker-zxMdjS_u.mjs                    [39m[1m[2m1,916.05 kB[22m[1m[22m
+2025-11-29T13:49:43.385540078Z [inf]  [2m../dist/public/[22m[2massets/[22m[35mindex-C0_Bq35A.css                         [39m[1m[2m   96.41 kB[22m[1m[22m[2m │ gzip:  14.76 kB[22m
+2025-11-29T13:49:43.385550501Z [inf]  [2m../dist/public/[22m[2massets/[22m[36mindex-BDWWRd-r.js                          [39m[1m[33m  874.93 kB[39m[22m[2m │ gzip: 261.28 kB[22m
+2025-11-29T13:49:43.385558967Z [err]  [33m
+2025-11-29T13:49:43.385575500Z [err]  (!) Some chunks are larger than 500 kB after minification. Consider:
+2025-11-29T13:49:43.385583873Z [err]  - Using dynamic import() to code-split the application
+2025-11-29T13:49:43.385602296Z [err]  - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2025-11-29T13:49:43.385609965Z [err]  - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+2025-11-29T13:49:43.385634299Z [inf]  [2m../dist/public/[22m[32mindex.html                                        [39m[1m[2m    2.37 kB[22m[1m[22m[2m │ gzip:   0.96 kB[22m
+2025-11-29T13:49:43.385645080Z [inf]  rendering chunks...
+2025-11-29T13:49:43.385654285Z [inf]  computing gzip size...
+2025-11-29T13:49:43.385672260Z [inf]  [2m../dist/public/[22m[2massets/[22m[32mready_for_better_future_hero-C6oVMAMg.png  [39m[1m[2m  945.56 kB[22m[1m[22m
+2025-11-29T13:49:43.385685104Z [inf]  [2m../dist/public/[22m[2massets/[22m[32mclient_testimonial_photo_2-B8UX-XkM.png    [39m[1m[2m1,312.17 kB[22m[1m[22m
+2025-11-29T13:49:43.385693181Z [inf]  [2m../dist/public/[22m[2massets/[22m[32mclient_testimonial_photo_1-C49icyGe.png    [39m[1m[2m1,313.43 kB[22m[1m[22m
+2025-11-29T13:49:43.389934764Z [inf]  [32m✓ built in 5.97s[39m
+2025-11-29T13:49:43.389940348Z [err]  
+2025-11-29T13:49:43.389944902Z [err]    dist/index.js  78.2kb
+2025-11-29T13:49:43.389949602Z [err]  
+2025-11-29T13:49:43.389953412Z [err]  ⚡ Done in 20ms
+2025-11-29T13:49:43.389958544Z [err]  npm warn config production Use `--omit=dev` instead.
+2025-11-29T13:49:43.389962639Z [inf]  
+2025-11-29T13:49:43.389966517Z [inf]  > rest-express@1.0.0 start
+2025-11-29T13:49:43.389971977Z [inf]  > NODE_ENV=production node dist/index.js
+2025-11-29T13:49:43.389977085Z [inf]  
+2025-11-29T13:49:44.413439629Z [inf]  [DbStorage] ✅ Database connected successfully
+2025-11-29T13:49:44.413446370Z [inf]  [Migration] Checking if database tables exist...
+2025-11-29T13:49:44.413455529Z [inf]  [AI] Claude initialized: true API key available: true
+2025-11-29T13:49:44.413461648Z [inf]  [AI] OpenAI initialized: true API key available: true
+2025-11-29T13:49:44.470823367Z [inf]  [Migration] ✅ users table ready
+2025-11-29T13:49:44.493110493Z [inf]  [Migration] ✅ contact_submissions table ready
+2025-11-29T13:49:44.501504197Z [inf]  [Migration] ✅ chat_messages table ready
+2025-11-29T13:49:44.506468103Z [inf]  [Migration] ✅ newsletter_subscriptions table ready
+2025-11-29T13:49:44.522041519Z [inf]  [Migration] ✅ documents table ready
+2025-11-29T13:49:44.522059872Z [inf]  [Migration] Ensuring file_content column exists on documents table...
+2025-11-29T13:49:44.543065559Z [inf]  [Migration] ✅ file_content column ensured on documents table
+2025-11-29T13:49:44.552174365Z [inf]  [Migration] ✅ chat_messages email index ready
+2025-11-29T13:49:44.556369438Z [inf]  [Migration] ✅ documents email index ready
+2025-11-29T13:49:45.296006820Z [inf]  [Migration] ✅ users username index ready
+2025-11-29T13:49:45.296012542Z [inf]  [Migration] ✅ All database tables and indices created successfully
+2025-11-29T13:49:45.296017924Z [inf]  [DbStorage] ✅ Database schema verified - User credentials will PERSIST
+2025-11-29T13:49:45.296024650Z [inf]  [Auth] ✅ Admin user already exists in database. ID: be4efa52-d502-4745-8a85-df401416e2ad
+2025-11-29T13:49:45.296030193Z [inf]  1:49:44 PM [express] serving on port 8080
+2025-11-29T13:50:25.634889498Z [inf]  [Chat POST] CRITICAL: Received request body: { sender: 'ai', email: 'support@tncreditsolutions.com', name: 'Riley' }
+2025-11-29T13:50:25.634933148Z [inf]  [Chat POST] Database ready, proceeding with validation
+2025-11-29T13:50:25.634945890Z [inf]  [Chat POST] Validation successful: { sender: 'ai', email: 'support@tncreditsolutions.com' }
+2025-11-29T13:50:25.634954113Z [inf]  [Chat POST] Message saved successfully: {
+2025-11-29T13:50:25.634962157Z [inf]    id: '9d18883b-d403-4251-acc3-00d5c279d8fe',
+2025-11-29T13:50:25.634967547Z [inf]    email: 'support@tncreditsolutions.com',
+2025-11-29T13:50:25.634973291Z [inf]    sender: 'ai',
+2025-11-29T13:50:25.634978943Z [inf]    message: 'Hi Sergie! How can I help you today?'
+2025-11-29T13:50:25.634984368Z [inf]  }
+2025-11-29T13:50:25.634989613Z [inf]  1:50:19 PM [express] POST /api/chat 200 in 41ms :: {"id":"9d18883b-d403-4251-acc3-00d5c279d8fe","nam…
+2025-11-29T13:50:29.055067920Z [inf]  [Chat POST] CRITICAL: Received request body: { sender: undefined, email: 'sergie822@gmail.com', name: 'Sergie' }
+2025-11-29T13:50:29.055082464Z [inf]  [Chat POST] Database ready, proceeding with validation
+2025-11-29T13:50:29.055088970Z [inf]  [Chat POST] Validation successful: { sender: 'visitor', email: 'sergie822@gmail.com' }
+2025-11-29T13:50:29.055095752Z [inf]  [Chat POST] Message saved successfully: {
+2025-11-29T13:50:29.055104621Z [inf]    id: 'f1d92f77-e0ef-4294-9b81-80d25cd7a68d',
+2025-11-29T13:50:29.055111748Z [inf]    email: 'sergie822@gmail.com',
+2025-11-29T13:50:29.055118319Z [inf]    sender: 'visitor',
+2025-11-29T13:50:29.055124840Z [inf]    message: 'analyze credit report and provide insights'
+2025-11-29T13:50:29.055131306Z [inf]  }
+2025-11-29T13:50:29.055138479Z [inf]  [AI] Visitor message received. OpenAI ready: true Email: sergie822@gmail.com
+2025-11-29T13:50:29.055145555Z [inf]  [AI] Starting AI response generation...
+2025-11-29T13:50:29.055153223Z [inf]  [AI] Detected urgent situation: false
+2025-11-29T13:50:29.055159838Z [inf]  1:50:28 PM [express] POST /api/chat 200 in 43ms :: {"id":"f1d92f77-e0ef-4294-9b81-80d25cd7a68d","nam…
+2025-11-29T13:50:29.055166442Z [inf]  [AI] User has uploaded documents: false Count: 0
+2025-11-29T13:50:29.055173054Z [inf]  [AI] Current session only - total messages: 5 current session: 5
+2025-11-29T13:50:29.055180252Z [inf]  [AI] Conversation turns: 5 Previous topics: []
+2025-11-29T13:50:29.055187206Z [inf]  [AI] Using standard prompt, visitor turns: 5 session message count: 5
+2025-11-29T13:50:32.085586096Z [inf]        },
+2025-11-29T13:50:32.085592933Z [inf]        "logprobs": null,
+2025-11-29T13:50:32.085603088Z [inf]        "finish_reason": "stop"
+2025-11-29T13:50:32.085609165Z [inf]          "content": "Hi there! It looks like we've already reviewed your credit report. Based on your analysis, here's what we should focus on moving forward:\n\n1. **Credit Utilization**: We should aim to reduce your credit utilization to under 30%. This is crucial for boosting your credit score.\n2. **Payment History**: Ensuring all future payments are on time will help improve your score.\n3. **Collections Status**: We should develop a strategy to address any outstanding collections.\n\nWould you like to start with creating a payment plan or addressing collection accounts? Also, I can create a beautiful PDF summary of your analysis that you can download and save. Would that be helpful?",
+2025-11-29T13:50:32.085610647Z [inf]      }
+2025-11-29T13:50:32.085618614Z [inf]    ],
+2025-11-29T13:50:32.085621889Z [inf]          "refusal": null,
+2025-11-29T13:50:32.085625778Z [inf]    "usage": {
+2025-11-29T13:50:32.085635762Z [inf]      "prompt_tokens": 662,
+2025-11-29T13:50:32.085641782Z [inf]      "completion_tokens": 135,
+2025-11-29T13:50:32.085706542Z [inf]  [AI] Full response: {
+2025-11-29T13:50:32.085713639Z [inf]    "id": "chatcmpl-ChFdF4L3NRc3KP5B9FoRUTsBWgJwT",
+2025-11-29T13:50:32.085719289Z [inf]    "object": "chat.completion",
+2025-11-29T13:50:32.085726104Z [inf]    "created": 1764424229,
+2025-11-29T13:50:32.085734621Z [inf]    "model": "gpt-4o-2024-08-06",
+2025-11-29T13:50:32.085743402Z [inf]    "choices": [
+2025-11-29T13:50:32.085744040Z [inf]      {
+2025-11-29T13:50:32.085749863Z [inf]        "index": 0,
+2025-11-29T13:50:32.085756637Z [inf]        "message": {
+2025-11-29T13:50:32.085763255Z [inf]          "role": "assistant",
+2025-11-29T13:50:32.085776263Z [inf]          "annotations": []
+2025-11-29T13:50:32.765426962Z [inf]      "total_tokens": 797,
+2025-11-29T13:50:32.768683122Z [inf]      "prompt_tokens_details": {
+2025-11-29T13:50:32.768691607Z [inf]        "cached_tokens": 0,
+2025-11-29T13:50:32.768701788Z [inf]        "audio_tokens": 0
+2025-11-29T13:50:32.768707385Z [inf]      },
+2025-11-29T13:50:32.768712936Z [inf]      "completion_tokens_details": {
+2025-11-29T13:50:32.768718867Z [inf]        "reasoning_tokens": 0,
+2025-11-29T13:50:32.768724426Z [inf]        "audio_tokens": 0,
+2025-11-29T13:50:32.768732765Z [inf]        "accepted_prediction_tokens": 0,
+2025-11-29T13:50:32.768738101Z [inf]        "rejected_prediction_tokens": 0
+2025-11-29T13:50:32.768743017Z [inf]      }
+2025-11-29T13:50:32.768749394Z [inf]    },
+2025-11-29T13:50:32.768755063Z [inf]    "service_tier": "default",
+2025-11-29T13:50:32.768761042Z [inf]    "system_fingerprint": "fp_ed643dde95"
+2025-11-29T13:50:32.768766273Z [inf]  }
+2025-11-29T13:50:32.768771806Z [inf]  [AI] AI response received: Hi there! It looks like we've already reviewed you
+2025-11-29T13:50:32.768777572Z [inf]  [AI] AI message saved successfully: b68e5ace-7b68-48a1-833b-35cc78cf8ef2 Escalated: false
