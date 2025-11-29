@@ -499,6 +499,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertChatMessageSchema.parse(req.body);
       const message = await storage.createChatMessage(validatedData);
       
+      console.log("[Chat POST] Message saved:", {
+        id: message.id,
+        email: message.email,
+        sender: message.sender,
+        message: message.message.substring(0, 50),
+      });
+      
       // Return immediately, then generate AI response in background (non-blocking)
       res.json(message);
       

@@ -285,6 +285,12 @@ export default function ChatWidget() {
     console.log("[Chat Form] Validation passed, saving to localStorage");
     localStorage.setItem(VISITOR_INFO_KEY, JSON.stringify({ name: trimmedName, email: trimmedEmail }));
     
+    // CRITICAL: Set email and name state BEFORE setting isNewVisitor to false
+    // This ensures the message filter can access the email when the component re-renders
+    setName(trimmedName);
+    setEmail(trimmedEmail);
+    console.log("[Chat Form] Email and name state updated:", trimmedEmail);
+    
     // Skip DELETE for now - just send greeting to get chat working
     // Try to clear previous data but don't block on it
     try {
