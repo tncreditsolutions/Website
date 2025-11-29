@@ -280,10 +280,13 @@ export default function ChatWidget() {
       return;
     }
     
-    // Update state FIRST so the message filter will work
+    // Save to localStorage IMMEDIATELY so the filter works
+    // (state updates are async, so we can't rely on state for the filter)
+    localStorage.setItem(VISITOR_INFO_KEY, JSON.stringify({ name: trimmedName, email: trimmedEmail }));
+    
+    // Update state for UI
     setName(trimmedName);
     setEmail(trimmedEmail);
-    localStorage.setItem(VISITOR_INFO_KEY, JSON.stringify({ name: trimmedName, email: trimmedEmail }));
     
     // CRITICAL: Clear any previous chat history AND documents for this email from the backend
     // This ensures fresh sessions don't inherit old conversation context
