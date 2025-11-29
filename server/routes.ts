@@ -151,15 +151,15 @@ async function generateAndSavePDF(document: any, analysisText?: string): Promise
     let pageNum = 1;
 
     // Helper: Add header on new pages (Improvement #6: Page Management)
-    function addPageHeader() {
+    const addPageHeader = () => {
       doc.rect(0, 0, 612, 40).fill("#0f2d6e");
       doc.fontSize(11).font("Helvetica-Bold").fillColor("#fbbf24");
       doc.text("TN CREDIT SOLUTIONS - " + (document.visitorName || "Credit Analysis"), 40, 10);
       doc.fontSize(9).fillColor("#c5d3ff").text("Page " + pageNum, 550, 14);
-    }
+    };
 
     // Helper: Add footer with page number
-    function addPageFooter() {
+    const addPageFooter = () => {
       doc.rect(0, 745, 612, 47).fill("#f9fafb");
       doc.moveTo(40, 745).lineTo(572, 745).strokeColor("#e5e7eb").lineWidth(0.75).stroke();
       doc.fontSize(7).fillColor("#6b7280").font("Helvetica");
@@ -167,16 +167,16 @@ async function generateAndSavePDF(document: any, analysisText?: string): Promise
       doc.text("© 2025 TN Credit Solutions", 40, 762, { align: "left" });
       doc.fontSize(6).fillColor("#9ca3af");
       doc.text("This analysis is not financial advice. Consult a qualified advisor for professional guidance.", 40, 773);
-    }
+    };
 
     // IMPROVEMENT #1: Executive Summary Box at top
     // Extract key findings from first section
     const lines = finalAnalysis.split("\n");
     const keyFindings = lines
-      .filter(l => l.includes("Critical") || l.includes("CRITICAL") || l.includes("Active Collections"))
+      .filter((l: string) => l.includes("Critical") || l.includes("CRITICAL") || l.includes("Active Collections"))
       .slice(0, 3)
-      .map(l => l.replace(/^[-•▪*]\s+/, "").replace(/\*\*/g, "").trim())
-      .filter(l => l.length > 0);
+      .map((l: string) => l.replace(/^[-•▪*]\s+/, "").replace(/\*\*/g, "").trim())
+      .filter((l: string) => l.length > 0);
 
     // First page header
     doc.rect(0, 0, 612, 155).fill("#0f2d6e");
@@ -211,7 +211,7 @@ async function generateAndSavePDF(document: any, analysisText?: string): Promise
     yPosition += 20;
 
     if (keyFindings.length > 0) {
-      keyFindings.forEach(finding => {
+      keyFindings.forEach((finding: string) => {
         const { color } = getRiskColor(finding);
         doc.rect(42, yPosition, 8, 8).fill(color);
         doc.fontSize(9).font("Helvetica").fillColor("#374151");
@@ -257,7 +257,7 @@ async function generateAndSavePDF(document: any, analysisText?: string): Promise
       // IMPROVEMENT #4: Tables with formatting
       else if (trimmedLine.includes("|")) {
         tableMode = true;
-        const cells = trimmedLine.split("|").map(c => c.trim()).filter(c => c);
+        const cells = trimmedLine.split("|").map((c: string) => c.trim()).filter((c: string) => c);
         if (cells.length > 1) {
           tableRows.push(cells);
           
