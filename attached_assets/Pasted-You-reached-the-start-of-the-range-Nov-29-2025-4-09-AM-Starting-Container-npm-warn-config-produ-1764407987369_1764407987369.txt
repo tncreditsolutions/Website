@@ -1,0 +1,106 @@
+You reached the start of the range
+Nov 29, 2025, 4:09 AM
+Starting Container
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 build
+> vite build && esbuild server/index-prod.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/index.js
+vite v5.4.20 building for production...
+transforming...
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+✓ 1742 modules transformed.
+../dist/public/assets/ready_for_better_future_hero-C6oVMAMg.png    945.56 kB
+../dist/public/assets/client_testimonial_photo_2-B8UX-XkM.png    1,312.17 kB
+../dist/public/assets/client_testimonial_photo_1-C49icyGe.png    1,313.43 kB
+../dist/public/assets/client_testimonial_photo_3-BHvJgOFH.png    1,457.77 kB
+⚡ Done in 11ms
+../dist/public/assets/pdf.worker-zxMdjS_u.mjs                    1,916.05 kB
+computing gzip size...
+../dist/public/index.html                                            2.37 kB │ gzip:   0.95 kB
+../dist/public/assets/index-B2cAoITb.css                            96.33 kB │ gzip:  14.74 kB
+../dist/public/assets/index-CPa9H5E2.js                            874.31 kB │ gzip: 261.31 kB
+✓ built in 5.04s
+rendering chunks...
+  dist/index.js  72.5kb
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+[DbStorage] ✅ Database connected successfully
+[Migration] Checking if database tables exist...
+[AI] OpenAI initialized: true API key available: true
+[Migration] ✅ users table ready
+[Migration] ✅ contact_submissions table ready
+[Migration] ✅ chat_messages table ready
+[Migration] ✅ newsletter_subscriptions table ready
+[Migration] ✅ documents table ready
+[Migration] ✅ file_content column already exists
+[Migration] ✅ chat_messages email index ready
+[Migration] ✅ documents email index ready
+[Migration] ✅ users username index ready
+[Migration] ✅ All database tables and indices created successfully
+[DbStorage] ✅ Database schema verified - User credentials will PERSIST
+[Auth] ✅ Admin user already exists in database. ID: be4efa52-d502-4745-8a85-df401416e2ad
+9:10:33 AM [express] serving on port 8080
+9:18:16 AM [express] GET /api/chat 304 in 447ms :: [{"id":"19b5932f-342c-4c4b-b64d-1db57e7b5305","na…
+9:18:22 AM [express] GET /api/chat 200 in 20ms :: [{"id":"19b5932f-342c-4c4b-b64d-1db57e7b5305","nam…
+9:18:24 AM [express] GET /api/chat 304 in 7ms :: [{"id":"19b5932f-342c-4c4b-b64d-1db57e7b5305","name…
+9:18:26 AM [express] GET /api/chat 304 in 10ms :: [{"id":"19b5932f-342c-4c4b-b64d-1db57e7b5305","nam…
+9:18:28 AM [express] GET /api/chat 304 in 7ms :: [{"id":"19b5932f-342c-4c4b-b64d-1db57e7b5305","name…
+9:18:30 AM [express] GET /api/chat 304 in 7ms :: [{"id":"19b5932f-342c-4c4b-b64d-1db57e7b5305","name…
+9:18:32 AM [express] GET /api/chat 304 in 8ms :: [{"id":"19b5932f-342c-4c4b-b64d-1db57e7b5305","name…
+9:18:34 AM [express] GET /api/chat 304 in 9ms :: [{"id":"19b5932f-342c-4c4b-b64d-1db57e7b5305","name…
+9:18:35 AM [express] DELETE /api/chat 200 in 65ms :: {"success":true}
+[Chat POST] CRITICAL: Received request body: { sender: 'ai', email: 'support@tncreditsolutions.com', name: 'Riley' }
+[Chat POST] Database ready, proceeding with validation
+[Chat POST] Validation successful: { sender: 'ai', email: 'support@tncreditsolutions.com' }
+[Chat POST] Message saved successfully: {
+  id: 'c0c1f0f7-8e30-48cb-bdcd-46f9cf9edbaf',
+  email: 'support@tncreditsolutions.com',
+  sender: 'ai',
+  message: 'Hi Sergey! How can I help you today?'
+}
+9:18:36 AM [express] POST /api/chat 200 in 21ms :: {"id":"c0c1f0f7-8e30-48cb-bdcd-46f9cf9edbaf","nam…
+9:18:36 AM [express] GET /api/chat 200 in 7ms :: [{"id":"c0c1f0f7-8e30-48cb-bdcd-46f9cf9edbaf","name…
+9:18:38 AM [express] GET /api/chat 304 in 7ms :: [{"id":"c0c1f0f7-8e30-48cb-bdcd-46f9cf9edbaf","name…
+9:18:40 AM [express] GET /api/chat 304 in 8ms :: [{"id":"c0c1f0f7-8e30-48cb-bdcd-46f9cf9edbaf","name…
+9:18:42 AM [express] GET /api/chat 304 in 7ms :: [{"id":"c0c1f0f7-8e30-48cb-bdcd-46f9cf9edbaf","name…
+[Chat POST] CRITICAL: Received request body: { sender: undefined, email: 'sergie820@gmail.com', name: 'Sergey' }
+[Chat POST] Database ready, proceeding with validation
+[Chat POST] Validation successful: { sender: 'visitor', email: 'sergie820@gmail.com' }
+[Chat POST] Message saved successfully: {
+  id: 'd926c608-dfb2-42bd-afdc-2c9f567a1b68',
+  email: 'sergie820@gmail.com',
+  sender: 'visitor',
+  message: 'analyze credit report and provide summary'
+}
+[AI] Visitor message received. OpenAI ready: true Email: sergie820@gmail.com
+[AI] Starting AI response generation...
+[AI] Detected urgent situation: false
+9:18:44 AM [express] POST /api/chat 200 in 13ms :: {"id":"d926c608-dfb2-42bd-afdc-2c9f567a1b68","nam…
+[AI] User has uploaded documents: false Count: 0
+[AI] Current session only - total messages: 1 current session: 1
+[AI] Conversation turns: 1 Previous topics: []
+[AI] Using standard prompt, visitor turns: 1 session message count: 1
+[AI] Fresh session - using simple greeting prompt
+9:18:44 AM [express] GET /api/chat 200 in 7ms :: [{"id":"d926c608-dfb2-42bd-afdc-2c9f567a1b68","name…
+[AI] Full response: {
+      "finish_reason": "stop"
+  "id": "chatcmpl-ChBOGqZLdgh5yMAfLz0J6ZUY5A5TS",
+  "object": "chat.completion",
+  "created": 1764407924,
+    }
+  "model": "gpt-4o-2024-08-06",
+  ],
+  "choices": [
+  "usage": {
+    {
+      "index": 0,
+    "prompt_tokens": 137,
+      "message": {
+        "role": "assistant",
+    "completion_tokens": 78,
+        "content": "Of course, I'd be happy to help with that! Before we get started, could you tell me a bit more about your current credit concerns and what prompted you to reach out to us today? This will help me provide the most relevant advice tailored to your situation. If you have your credit report handy, feel free to share some details or specific areas you’d like me to focus on.",
+    "total_tokens": 215,
