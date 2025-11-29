@@ -239,7 +239,14 @@ async function generateAndSavePDF(document: any, analysisText?: string): Promise
       }
 
       const trimmedLine = line.trim();
-      if (!trimmedLine || trimmedLine.includes("═") || trimmedLine.includes("---")) continue;
+      // Skip empty lines, dividers, corrupted text, and unwanted metadata
+      if (!trimmedLine || 
+          trimmedLine.includes("═") || 
+          trimmedLine.includes("---") ||
+          trimmedLine.includes("Confidential") ||
+          trimmedLine.includes("© 2025") ||
+          trimmedLine.match(/^TN CREDIT SOLUTIONS/) ||
+          trimmedLine.match(/^Page \d+/)) continue;
 
       // IMPROVEMENT #3: Better Visual Hierarchy - Detect and format section headers
       if (line.match(/^#+\s+/) || (trimmedLine.length < 60 && trimmedLine === trimmedLine.toUpperCase() && trimmedLine.length > 5)) {
@@ -305,8 +312,14 @@ async function generateAndSavePDF(document: any, analysisText?: string): Promise
         actionItemNum++;
       }
       // Bullet points with enhanced styling
-      else if (line.match(/^\s*[-•▪*]\s+/)) {
-        const cleanContent = line.replace(/^\s*[-•▪*]\s+/, "").replace(/\*\*/g, "").trim();
+      else if (line.match(/^\s*[-•▪*%]\s+/) || trimmedLine.startsWith("%Ï")) {
+        // Handle corrupted %Ï characters and standard bullets
+        const cleanContent = line
+          .replace(/^\s*[-•▪*%]\s+/, "")
+          .replace(/^%Ï\s*/, "")
+          .replace(/\*\*/g, "")
+          .replace(/%Ï/g, "")
+          .trim();
         if (cleanContent) {
           const { color } = getRiskColor(cleanContent);
           doc.fontSize(9).fillColor(color);
@@ -319,11 +332,17 @@ async function generateAndSavePDF(document: any, analysisText?: string): Promise
       }
       // Regular content
       else if (trimmedLine.length > 0) {
-        const cleanLine = trimmedLine.replace(/\*\*/g, "");
-        doc.fontSize(9).fillColor("#4b5563").font("Helvetica");
-        const wrappedHeight = doc.heightOfString(cleanLine, { width: 510 });
-        doc.text(cleanLine, 48, yPosition, { width: 510 });
-        yPosition += wrappedHeight + 5;
+        const cleanLine = trimmedLine
+          .replace(/\*\*/g, "")
+          .replace(/%Ï/g, "")
+          .trim();
+        // Skip overly short lines that are likely corrupted metadata
+        if (cleanLine.length > 2) {
+          doc.fontSize(9).fillColor("#4b5563").font("Helvetica");
+          const wrappedHeight = doc.heightOfString(cleanLine, { width: 510 });
+          doc.text(cleanLine, 48, yPosition, { width: 510 });
+          yPosition += wrappedHeight + 5;
+        }
       }
     }
 
@@ -351,6 +370,23 @@ async function generateAndSavePDF(document: any, analysisText?: string): Promise
 function cleanAnalysisText(rawText: string): string {
   // Remove code blocks
   let cleaned = rawText.replace(/^(```.*?\n|```)/gm, "");
+  
+  // Remove unwanted PDF metadata lines
+  cleaned = cleaned
+    .split('\n')
+    .filter(line => {
+      const trimmed = line.trim();
+      // Filter out original PDF headers and metadata
+      if (trimmed.includes("CREDIT REPORT ANALYSIS FOR") ||
+          trimmed.includes("Report Date:") ||
+          trimmed.match(/^Report Date:.*\d{4}$/) ||
+          trimmed.match(/^Date:.*\d{4}$/) ||
+          trimmed === "" && line === "") {
+        return false;
+      }
+      return true;
+    })
+    .join('\n');
   
   // Remove common conversational openers and fallback messages
   const conversationalPatterns = [
