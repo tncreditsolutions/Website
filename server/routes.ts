@@ -68,15 +68,16 @@ async function generateAndSavePDF(document: any, analysisText?: string): Promise
     const MAX_CONTENT_Y = PAGE_HEIGHT - FOOTER_HEIGHT;
     let yPosition = 160;
     
-    // Use passed analysis text, fall back to document.aiAnalysis, or use empty
-    const finalAnalysis = analysisText || document.aiAnalysis || "";
-    console.log("[PDF Save] Document ID:", document.id, "Analysis source:", analysisText ? "parameter" : "document.aiAnalysis", "length:", finalAnalysis.length);
-    if (!finalAnalysis) {
-      console.error("[PDF Save] No AI analysis found for document:", document.id);
+    // Use ONLY the passed analysis text - do NOT fall back to database to avoid sync issues on Railway
+    const finalAnalysis = analysisText || "";
+    console.log("[PDF Save] Document ID:", document.id, "Using analysisText parameter, length:", finalAnalysis.length);
+    
+    if (!finalAnalysis || finalAnalysis.trim().length === 0) {
+      console.error("[PDF Save] ERROR: No AI analysis provided for document:", document.id, "- analysisText length:", analysisText?.length || 0);
       doc.end();
       return new Promise((resolve) => {
         writeStream.on('finish', () => {
-          console.log("[PDF Save] Empty PDF saved (no analysis):", pdfFileName);
+          console.log("[PDF Save] Empty PDF saved (no analysis provided):", pdfFileName);
           resolve(pdfFileName);
         });
       });
