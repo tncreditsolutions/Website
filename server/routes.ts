@@ -154,8 +154,8 @@ async function generateAndSavePDF(document: any, analysisText?: string): Promise
     const addPageHeader = () => {
       doc.rect(0, 0, 612, 40).fill("#0f2d6e");
       doc.fontSize(11).font("Helvetica-Bold").fillColor("#fbbf24");
-      doc.text("TN CREDIT SOLUTIONS - " + (document.visitorName || "Credit Analysis"), 40, 10);
-      doc.fontSize(9).fillColor("#c5d3ff").text("Page " + pageNum, 550, 14);
+      doc.text("TN CREDIT SOLUTIONS - " + (document.visitorName || "Credit Analysis"), 40, 10, { width: 450 });
+      doc.fontSize(9).fillColor("#c5d3ff").text("Page " + pageNum, 500, 14, { width: 100, align: "right" });
     };
 
     // Helper: Add footer with page number
