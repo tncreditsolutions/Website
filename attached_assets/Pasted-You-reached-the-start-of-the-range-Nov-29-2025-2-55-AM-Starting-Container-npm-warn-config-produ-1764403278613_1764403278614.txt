@@ -1,0 +1,106 @@
+You reached the start of the range
+Nov 29, 2025, 2:55 AM
+Starting Container
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 build
+> vite build && esbuild server/index-prod.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/index.js
+vite v5.4.20 building for production...
+transforming...
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+✓ 1742 modules transformed.
+rendering chunks...
+computing gzip size...
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+../dist/public/index.html                                            2.37 kB │ gzip:   0.95 kB
+✓ built in 4.95s
+../dist/public/assets/ready_for_better_future_hero-C6oVMAMg.png    945.56 kB
+../dist/public/assets/client_testimonial_photo_2-B8UX-XkM.png    1,312.17 kB
+../dist/public/assets/client_testimonial_photo_1-C49icyGe.png    1,313.43 kB
+../dist/public/assets/client_testimonial_photo_3-BHvJgOFH.png    1,457.77 kB
+../dist/public/assets/pdf.worker-zxMdjS_u.mjs                    1,916.05 kB
+../dist/public/assets/index-B2cAoITb.css                            96.33 kB │ gzip:  14.74 kB
+../dist/public/assets/index-CPa9H5E2.js                            874.31 kB │ gzip: 261.31 kB
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+  dist/index.js  68.4kb
+⚡ Done in 11ms
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+[DbStorage] ✅ Database connected successfully
+[Migration] Checking if database tables exist...
+[AI] ✅ pdf-parse loaded successfully
+[AI] OpenAI initialized: true API key available: true
+[Migration] ✅ users username index ready
+[Migration] ✅ All database tables and indices created successfully
+[DbStorage] ✅ Database schema verified - User credentials will PERSIST
+[Migration] ✅ users table ready
+[Migration] ✅ contact_submissions table ready
+[Migration] ✅ chat_messages table ready
+[Migration] ✅ newsletter_subscriptions table ready
+[Migration] ✅ documents table ready
+[Migration] ✅ chat_messages email index ready
+[Migration] ✅ documents email index ready
+[Auth] ✅ Admin user already exists in database. ID: be4efa52-d502-4745-8a85-df401416e2ad
+7:56:34 AM [express] serving on port 8080
+7:59:10 AM [express] GET /api/chat 304 in 28ms :: [{"id":"9336fb18-539a-4037-bd28-6e8cb23b008e","nam…
+[DbStorage] Error fetching documents from database: NeonDbError: column "file_content" does not exist
+    at execute (file:///app/node_modules/@neondatabase/serverless/index.mjs:1556:55)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonHttpPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-http/session.js:40:20)
+    at async DbStorage.getAllDocuments (file:///app/dist/index.js:417:24)
+    at async file:///app/dist/index.js:1297:28 {
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '86',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn',
+  sourceError: undefined
+}
+7:59:12 AM [express] GET /api/documents 200 in 8ms :: []
+7:59:12 AM [express] GET /api/newsletter 304 in 1ms :: []
+7:59:12 AM [express] GET /api/chat 304 in 31ms :: [{"id":"9336fb18-539a-4037-bd28-6e8cb23b008e","nam…
+7:59:14 AM [express] GET /api/auth/check 401 in 3ms :: {"authenticated":false}
+7:59:14 AM [express] GET /api/chat 304 in 11ms :: [{"id":"9336fb18-539a-4037-bd28-6e8cb23b008e","nam…
+7:59:16 AM [express] GET /api/chat 304 in 6ms :: [{"id":"9336fb18-539a-4037-bd28-6e8cb23b008e","name…
+7:59:18 AM [express] GET /api/chat 304 in 6ms :: [{"id":"9336fb18-539a-4037-bd28-6e8cb23b008e","name…
+7:59:20 AM [express] GET /api/chat 304 in 5ms :: [{"id":"9336fb18-539a-4037-bd28-6e8cb23b008e","name…
+[Auth] Login attempt
+[Auth] Received username: admin
+[Auth] User lookup result: Found
+[Auth] Password check: Valid
+[Auth] Session set, userId: be4efa52-d502-4745-8a85-df401416e2ad
+[Auth] Login successful
+7:59:20 AM [express] POST /api/auth/login 200 in 80ms :: {"success":true,"user":{"id":"be4efa52-d502…
+7:59:21 AM [express] GET /api/auth/check 200 in 0ms :: {"authenticated":true}
+7:59:21 AM [express] GET /api/chat 304 in 8ms :: [{"id":"9336fb18-539a-4037-bd28-6e8cb23b008e","name…
+7:59:21 AM [express] GET /api/contact 200 in 1ms :: []
+7:59:21 AM [express] GET /api/newsletter 304 in 1ms :: []
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn',
+  sourceError: undefined
+}
+[DbStorage] Error fetching documents from database: NeonDbError: column "file_content" does not exist
+    at execute (file:///app/node_modules/@neondatabase/serverless/index.mjs:1556:55)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonHttpPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-http/session.js:40:20)
+    at async DbStorage.getAllDocuments (file:///app/dist/index.js:417:24)
+    at async file:///app/dist/index.js:1297:28 {
+  severity: 'ERROR',
+  code: '42703',
