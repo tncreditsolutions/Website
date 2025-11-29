@@ -52,19 +52,25 @@ export default function ChatWidget() {
     mutationFn: async (data: any) => {
       return apiRequest("POST", "/api/chat", data);
     },
-    onSuccess: async (response: any) => {
-      // Add visitor message to session display only
-      setSessionMessages(prev => [...prev, {
-        id: response.id || `temp-${Date.now()}`,
-        name: response.name,
-        email: response.email,
-        message: response.message,
-        sender: response.sender || "visitor",
-        isEscalated: response.isEscalated || "false",
-        createdAt: response.createdAt || new Date().toISOString(),
-      }]);
-      // Save visitor info for next time
-      localStorage.setItem(VISITOR_INFO_KEY, JSON.stringify({ name, email }));
+    onSuccess: async (responseBlob: any) => {
+      try {
+        // Parse JSON response
+        const response = await responseBlob.json();
+        // Add visitor message to session display only
+        setSessionMessages(prev => [...prev, {
+          id: response.id || `temp-${Date.now()}`,
+          name: response.name || name,
+          email: response.email || email,
+          message: response.message,
+          sender: response.sender || "visitor",
+          isEscalated: response.isEscalated || "false",
+          createdAt: response.createdAt || new Date().toISOString(),
+        }]);
+        // Save visitor info for next time
+        localStorage.setItem(VISITOR_INFO_KEY, JSON.stringify({ name, email }));
+      } catch (error) {
+        console.error("[Chat] Error parsing response:", error);
+      }
     },
     onError: (error: any) => {
       toast({
@@ -306,14 +312,14 @@ export default function ChatWidget() {
     // Send greeting message from AI agent
     try {
       console.log("[Chat Form] Sending greeting message from Riley");
-      const greetingBlob = await apiRequest("POST", "/api/chat", {
+      const greetingResponseBlob = await apiRequest("POST", "/api/chat", {
         name: "Riley",
         email: "support@tncreditsolutions.com",
         message: `Hi ${trimmedName}! How can I help you today?`,
         sender: "ai",
         isEscalated: "false",
       });
-      const greetingResponse = await greetingBlob.json();
+      const greetingResponse = await greetingResponseBlob.json();
       console.log("[Chat Form] Greeting sent successfully");
       
       // Add greeting to session messages for display
