@@ -307,8 +307,14 @@ export default function ChatWidget() {
         isEscalated: "false",
       });
       console.log("[Chat Form] Greeting sent successfully:", greetingResponse.status);
+      
+      // CRITICAL: Refetch the messages immediately and wait for them to load
+      // before showing the chat area. This ensures Riley's greeting appears immediately.
+      console.log("[Chat Form] Invalidating and refetching chat messages");
+      await queryClient.refetchQueries({ queryKey: ["/api/chat"] });
+      console.log("[Chat Form] Messages refetched, now showing chat");
+      
       setIsNewVisitor(false);
-      queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
     } catch (error: any) {
       console.error("[Chat Form] CRITICAL: Failed to send greeting:", {
         error: error?.message || String(error),

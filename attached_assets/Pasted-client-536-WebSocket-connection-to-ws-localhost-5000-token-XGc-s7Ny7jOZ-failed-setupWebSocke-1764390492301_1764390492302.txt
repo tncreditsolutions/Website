@@ -1,0 +1,118 @@
+client:536 WebSocket connection to 'ws://localhost:5000/?token=XGc_s7Ny7jOZ' failed: 
+setupWebSocket @ client:536
+client:560 [vite] server connection lost. Polling for restart...
+chunk-RPCDYKBN.js?v=85b2b841:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+localhost:5000/:1  Failed to load resource: net::ERR_CONNECTION_REFUSED
+localhost:5000/:1  Failed to load resource: net::ERR_CONNECTION_REFUSED
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+ChatWidget.tsx:258 [Chat Form] Submit handler called {name: 'Sergey', email: 'sergie820@gmail.com'}
+ChatWidget.tsx:285 [Chat Form] Validation passed, saving to localStorage
+ChatWidget.tsx:291 [Chat Form] Attempting to clear previous messages
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+ChatWidget.tsx:293 [Chat Form] Successfully cleared previous messages
+ChatWidget.tsx:301 [Chat Form] Sending greeting message from Riley
+ChatWidget.tsx:309 [Chat Form] Greeting sent successfully: 200
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+ChatWidget.tsx:95 [Upload] Timezone: America/New_York Now UTC: 2025-11-29T04:26:28.024Z Formatted: 11/28/2025 For filename: 11-28-2025
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+ChatWidget.tsx:117 [Upload] Document uploaded successfully: {id: '971ca8dc-d72b-407b-81dc-1be8f858f68d', visitorEmail: 'sergie820@gmail.com', visitorName: 'Sergey', fileName: 'Experian.pdf', fileType: 'application/pdf', …}
+ChatWidget.tsx:128 [Upload] Analysis complete, directing to PDF download
+ChatWidget.tsx:138 [Upload] Download message sent successfully
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
+client:736  GET http://localhost:5000/ net::ERR_CONNECTION_REFUSED
+ping @ client:736
+waitForSuccessfulPing @ client:755
