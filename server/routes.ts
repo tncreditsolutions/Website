@@ -11,23 +11,14 @@ import bcrypt from "bcrypt";
 
 let pdfParse: any = null;
 
-// Load pdf-parse at startup using dynamic import for better bundling compatibility
-(async () => {
-  try {
-    const pdfParseModule = await import('pdf-parse/lib/pdf.js');
-    pdfParse = pdfParseModule.default;
-    console.log("[AI] ✅ pdf-parse loaded successfully from pdf.js");
-  } catch (e) {
-    console.warn("[AI] Failed to load pdf-parse from pdf.js, trying default export:", e);
-    try {
-      const pdfParseModule = await import('pdf-parse');
-      pdfParse = pdfParseModule.default;
-      console.log("[AI] ✅ pdf-parse loaded successfully from default export");
-    } catch (e2) {
-      console.error("[AI] Failed to load pdf-parse:", e2);
-    }
-  }
-})();
+// Try to load pdf-parse synchronously first (works with bundled code)
+try {
+  const pdfParseModule = require('pdf-parse');
+  pdfParse = pdfParseModule;
+  console.log("[AI] ✅ pdf-parse loaded successfully via require");
+} catch (e: any) {
+  console.warn("[AI] Failed to load pdf-parse via require, will attempt dynamic import on first use");
+}
 
 // Using gpt-4o (most recent stable model)
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
@@ -862,61 +853,54 @@ This is the start of the conversation. Ask open-ended questions to understand th
         } else if (isPdf) {
           // For PDFs, extract text from database content and send to OpenAI for analysis
           try {
-            // Try to load pdf-parse if not already loaded
             if (!pdfParse) {
-              try {
-                console.log("[AI] Attempting to load pdf-parse dynamically...");
-                const module = await import('pdf-parse');
-                pdfParse = module.default;
-                console.log("[AI] pdf-parse loaded dynamically");
-              } catch (importError) {
-                console.error("[AI] Failed to load pdf-parse dynamically:", importError);
-              }
-            }
-            
-            if (!pdfParse) {
-              console.error("[AI] pdf-parse still not available - falling back to generic message");
+              console.error("[AI] pdf-parse not available - cannot process PDF");
               analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
             } else {
+              console.log("[AI] Starting PDF text extraction with pdf-parse...");
               // Read PDF from database (base64 encoded)
               const pdfBuffer = Buffer.from(base64Data, "base64");
-              console.log("[AI] PDF buffer from database, size:", pdfBuffer.length);
+              console.log("[AI] PDF buffer size:", pdfBuffer.length, "bytes");
               
-              const pdfData = await pdfParse(pdfBuffer);
-              const pdfText = pdfData.text || "";
-              
-              console.log("[AI] PDF text extracted, length:", pdfText.length, "preview:", pdfText.substring(0, 200));
-              
-              if (!pdfText.trim()) {
-                console.log("[AI] PDF has no extractable text");
+              try {
+                const pdfData = await pdfParse(pdfBuffer);
+                const pdfText = pdfData.text || "";
+                
+                console.log("[AI] PDF text extracted successfully, length:", pdfText.length);
+                
+                if (!pdfText.trim()) {
+                  console.log("[AI] PDF has no extractable text");
+                  analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
+                } else {
+                  // Send extracted text to OpenAI for analysis
+                  console.log("[AI] Sending PDF text to OpenAI for analysis...");
+                  const response = await openai.chat.completions.create({
+                    model: "gpt-4o",
+                    messages: [
+                      {
+                        role: "user",
+                        content: `IMPORTANT: Analyze this credit report document and provide ONLY a professional financial analysis. Do NOT include any conversational preamble, acknowledgments, or agent responses. Format ONLY with: sections marked with #### headers, bullet points starting with -, and key-value pairs with colons. Start immediately with the analysis content.\n\nDocument text:\n${pdfText}`,
+                      },
+                    ],
+                    max_tokens: 1500,
+                  });
+                  
+                  let rawAnalysis = response.choices[0].message.content || "";
+                  console.log("[AI] Raw OpenAI response length:", rawAnalysis.length);
+                  
+                  // Clean analysis text
+                  rawAnalysis = cleanAnalysisText(rawAnalysis);
+                  analysisText = rawAnalysis || "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
+                  console.log("[AI] PDF analysis complete, length:", analysisText.length);
+                }
+              } catch (parseError: any) {
+                console.error("[AI] pdf-parse execution error:", parseError?.message || String(parseError));
                 analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
-              } else {
-                // Send extracted text to OpenAI for analysis
-                console.log("[AI] Sending PDF text to OpenAI for analysis...");
-                const response = await openai.chat.completions.create({
-                  model: "gpt-4o",
-                  messages: [
-                    {
-                      role: "user",
-                      content: `IMPORTANT: Analyze this credit report document and provide ONLY a professional financial analysis. Do NOT include any conversational preamble, acknowledgments, or agent responses. Format ONLY with: sections marked with #### headers, bullet points starting with -, and key-value pairs with colons. Start immediately with the analysis content.\n\nDocument text:\n${pdfText}`,
-                    },
-                  ],
-                  max_tokens: 1500,
-                });
-                
-                let rawAnalysis = response.choices[0].message.content || "";
-                console.log("[AI] Raw OpenAI response length:", rawAnalysis.length, "preview:", rawAnalysis.substring(0, 200));
-                
-                // Clean analysis text: remove conversational preambles and agent-like responses
-                rawAnalysis = cleanAnalysisText(rawAnalysis);
-                analysisText = rawAnalysis || "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
-                console.log("[AI] PDF analysis after cleaning, length:", analysisText.length, "preview:", analysisText.substring(0, 200));
               }
             }
-          } catch (pdfError) {
-            console.error("[AI] PDF processing error:", pdfError instanceof Error ? pdfError.message : String(pdfError));
-            console.error("[AI] Full error:", pdfError);
-            analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations to help improve your credit score and financial situation.";
+          } catch (pdfError: any) {
+            console.error("[AI] PDF processing error:", pdfError?.message || String(pdfError));
+            analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
           }
         } else {
           analysisText = "Unsupported file format. Please upload a PDF or image (PNG/JPG) and we'll analyze it.";

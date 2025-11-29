@@ -1,0 +1,106 @@
+You reached the start of the range
+Nov 29, 2025, 3:14 AM
+Starting Container
+transforming...
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 build
+> vite build && esbuild server/index-prod.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/index.js
+vite v5.4.20 building for production...
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+✓ 1742 modules transformed.
+rendering chunks...
+computing gzip size...
+../dist/public/index.html                                            2.37 kB │ gzip:   0.95 kB
+../dist/public/assets/ready_for_better_future_hero-C6oVMAMg.png    945.56 kB
+../dist/public/assets/client_testimonial_photo_2-B8UX-XkM.png    1,312.17 kB
+../dist/public/assets/client_testimonial_photo_1-C49icyGe.png    1,313.43 kB
+../dist/public/assets/client_testimonial_photo_3-BHvJgOFH.png    1,457.77 kB
+../dist/public/assets/pdf.worker-zxMdjS_u.mjs                    1,916.05 kB
+../dist/public/assets/index-B2cAoITb.css                            96.33 kB │ gzip:  14.74 kB
+../dist/public/assets/index-CPa9H5E2.js                            874.31 kB │ gzip: 261.31 kB
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 4.68s
+  dist/index.js  70.9kb
+⚡ Done in 8ms
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+[DbStorage] ✅ Database connected successfully
+[Migration] Checking if database tables exist...
+[AI] OpenAI initialized: true API key available: true
+[AI] Failed to load pdf-parse from pdf.js, trying default export: Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: Package subpath './lib/pdf.js' is not defined by "exports" in /app/node_modules/pdf-parse/package.json imported from /app/dist/index.js
+    at ModuleLoader.resolve (node:internal/modules/esm/loader:708:38)
+    at exportsNotFound (node:internal/modules/esm/resolve:313:10)
+    at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:310:38)
+    at packageExportsResolve (node:internal/modules/esm/resolve:660:9)
+    at onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:664:36)
+    at packageResolve (node:internal/modules/esm/resolve:773:12)
+    at TracingChannel.tracePromise (node:diagnostics_channel:350:14) {
+  code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'
+    at moduleResolve (node:internal/modules/esm/resolve:853:18)
+}
+    at defaultResolve (node:internal/modules/esm/resolve:983:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:731:20)
+[AI] ✅ pdf-parse loaded successfully from default export
+[Migration] ✅ users table ready
+[Migration] ✅ contact_submissions table ready
+[Migration] ✅ chat_messages table ready
+[Migration] ✅ newsletter_subscriptions table ready
+[Migration] ✅ documents table ready
+[Migration] ✅ chat_messages email index ready
+[Migration] ✅ documents email index ready
+[Migration] ✅ users username index ready
+[Migration] ✅ All database tables and indices created successfully
+[DbStorage] ✅ Database schema verified - User credentials will PERSIST
+[Auth] ✅ Admin user already exists in database. ID: be4efa52-d502-4745-8a85-df401416e2ad
+8:15:28 AM [express] serving on port 8080
+8:15:30 AM [express] GET /api/chat 304 in 11ms :: [{"id":"6c0932ef-8387-4b50-a4d6-b5e9df18cab3","nam…
+8:15:36 AM [express] GET /api/chat 200 in 26ms :: [{"id":"6c0932ef-8387-4b50-a4d6-b5e9df18cab3","nam…
+8:15:38 AM [express] GET /api/chat 304 in 8ms :: [{"id":"6c0932ef-8387-4b50-a4d6-b5e9df18cab3","name…
+8:15:40 AM [express] GET /api/chat 200 in 9ms :: [{"id":"6c0932ef-8387-4b50-a4d6-b5e9df18cab3","name…
+8:15:42 AM [express] GET /api/chat 304 in 8ms :: [{"id":"6c0932ef-8387-4b50-a4d6-b5e9df18cab3","name…
+8:15:44 AM [express] GET /api/chat 304 in 9ms :: [{"id":"6c0932ef-8387-4b50-a4d6-b5e9df18cab3","name…
+8:15:46 AM [express] GET /api/chat 304 in 7ms :: [{"id":"6c0932ef-8387-4b50-a4d6-b5e9df18cab3","name…
+8:15:48 AM [express] GET /api/chat 304 in 9ms :: [{"id":"6c0932ef-8387-4b50-a4d6-b5e9df18cab3","name…
+8:15:50 AM [express] DELETE /api/chat 200 in 24ms :: {"success":true}
+[Chat POST] CRITICAL: Received request body: { sender: 'ai', email: 'support@tncreditsolutions.com', name: 'Riley' }
+[Chat POST] Database ready, proceeding with validation
+[Chat POST] Validation successful: { sender: 'ai', email: 'support@tncreditsolutions.com' }
+[Chat POST] Message saved successfully: {
+  id: '47580b3f-8c08-4847-baa8-74c3516e1ccd',
+  email: 'support@tncreditsolutions.com',
+  sender: 'ai',
+  message: 'Hi Sergey! How can I help you today?'
+}
+8:15:50 AM [express] POST /api/chat 200 in 14ms :: {"id":"47580b3f-8c08-4847-baa8-74c3516e1ccd","nam…
+8:15:50 AM [express] GET /api/chat 200 in 7ms :: [{"id":"47580b3f-8c08-4847-baa8-74c3516e1ccd","name…
+8:15:52 AM [express] GET /api/chat 304 in 8ms :: [{"id":"47580b3f-8c08-4847-baa8-74c3516e1ccd","name…
+8:15:55 AM [express] GET /api/chat 304 in 8ms :: [{"id":"47580b3f-8c08-4847-baa8-74c3516e1ccd","name…
+8:15:57 AM [express] GET /api/chat 304 in 6ms :: [{"id":"47580b3f-8c08-4847-baa8-74c3516e1ccd","name…
+[Chat POST] CRITICAL: Received request body: { sender: undefined, email: 'sergie820@gmail.com', name: 'Sergey' }
+[Chat POST] Database ready, proceeding with validation
+[Chat POST] Validation successful: { sender: 'visitor', email: 'sergie820@gmail.com' }
+[Chat POST] Message saved successfully: {
+  id: 'f4769ab6-2282-4561-9b5f-d86a24d567dc',
+  email: 'sergie820@gmail.com',
+  sender: 'visitor',
+  message: 'analyze credit report and provide summary'
+}
+[AI] Visitor message received. OpenAI ready: true Email: sergie820@gmail.com
+[AI] Starting AI response generation...
+[AI] Detected urgent situation: false
+8:15:58 AM [express] POST /api/chat 200 in 11ms :: {"id":"f4769ab6-2282-4561-9b5f-d86a24d567dc","nam…
+[AI] User has uploaded documents: false Count: 0
+[AI] Current session only - total messages: 1 current session: 1
+[AI] Conversation turns: 1 Previous topics: []
+[AI] Using standard prompt, visitor turns: 1 session message count: 1
+[AI] Fresh session - using simple greeting prompt
+8:15:58 AM [express] GET /api/chat 200 in 6ms :: [{"id":"f4769ab6-2282-4561-9b5f-d86a24d567dc","name…
+[AI] Full response: {
+  "id": "chatcmpl-ChAPXAbedC1xhwiii6l9FhaJxhqZO",
+  "object": "chat.completion",
+    }
+  "created": 1764404159,
