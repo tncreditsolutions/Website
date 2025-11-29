@@ -26,10 +26,10 @@ async function analyzePdfWithClaude(pdfBuffer: Buffer, fileName: string): Promis
     console.log("[AI] PDF encoded to base64, length:", pdfBase64.length, "chars");
     
     // Send to Claude with native PDF support
-    console.log("[AI] Sending PDF to Claude for analysis with claude-3-5-haiku...");
+    console.log("[AI] Sending PDF to Claude for analysis with claude-haiku-4-5...");
     
     const response = await claude.messages.create({
-      model: "claude-3-5-haiku-20241022",
+      model: "claude-haiku-4-5-20251001",
       max_tokens: 2000,
       messages: [
         {
