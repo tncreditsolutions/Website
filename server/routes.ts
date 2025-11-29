@@ -496,19 +496,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/chat", async (req, res) => {
     try {
-      const { sender, ...data } = req.body;
-      const validatedData = insertChatMessageSchema.parse(data);
-      const senderType = sender || "visitor";
-      const message = await storage.createChatMessage({
-        ...validatedData,
-        sender: senderType,
-      });
+      const validatedData = insertChatMessageSchema.parse(req.body);
+      const message = await storage.createChatMessage(validatedData);
       
       // Return immediately, then generate AI response in background (non-blocking)
       res.json(message);
       
       // Generate AI response asynchronously without blocking the response
-      if (senderType === "visitor") {
+      if (message.sender === "visitor") {
         console.log("[AI] Visitor message received. OpenAI ready:", !!openai, "Email:", message.email);
         if (!openai) {
           console.error("[AI] OpenAI client not initialized - API key missing");
