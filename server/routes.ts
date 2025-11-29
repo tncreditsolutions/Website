@@ -9,54 +9,80 @@ import path from "path";
 import PDFDocument from "pdfkit";
 import bcrypt from "bcrypt";
 
-// For PDFs: Since they're scanned documents with no extractable text, we need the PDF to be 
-// uploaded as an image (PNG/JPG) instead for proper analysis via OpenAI's vision API.
-// This function returns empty string, triggering the fallback message.
-async function analyzePdfWithVision(pdfBuffer: Buffer): Promise<string> {
+// Analyze PDF using OpenAI Files API for professional document handling
+async function analyzePdfWithOpenAI(pdfBuffer: Buffer, fileName: string): Promise<string> {
+  let fileId: string | null = null;
   try {
-    console.log("[AI] PDF analysis: Scanned PDFs require image format for vision analysis");
-    console.log("[AI] Trying text extraction first...");
+    console.log("[AI] Starting PDF analysis via OpenAI Files API");
     
-    // Try to extract any text from PDF (works for born-digital PDFs, not scanned)
-    const pdfjsLib = await import('pdfjs-dist');
-    const pdf = await pdfjsLib.getDocument(pdfBuffer).promise;
-    console.log("[AI] PDF loaded, pages:", pdf.numPages);
+    // Upload PDF to OpenAI Files API
+    console.log("[AI] Uploading PDF to OpenAI Files API...");
     
-    let extractedText = "";
-    const pagesToCheck = Math.min(2, pdf.numPages);
+    // Create a Blob-like object from the buffer
+    const file = new (await import('fetch')).File([pdfBuffer], fileName, { type: 'application/pdf' });
     
-    for (let i = 1; i <= pagesToCheck; i++) {
-      const page = await pdf.getPage(i);
-      const textContent = await page.getTextContent();
-      const pageText = textContent.items.map((item: any) => item.str).join(" ");
-      extractedText += pageText + " ";
+    const uploadResponse = await (openai as any).beta.files.create({
+      file: file,
+      purpose: 'assistants'
+    });
+    
+    fileId = uploadResponse.id;
+    console.log("[AI] File uploaded successfully, fileId:", fileId);
+    
+    // Use the file for analysis via vision/document processing
+    // For now, we'll use the chat API with file context
+    console.log("[AI] Analyzing PDF with OpenAI...");
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: "Please analyze this credit report PDF and provide a professional financial analysis. Include key findings, credit score insights, account information, and recommendations. Format with #### headers, bullet points with -, and key-value pairs with colons. Start immediately with the analysis, no preamble.",
+            },
+            {
+              type: "document",
+              document: {
+                type: "file",
+                file_id: fileId,
+              },
+            } as any,
+          ],
+        },
+      ],
+      max_tokens: 2000,
+    });
+    
+    const analysis = response.choices[0].message.content || "";
+    console.log("[AI] PDF analysis complete, length:", analysis.length);
+    
+    // Clean up: delete the file from OpenAI
+    try {
+      await (openai as any).beta.files.delete(fileId);
+      console.log("[AI] Temporary file deleted from OpenAI");
+    } catch (deleteError) {
+      console.log("[AI] Note: Could not delete temporary file from OpenAI");
     }
     
-    if (extractedText.trim().length > 100) {
-      console.log("[AI] Text extraction successful, length:", extractedText.trim().length);
-      // Send extracted text to OpenAI for analysis
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "user",
-            content: `Analyze this credit report and provide ONLY professional financial analysis. Format with #### headers, bullet points with -, and key-value pairs with colons. Start immediately with analysis.\n\nReport text:\n${extractedText}`,
-          },
-        ],
-        max_tokens: 1500,
-      });
-      
-      const analysis = response.choices[0].message.content || "";
-      if (analysis.trim().length > 10) {
-        console.log("[AI] PDF analysis successful via text extraction");
-        return cleanAnalysisText(analysis);
+    if (analysis.trim().length > 50) {
+      return cleanAnalysisText(analysis);
+    }
+    
+    return "";
+  } catch (e: any) {
+    console.error("[AI] PDF analysis error:", e?.message);
+    
+    // Attempt cleanup if upload succeeded but analysis failed
+    if (fileId) {
+      try {
+        await (openai as any).beta.files.delete(fileId);
+      } catch (deleteError) {
+        console.log("[AI] Could not delete temporary file on error");
       }
     }
     
-    console.log("[AI] PDF is scanned document (no extractable text). For best results, please upload credit report as an image (PNG/JPG).");
-    return "";
-  } catch (e: any) {
-    console.error("[AI] PDF processing error:", e?.message);
     return "";
   }
 }
@@ -897,22 +923,20 @@ This is the start of the conversation. Ask open-ended questions to understand th
           rawAnalysis = cleanAnalysisText(rawAnalysis);
           analysisText = rawAnalysis || "No analysis available";
         } else if (isPdf) {
-          // For PDFs, convert pages to images and analyze with vision API (for scanned documents)
+          // For PDFs, use OpenAI Files API for professional document analysis
           try {
-            console.log("[AI] Starting PDF vision analysis...");
+            console.log("[AI] Starting PDF analysis via OpenAI Files API...");
             // Read PDF from database (base64 encoded)
             const pdfBuffer = Buffer.from(base64Data, "base64");
             console.log("[AI] PDF buffer size:", pdfBuffer.length, "bytes");
             
-            const visionAnalysis = await analyzePdfWithVision(pdfBuffer);
+            const pdfAnalysis = await analyzePdfWithOpenAI(pdfBuffer, fileName);
             
-            if (!visionAnalysis.trim()) {
-              console.log("[AI] PDF vision analysis returned empty result");
+            if (!pdfAnalysis.trim()) {
+              console.log("[AI] PDF analysis returned empty result");
               analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
             } else {
-              // Clean analysis text
-              const cleanedAnalysis = cleanAnalysisText(visionAnalysis);
-              analysisText = cleanedAnalysis || "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
+              analysisText = pdfAnalysis;
               console.log("[AI] PDF analysis complete, length:", analysisText.length);
             }
           } catch (pdfError: any) {
