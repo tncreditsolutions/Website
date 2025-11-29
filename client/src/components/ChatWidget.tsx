@@ -129,13 +129,14 @@ export default function ChatWidget() {
         console.log("[Upload] Analysis complete, directing to PDF download");
         try {
           // Send message directing user to download the PDF
-          const response = await apiRequest("POST", "/api/chat", {
+          const responseBlob = await apiRequest("POST", "/api/chat", {
             email: document.visitorEmail,
             name: "Riley",
             message: `I've completed my analysis of your ${document.fileName}. Your detailed credit analysis report is ready for download. Click the download button below to view your professional report with all findings, metrics, and personalized recommendations.`,
             sender: "ai",
             isEscalated: "false",
           });
+          const response = await responseBlob.json();
           console.log("[Upload] Download message sent successfully");
           
           // Add AI message to session display
@@ -143,7 +144,7 @@ export default function ChatWidget() {
             id: response.id || `temp-${Date.now()}`,
             name: "Riley",
             email: document.visitorEmail,
-            message: response.message,
+            message: response.message || `I've completed my analysis of your ${document.fileName}. Your detailed credit analysis report is ready for download.`,
             sender: "ai",
             isEscalated: "false",
             createdAt: response.createdAt || new Date().toISOString(),
@@ -305,13 +306,14 @@ export default function ChatWidget() {
     // Send greeting message from AI agent
     try {
       console.log("[Chat Form] Sending greeting message from Riley");
-      const greetingResponse = await apiRequest("POST", "/api/chat", {
+      const greetingBlob = await apiRequest("POST", "/api/chat", {
         name: "Riley",
         email: "support@tncreditsolutions.com",
         message: `Hi ${trimmedName}! How can I help you today?`,
         sender: "ai",
         isEscalated: "false",
       });
+      const greetingResponse = await greetingBlob.json();
       console.log("[Chat Form] Greeting sent successfully");
       
       // Add greeting to session messages for display
@@ -372,20 +374,31 @@ export default function ChatWidget() {
   const handleEscalate = async () => {
     try {
       // Send friendly escalation message from Riley
-      await apiRequest("POST", "/api/chat", {
+      const escalateBlob = await apiRequest("POST", "/api/chat", {
         name: "Riley",
         email: "support@tncreditsolutions.com",
         message: "Perfect! I've connected you with our specialist team. They'll review your situation and get back to you shortly with personalized guidance. Thank you for choosing TN Credit Solutions!",
         sender: "ai",
         isEscalated: "true",
       });
+      const escalateResponse = await escalateBlob.json();
+      
+      // Add escalation message to session display
+      setSessionMessages(prev => [...prev, {
+        id: escalateResponse.id || `temp-${Date.now()}`,
+        name: "Riley",
+        email: "support@tncreditsolutions.com",
+        message: "Perfect! I've connected you with our specialist team. They'll review your situation and get back to you shortly with personalized guidance. Thank you for choosing TN Credit Solutions!",
+        sender: "ai",
+        isEscalated: "true",
+        createdAt: escalateResponse.createdAt || new Date().toISOString(),
+      }]);
       
       // Reset escalation tracking
       escalationMessageIdRef.current = null;
       setEscalationTime(null);
       setShouldShowEscalationButton(false);
       setIsEscalated(true);
-      queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
     } catch (error) {
       toast({
         title: "Error",
@@ -394,6 +407,35 @@ export default function ChatWidget() {
       });
     }
   };
+
+  // Poll for new AI responses from Riley (added by background process on server)
+  useEffect(() => {
+    if (!email || isNewVisitor) return;
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const allMessagesBlob = await fetch("/api/chat");
+        const allMessages = await allMessagesBlob.json() as ChatMessage[];
+        
+        // Find messages from this email that aren't in sessionMessages
+        const newMessages = allMessages.filter(msg => 
+          msg.email === email && 
+          !sessionMessages.some(sm => sm.id === msg.id)
+        );
+        
+        // Add any new AI/admin messages to session
+        newMessages.forEach(msg => {
+          if (msg.sender === "ai" || msg.sender === "admin") {
+            setSessionMessages(prev => [...prev, msg]);
+          }
+        });
+      } catch (error) {
+        // Silently fail - don't spam errors if polling fails
+      }
+    }, 2000); // Poll every 2 seconds for new responses
+    
+    return () => clearInterval(pollInterval);
+  }, [email, isNewVisitor, sessionMessages]);
 
   const handleDownloadPDF = async () => {
     if (!lastDocumentId) {
