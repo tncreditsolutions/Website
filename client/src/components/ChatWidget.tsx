@@ -51,9 +51,11 @@ export default function ChatWidget() {
 
   // Filter messages to only show this visitor's conversation
   const messages = allMessages.filter(msg => {
-    if (!email) return false;
+    // Use email from state, but also check localStorage as fallback for fresh sessions
+    const visitorEmail = email || (localStorage.getItem(VISITOR_INFO_KEY) ? JSON.parse(localStorage.getItem(VISITOR_INFO_KEY)!).email : null);
+    if (!visitorEmail) return false;
     // Show visitor's own messages OR admin/AI replies
-    return msg.email === email || msg.sender === "admin" || msg.sender === "ai" || msg.email === "support@tncreditsolutions.com";
+    return msg.email === visitorEmail || msg.sender === "admin" || msg.sender === "ai" || msg.email === "support@tncreditsolutions.com";
   });
 
   const sendMutation = useMutation({
@@ -302,7 +304,7 @@ export default function ChatWidget() {
         email: trimmedEmail,
         message: `Hi ${trimmedName}! How can I help you today?`,
         sender: "ai",
-        isEscalated: "false",
+        isEscalated: false,
       });
       console.log("[Chat] Greeting sent successfully:", greetingResponse);
       // Force refresh immediately
