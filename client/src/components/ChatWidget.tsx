@@ -60,10 +60,11 @@ export default function ChatWidget() {
     mutationFn: async (data: any) => {
       return apiRequest("POST", "/api/chat", data);
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       // Save visitor info for next time
       localStorage.setItem(VISITOR_INFO_KEY, JSON.stringify({ name, email }));
-      queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
+      // Force fresh fetch after mutation
+      await queryClient.refetchQueries({ queryKey: ["/api/chat"] });
     },
     onError: (error: any) => {
       toast({
