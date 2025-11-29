@@ -160,13 +160,19 @@ async function generateAndSavePDF(document: any, analysisText?: string): Promise
 
     // Helper: Add footer with page number
     const addPageFooter = () => {
+      // Footer background box from y=745 to y=792 (47 points)
       doc.rect(0, 745, 612, 47).fill("#f9fafb");
       doc.moveTo(40, 745).lineTo(572, 745).strokeColor("#e5e7eb").lineWidth(0.75).stroke();
+      
+      // Footer text with proper spacing inside the box
       doc.fontSize(7).fillColor("#6b7280").font("Helvetica");
-      doc.text("Confidential - For personal use only", 40, 750, { align: "left" });
-      doc.text("© 2025 TN Credit Solutions", 40, 762, { align: "left" });
-      doc.fontSize(6).fillColor("#9ca3af");
-      doc.text("This analysis is not financial advice. Consult a qualified advisor for professional guidance.", 40, 773);
+      doc.text("Confidential - For personal use only", 40, 753, { width: 500 });
+      
+      doc.fontSize(7).fillColor("#6b7280").font("Helvetica");
+      doc.text("© 2025 TN Credit Solutions", 40, 765, { width: 500 });
+      
+      doc.fontSize(6).fillColor("#9ca3af").font("Helvetica");
+      doc.text("This analysis is not financial advice. Consult a qualified advisor for professional guidance.", 40, 775, { width: 500 });
     };
 
     // IMPROVEMENT #1: Executive Summary Box at top
@@ -269,22 +275,39 @@ async function generateAndSavePDF(document: any, analysisText?: string): Promise
           tableRows.push(cells);
           
           if (tableRows.length > 1) {
-            const rowHeight = 20;
+            // Render table with proper borders and spacing
+            const rowHeight = 18;
             const colWidth = 480 / cells.length;
             let x = 45;
+            let rowY = yPosition;
             
             tableRows.forEach((row, rowIdx) => {
-              row.forEach((cell, colIdx) => {
-                const bgColor = rowIdx > 0 && rowIdx % 2 === 0 ? "#f9fafb" : "#ffffff";
-                if (rowIdx > 0) doc.rect(x, yPosition - 2, colWidth, rowHeight).fill(bgColor);
-                
+              // Draw row background
+              const bgColor = rowIdx === 0 ? "#0f2d6e" : (rowIdx % 2 === 0 ? "#ffffff" : "#f9fafb");
+              doc.rect(45, rowY - 2, 480, rowHeight).fill(bgColor);
+              
+              // Draw cell borders
+              let cellX = 45;
+              for (let i = 0; i < cells.length; i++) {
+                doc.strokeColor("#e5e7eb").lineWidth(0.5);
+                doc.rect(cellX, rowY - 2, colWidth, rowHeight).stroke();
+                cellX += colWidth;
+              }
+              
+              // Draw cell text
+              cellX = 45;
+              row.forEach((cell) => {
                 doc.fontSize(rowIdx === 0 ? 8 : 7).font(rowIdx === 0 ? "Helvetica-Bold" : "Helvetica");
-                doc.fillColor(rowIdx === 0 ? "#0f2d6e" : "#374151");
-                doc.text(cell, x + 4, yPosition + 2, { width: colWidth - 8, height: rowHeight - 4 });
-                x += colWidth;
+                doc.fillColor(rowIdx === 0 ? "#ffffff" : "#374151");
+                const truncated = cell.length > 30 ? cell.substring(0, 27) + "..." : cell;
+                doc.text(truncated, cellX + 3, rowY + 2, { width: colWidth - 6, height: rowHeight - 4 });
+                cellX += colWidth;
               });
-              yPosition += rowHeight;
+              
+              rowY += rowHeight;
             });
+            
+            yPosition = rowY + 6;
             tableRows = [];
           }
         }
@@ -320,14 +343,16 @@ async function generateAndSavePDF(document: any, analysisText?: string): Promise
           .replace(/\*\*/g, "")
           .replace(/%Ï/g, "")
           .trim();
-        if (cleanContent) {
+        if (cleanContent && cleanContent.length > 0) {
+          // Ensure proper spacing before bullet
+          yPosition += 2;
           const { color } = getRiskColor(cleanContent);
-          doc.fontSize(9).fillColor(color);
+          doc.fontSize(10).fillColor(color);
           doc.text("●", 50, yPosition);
           doc.fontSize(9).fillColor("#374151").font("Helvetica");
-          const wrappedHeight = doc.heightOfString(cleanContent, { width: 490 });
-          doc.text(cleanContent, 65, yPosition, { width: 490 });
-          yPosition += wrappedHeight + 6;
+          const wrappedHeight = doc.heightOfString(cleanContent, { width: 485 });
+          doc.text(cleanContent, 65, yPosition + 1, { width: 485 });
+          yPosition += Math.max(wrappedHeight, 12) + 4;
         }
       }
       // Regular content
@@ -339,8 +364,8 @@ async function generateAndSavePDF(document: any, analysisText?: string): Promise
         // Skip overly short lines that are likely corrupted metadata
         if (cleanLine.length > 2) {
           doc.fontSize(9).fillColor("#4b5563").font("Helvetica");
-          const wrappedHeight = doc.heightOfString(cleanLine, { width: 510 });
-          doc.text(cleanLine, 48, yPosition, { width: 510 });
+          const wrappedHeight = doc.heightOfString(cleanLine, { width: 505 });
+          doc.text(cleanLine, 48, yPosition, { width: 505 });
           yPosition += wrappedHeight + 5;
         }
       }
