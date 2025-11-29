@@ -58,8 +58,8 @@ async function initializeDatabase() {
   }
 }
 
-// Initialize on startup
-initializeDatabase().catch(err => {
+// Export a promise that resolves when database is ready
+export const dbReadyPromise = initializeDatabase().catch(err => {
   console.error("[DbStorage] Failed to initialize database on startup:", err);
 });
 

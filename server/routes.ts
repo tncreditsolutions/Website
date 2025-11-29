@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { createRequire } from "module";
-import { storage } from "./storage";
+import { storage, dbReadyPromise } from "./storage";
 import { insertContactSubmissionSchema, insertChatMessageSchema, insertNewsletterSubscriptionSchema, insertDocumentSchema } from "@shared/schema";
 import OpenAI from "openai";
 import fs from "fs";
@@ -293,6 +293,9 @@ async function initializeDefaultAdmin() {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // CRITICAL: Wait for database to be fully initialized before proceeding
+  await dbReadyPromise;
+  
   // Initialize default admin user
   await initializeDefaultAdmin();
 
