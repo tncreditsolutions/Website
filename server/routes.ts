@@ -9,24 +9,75 @@ import path from "path";
 import PDFDocument from "pdfkit";
 import bcrypt from "bcrypt";
 
-// Extract text from PDF using pdfjs-dist
-async function extractPdfText(pdfBuffer: Buffer): Promise<string> {
+// Convert PDF pages to images and analyze with OpenAI vision API
+async function analyzePdfWithVision(pdfBuffer: Buffer): Promise<string> {
   try {
     const pdfjsLib = await import('pdfjs-dist');
+    const { createCanvas } = await import('canvas');
     const pdf = await pdfjsLib.getDocument(pdfBuffer).promise;
     
-    let text = "";
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const textContent = await page.getTextContent();
-      const pageText = textContent.items.map((item: any) => item.str).join(" ");
-      text += pageText + " ";
+    console.log("[AI] PDF loaded, analyzing", pdf.numPages, "pages with vision API...");
+    
+    let combinedAnalysis = "";
+    
+    // Process first 3 pages max (to avoid token limits)
+    const pagesToProcess = Math.min(3, pdf.numPages);
+    
+    for (let i = 1; i <= pagesToProcess; i++) {
+      try {
+        const page = await pdf.getPage(i);
+        const viewport = page.getViewport({ scale: 2 });
+        
+        // Create canvas and render PDF page
+        const canvas = createCanvas(viewport.width, viewport.height);
+        const context = canvas.getContext('2d');
+        
+        await page.render({
+          canvasContext: context,
+          viewport: viewport,
+        }).promise;
+        
+        // Convert canvas to base64 PNG
+        const imageBase64 = canvas.toDataURL('image/png').split(',')[1];
+        console.log("[AI] Page", i, "rendered, size:", imageBase64.length, "bytes");
+        
+        // Send to OpenAI vision API
+        const response = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "text",
+                  text: "Analyze this credit report page and extract the key financial information. Provide ONLY the professional analysis with sections marked with #### headers, bullet points starting with -, and key-value pairs with colons. Start immediately with the analysis.",
+                },
+                {
+                  type: "image_url",
+                  image_url: {
+                    url: `data:image/png;base64,${imageBase64}`,
+                  },
+                },
+              ],
+            },
+          ],
+          max_tokens: 800,
+        });
+        
+        const pageAnalysis = response.choices[0].message.content || "";
+        if (pageAnalysis) {
+          combinedAnalysis += pageAnalysis + "\n\n";
+          console.log("[AI] Page", i, "analysis complete, content length:", pageAnalysis.length);
+        }
+      } catch (pageError: any) {
+        console.error("[AI] Error analyzing page", i, ":", pageError?.message);
+      }
     }
     
-    console.log("[AI] PDF text extracted successfully with pdfjs-dist, length:", text.trim().length);
-    return text.trim();
+    console.log("[AI] PDF vision analysis complete, total length:", combinedAnalysis.trim().length);
+    return combinedAnalysis.trim();
   } catch (e: any) {
-    console.error("[AI] pdfjs-dist extraction error:", e?.message);
+    console.error("[AI] PDF vision analysis error:", e?.message);
     return "";
   }
 }
@@ -867,38 +918,22 @@ This is the start of the conversation. Ask open-ended questions to understand th
           rawAnalysis = cleanAnalysisText(rawAnalysis);
           analysisText = rawAnalysis || "No analysis available";
         } else if (isPdf) {
-          // For PDFs, extract text from database content and send to OpenAI for analysis
+          // For PDFs, convert pages to images and analyze with vision API (for scanned documents)
           try {
-            console.log("[AI] Starting PDF text extraction with pdfjs-dist...");
+            console.log("[AI] Starting PDF vision analysis...");
             // Read PDF from database (base64 encoded)
             const pdfBuffer = Buffer.from(base64Data, "base64");
             console.log("[AI] PDF buffer size:", pdfBuffer.length, "bytes");
             
-            const pdfText = await extractPdfText(pdfBuffer);
+            const visionAnalysis = await analyzePdfWithVision(pdfBuffer);
             
-            if (!pdfText.trim()) {
-              console.log("[AI] PDF has no extractable text");
+            if (!visionAnalysis.trim()) {
+              console.log("[AI] PDF vision analysis returned empty result");
               analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
             } else {
-              // Send extracted text to OpenAI for analysis
-              console.log("[AI] Sending PDF text to OpenAI for analysis...");
-              const response = await openai.chat.completions.create({
-                model: "gpt-4o",
-                messages: [
-                  {
-                    role: "user",
-                    content: `IMPORTANT: Analyze this credit report document and provide ONLY a professional financial analysis. Do NOT include any conversational preamble, acknowledgments, or agent responses. Format ONLY with: sections marked with #### headers, bullet points starting with -, and key-value pairs with colons. Start immediately with the analysis content.\n\nDocument text:\n${pdfText}`,
-                  },
-                ],
-                max_tokens: 1500,
-              });
-              
-              let rawAnalysis = response.choices[0].message.content || "";
-              console.log("[AI] Raw OpenAI response length:", rawAnalysis.length);
-              
               // Clean analysis text
-              rawAnalysis = cleanAnalysisText(rawAnalysis);
-              analysisText = rawAnalysis || "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
+              const cleanedAnalysis = cleanAnalysisText(visionAnalysis);
+              analysisText = cleanedAnalysis || "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
               console.log("[AI] PDF analysis complete, length:", analysisText.length);
             }
           } catch (pdfError: any) {
