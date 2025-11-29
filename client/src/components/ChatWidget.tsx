@@ -536,11 +536,7 @@ export default function ChatWidget() {
               <>
                 {/* Message History */}
                 <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-gradient-to-b from-background to-card/30">
-                  {isLoading ? (
-                    <p className="text-sm text-muted-foreground text-center py-8">
-                      Loading messages...
-                    </p>
-                  ) : messages.length === 0 ? (
+                  {messages.length === 0 ? (
                     <p className="text-sm text-muted-foreground text-center py-8">
                       Start a conversation
                     </p>
