@@ -78,6 +78,7 @@ export const documents = pgTable("documents", {
   fileName: text("file_name").notNull(),
   fileType: text("file_type").notNull(), // e.g. "application/pdf", "image/png"
   filePath: text("file_path").notNull(),
+  fileContent: text("file_content"), // Base64 encoded file content for Railway compatibility
   aiAnalysis: text("ai_analysis"),
   adminReview: text("admin_review"),
   status: text("status").notNull().default("pending"), // pending, reviewed, archived
@@ -97,6 +98,7 @@ export const insertDocumentSchema = createInsertSchema(documents).omit({
 }).extend({
   visitorDateForFilename: z.string().optional(),
   visitorTimezone: z.string().optional(),
+  fileContent: z.string().optional(),
 });
 
 export type InsertDocument = z.infer<typeof insertDocumentSchema>;
