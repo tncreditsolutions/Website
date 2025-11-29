@@ -302,12 +302,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Login endpoint
   app.post("/api/auth/login", async (req, res) => {
     try {
-      console.log("[Auth] Login attempt");
+      console.log("[Auth] Login attempt, request body:", JSON.stringify(req.body));
       const { username, password } = req.body;
-      console.log("[Auth] Received username:", username);
+      console.log("[Auth] Received username:", username, "password:", password ? "***" : "undefined");
       
       if (!username || !password) {
-        console.log("[Auth] Missing credentials");
+        console.log("[Auth] Missing credentials - username:", !!username, "password:", !!password);
         return res.status(400).json({ error: "Username and password required" });
       }
 
@@ -496,8 +496,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/chat", async (req, res) => {
     try {
+      console.log("[Chat] Received request body:", JSON.stringify(req.body));
       const { sender, ...data } = req.body;
-      const validatedData = insertChatMessageSchema.parse(data);
+      console.log("[Chat] Extracted data for validation:", JSON.stringify(data));
+      
+      let validatedData;
+      try {
+        validatedData = insertChatMessageSchema.parse(data);
+        console.log("[Chat] Validation passed");
+      } catch (validationError: any) {
+        console.error("[Chat] Validation failed:", validationError.errors || validationError.message);
+        return res.status(400).json({ error: validationError.message || "Invalid request data" });
+      }
+      
       const senderType = sender || "visitor";
       const message = await storage.createChatMessage({
         ...validatedData,
