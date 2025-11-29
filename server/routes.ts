@@ -518,7 +518,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         if (openai && message.email) {
-          setImmediate(async () => {
+          // Use async immediately invoked function to ensure promise is tracked
+          (async () => {
             try {
               console.log("[AI] Starting AI response generation...");
               // Check if this is an urgent debt collection situation
@@ -688,6 +689,8 @@ This is the start of the conversation. Ask open-ended questions to understand th
               console.error("[AI] AI response generation failed:", aiError instanceof Error ? aiError.message : String(aiError));
               console.error("[AI] Full error:", aiError);
             }
+          })().catch(err => {
+            console.error("[AI] Unhandled error in AI response generation:", err);
           });
         }
       }
