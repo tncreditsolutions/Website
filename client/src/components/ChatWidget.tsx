@@ -299,7 +299,7 @@ export default function ChatWidget() {
     // Send greeting message from AI agent
     try {
       console.log("[Chat] Sending greeting to:", trimmedEmail);
-      const greetingResponse = await apiRequest("POST", "/api/chat", {
+      await apiRequest("POST", "/api/chat", {
         name: "Riley",
         email: trimmedEmail,
         message: `Hi ${trimmedName}! How can I help you today?`,
@@ -308,19 +308,8 @@ export default function ChatWidget() {
       });
       console.log("[Chat] Greeting sent successfully");
       
-      // Immediately add greeting to React Query cache so it displays instantly
-      const currentMessages = queryClient.getQueryData<any[]>(["/api/chat"]) || [];
-      const greetingMessage = {
-        id: Date.now().toString(),
-        name: "Riley",
-        email: trimmedEmail,
-        message: `Hi ${trimmedName}! How can I help you today?`,
-        sender: "ai",
-        isEscalated: "false",
-        createdAt: new Date(),
-      };
-      queryClient.setQueryData(["/api/chat"], [...currentMessages, greetingMessage]);
-      
+      // Let the normal 2-second refetch pick up the greeting from the server
+      await queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
       setIsNewVisitor(false);
     } catch (error: any) {
       console.error("[Chat] Failed to send greeting:", error);
