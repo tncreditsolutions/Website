@@ -52,11 +52,19 @@ export default function ChatWidget() {
     mutationFn: async (data: any) => {
       return apiRequest("POST", "/api/chat", data);
     },
-    onSuccess: async () => {
+    onSuccess: async (response: any) => {
+      // Add visitor message to session display only
+      setSessionMessages(prev => [...prev, {
+        id: response.id || `temp-${Date.now()}`,
+        name: response.name,
+        email: response.email,
+        message: response.message,
+        sender: response.sender || "visitor",
+        isEscalated: response.isEscalated || "false",
+        createdAt: response.createdAt || new Date().toISOString(),
+      }]);
       // Save visitor info for next time
       localStorage.setItem(VISITOR_INFO_KEY, JSON.stringify({ name, email }));
-      // Force fresh fetch after mutation
-      await queryClient.refetchQueries({ queryKey: ["/api/chat"] });
     },
     onError: (error: any) => {
       toast({
@@ -130,9 +138,16 @@ export default function ChatWidget() {
           });
           console.log("[Upload] Download message sent successfully");
           
-          // Force immediate refresh of chat messages
-          await new Promise(resolve => setTimeout(resolve, 800));
-          queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
+          // Add AI message to session display
+          setSessionMessages(prev => [...prev, {
+            id: response.id || `temp-${Date.now()}`,
+            name: "Riley",
+            email: document.visitorEmail,
+            message: response.message,
+            sender: "ai",
+            isEscalated: "false",
+            createdAt: response.createdAt || new Date().toISOString(),
+          }]);
         } catch (error) {
           console.error("[Upload] Failed to send download message:", error);
         }
@@ -284,16 +299,8 @@ export default function ChatWidget() {
     setEmail(trimmedEmail);
     console.log("[Chat Form] Email and name state updated:", trimmedEmail);
     
-    // Skip DELETE for now - just send greeting to get chat working
-    // Try to clear previous data but don't block on it
-    try {
-      console.log("[Chat Form] Attempting to clear previous messages");
-      await apiRequest("DELETE", "/api/chat", { email: trimmedEmail });
-      console.log("[Chat Form] Successfully cleared previous messages");
-    } catch (error) {
-      console.log("[Chat Form] Delete failed (OK for new users):", error);
-      // Continue anyway - new users won't have previous data
-    }
+    // Clear session messages for fresh start (previous session, if any)
+    setSessionMessages([]);
     
     // Send greeting message from AI agent
     try {
@@ -305,13 +312,18 @@ export default function ChatWidget() {
         sender: "ai",
         isEscalated: "false",
       });
-      console.log("[Chat Form] Greeting sent successfully:", greetingResponse.status);
+      console.log("[Chat Form] Greeting sent successfully");
       
-      // CRITICAL: Refetch the messages immediately and wait for them to load
-      // before showing the chat area. This ensures Riley's greeting appears immediately.
-      console.log("[Chat Form] Invalidating and refetching chat messages");
-      await queryClient.refetchQueries({ queryKey: ["/api/chat"] });
-      console.log("[Chat Form] Messages refetched, now showing chat");
+      // Add greeting to session messages for display
+      setSessionMessages([{
+        id: greetingResponse.id || `temp-${Date.now()}`,
+        name: "Riley",
+        email: "support@tncreditsolutions.com",
+        message: `Hi ${trimmedName}! How can I help you today?`,
+        sender: "ai",
+        isEscalated: "false",
+        createdAt: greetingResponse.createdAt || new Date().toISOString(),
+      }]);
       
       setIsNewVisitor(false);
     } catch (error: any) {
