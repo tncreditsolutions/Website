@@ -894,8 +894,13 @@ This is the start of the conversation. Ask open-ended questions to understand th
 
       // Update storage with analysis
       console.log("[Document Upload] Saving analysis, length:", analysisText.length, "text preview:", analysisText.substring(0, 100));
-      await storage.updateDocumentAnalysis(document.id, analysisText);
-      console.log("[Document Upload] ✅ Analysis saved successfully");
+      try {
+        await storage.updateDocumentAnalysis(document.id, analysisText);
+        console.log("[Document Upload] ✅ Analysis saved successfully");
+      } catch (storageError) {
+        console.error("[Document Upload] ❌ CRITICAL: Failed to save analysis to database:", storageError);
+        return res.status(500).json({ error: "Failed to save document analysis to database. Please try again." });
+      }
       
       // Fetch the updated document from storage to ensure aiAnalysis is included
       const updatedDoc = await storage.getDocumentById(document.id);
@@ -912,7 +917,12 @@ This is the start of the conversation. Ask open-ended questions to understand th
       const pdfFileName = await generateAndSavePDF(updatedDoc, analysisText);
       console.log("[Document Upload] PDF generation complete - file:", pdfFileName);
       if (pdfFileName) {
-        await storage.updateDocumentPdfPath(updatedDoc.id, pdfFileName);
+        try {
+          await storage.updateDocumentPdfPath(updatedDoc.id, pdfFileName);
+        } catch (pdfStorageError) {
+          console.error("[Document Upload] ❌ CRITICAL: Failed to save PDF path to database:", pdfStorageError);
+          return res.status(500).json({ error: "Failed to save PDF path to database. Please try again." });
+        }
       }
       
       // Construct response with all fields, converting Date to ISO string
