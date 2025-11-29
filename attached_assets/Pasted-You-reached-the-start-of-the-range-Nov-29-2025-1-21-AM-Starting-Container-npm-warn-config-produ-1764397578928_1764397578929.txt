@@ -1,0 +1,106 @@
+You reached the start of the range
+Nov 29, 2025, 1:21 AM
+Starting Container
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 build
+> vite build && esbuild server/index-prod.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/index.js
+vite v5.4.20 building for production...
+transforming...
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+✓ 1742 modules transformed.
+rendering chunks...
+computing gzip size...
+../dist/public/index.html                                            2.37 kB │ gzip:   0.95 kB
+✓ built in 7.12s
+../dist/public/assets/ready_for_better_future_hero-C6oVMAMg.png    945.56 kB
+../dist/public/assets/client_testimonial_photo_2-B8UX-XkM.png    1,312.17 kB
+../dist/public/assets/client_testimonial_photo_1-C49icyGe.png    1,313.43 kB
+../dist/public/assets/client_testimonial_photo_3-BHvJgOFH.png    1,457.77 kB
+../dist/public/assets/pdf.worker-zxMdjS_u.mjs                    1,916.05 kB
+../dist/public/assets/index-B2cAoITb.css                            96.33 kB │ gzip:  14.74 kB
+../dist/public/assets/index-CPa9H5E2.js                            874.31 kB │ gzip: 261.31 kB
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+  dist/index.js  67.6kb
+⚡ Done in 12ms
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+[DbStorage] ✅ Database connected successfully
+[Migration] Checking if database tables exist...
+[AI] OpenAI initialized: true API key available: true
+[Migration] ✅ users table ready
+[Migration] ✅ contact_submissions table ready
+[Migration] ✅ chat_messages table ready
+[Migration] ✅ newsletter_subscriptions table ready
+[Migration] ✅ documents table ready
+[Migration] ✅ chat_messages email index ready
+[Migration] ✅ documents email index ready
+[Migration] ✅ users username index ready
+[Migration] ✅ All database tables and indices created successfully
+[DbStorage] ✅ Database schema verified - User credentials will PERSIST
+[Auth] ✅ Admin user already exists in database. ID: be4efa52-d502-4745-8a85-df401416e2ad
+6:22:19 AM [express] serving on port 8080
+6:22:46 AM [express] GET /api/chat 304 in 30ms :: []
+6:22:48 AM [express] GET /api/chat 304 in 7ms :: []
+6:22:50 AM [express] GET /api/chat 304 in 7ms :: []
+6:22:52 AM [express] GET /api/chat 304 in 7ms :: []
+6:23:01 AM [express] GET /api/chat 304 in 26ms :: []
+6:23:03 AM [express] GET /api/chat 304 in 8ms :: []
+6:23:05 AM [express] GET /api/chat 304 in 8ms :: []
+6:23:11 AM [express] GET /api/chat 200 in 19ms :: []
+6:23:12 AM [express] GET /api/chat 304 in 11ms :: []
+6:23:14 AM [express] GET /api/chat 304 in 6ms :: []
+6:23:16 AM [express] GET /api/chat 304 in 7ms :: []
+6:23:18 AM [express] GET /api/chat 304 in 8ms :: []
+6:23:21 AM [express] GET /api/chat 304 in 8ms :: []
+6:23:23 AM [express] GET /api/chat 304 in 6ms :: []
+  table: 'chat_messages',
+  column: 'id',
+  dataType: undefined,
+  constraint: undefined,
+  file: 'execMain.c',
+  line: '1991',
+  routine: 'ExecConstraints',
+  sourceError: undefined
+}
+[Chat POST] Message saved successfully: {
+  id: '742f6648-92b5-42c0-8d4a-8016e45a3def',
+  email: 'support@tncreditsolutions.com',
+  sender: 'ai',
+  message: 'Hi Sergey! How can I help you today?'
+}
+6:23:23 AM [express] POST /api/chat 200 in 11ms :: {"name":"Riley","email":"support@tncreditsolution…
+6:23:23 AM [express] GET /api/chat 200 in 14ms :: []
+6:23:23 AM [express] DELETE /api/chat 200 in 23ms :: {"success":true}
+[Chat POST] CRITICAL: Received request body: { sender: 'ai', email: 'support@tncreditsolutions.com', name: 'Riley' }
+[Chat POST] Database ready, proceeding with validation
+[Chat POST] Validation successful: { sender: 'ai', email: 'support@tncreditsolutions.com' }
+[DbStorage] Error creating chat message in database: NeonDbError: null value in column "id" of relation "chat_messages" violates not-null constraint
+    at execute (file:///app/node_modules/@neondatabase/serverless/index.mjs:1556:55)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonHttpPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-http/session.js:40:20)
+    at async DbStorage.createChatMessage (file:///app/dist/index.js:312:24)
+    at async file:///app/dist/index.js:935:23 {
+  severity: 'ERROR',
+  code: '23502',
+  detail: 'Failing row contains (null, Riley, support@tncreditsolutions.com, Hi Sergey! How can I help you today?, ai, false, 2025-11-29 06:23:23.586142).',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: 'public',
+6:23:25 AM [express] GET /api/chat 304 in 6ms :: []
+6:23:27 AM [express] GET /api/chat 304 in 6ms :: []
+6:23:29 AM [express] GET /api/chat 304 in 6ms :: []
+6:23:31 AM [express] GET /api/chat 304 in 9ms :: []
+6:23:34 AM [express] GET /api/chat 304 in 7ms :: []
+6:23:36 AM [express] GET /api/chat 304 in 6ms :: []
+6:23:36 AM [express] GET /api/auth/check 401 in 4ms :: {"authenticated":false}
+6:23:36 AM [express] GET /api/chat 304 in 12ms :: []
+6:23:38 AM [express] GET /api/chat 304 in 8ms :: []
+6:23:40 AM [express] GET /api/chat 304 in 6ms :: []
+6:23:43 AM [express] GET /api/chat 304 in 8ms :: []
