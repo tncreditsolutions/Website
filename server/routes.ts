@@ -90,10 +90,20 @@ async function generateAndSavePDF(document: any, analysisText?: string): Promise
         doc.addPage();
         yPosition = 40;
       }
-      if (line.includes("CREDIT ANALYSIS SUMMARY") || line.includes("═") || line.includes("━") || line.includes("Summary Analysis") || line.includes("**Summary") || line.includes("---") || line.includes("Certainly!")) {
+      
+      const trimmedLine = line.trim();
+      if (!trimmedLine) {
+        yPosition += 5;
         continue;
       }
-      if (line.match(/^#+\s+[A-Z]/)) {
+      
+      // Skip only very obvious non-content lines
+      if (trimmedLine.includes("═") || trimmedLine.includes("━") || trimmedLine.includes("---") || trimmedLine === "Certainly!") {
+        continue;
+      }
+      
+      // Detect and format headers (lines starting with # or ALL CAPS lines that look like headers)
+      if (line.match(/^#+\s+/) || (trimmedLine.length < 50 && trimmedLine === trimmedLine.toUpperCase() && trimmedLine.length > 5)) {
         if (!isFirstSection) yPosition += 10;
         const sectionTitle = line.replace(/^#+\s+/, "").trim();
         doc.rect(40, yPosition, 4, 20).fill("#fbbf24");
@@ -102,34 +112,40 @@ async function generateAndSavePDF(document: any, analysisText?: string): Promise
         doc.moveTo(50, yPosition + 20).lineTo(560, yPosition + 20).strokeColor("#e5e7eb").lineWidth(0.75).stroke();
         yPosition += 32;
         isFirstSection = false;
-      } else if (line.match(/^\s*[-•▪*]\s+/) || line.match(/^\s*\d+\.\s+/)) {
+      } 
+      // Format bullet points
+      else if (line.match(/^\s*[-•▪*]\s+/) || line.match(/^\s*\d+\.\s+/)) {
         const cleanContent = line.replace(/^\s*[-•▪*\d.]\s+/, "").replace(/\*\*/g, "").trim();
-        if (!cleanContent) continue;
-        doc.fontSize(9).fillColor("#fbbf24").font("Helvetica-Bold");
-        doc.text("●", 48, yPosition);
-        doc.fontSize(10).fillColor("#374151").font("Helvetica");
-        const wrappedHeight = doc.heightOfString(cleanContent, { width: 500 });
-        doc.text(cleanContent, 62, yPosition, { width: 500 });
-        yPosition += wrappedHeight + 6;
-      } else if (line.includes(":") && !line.match(/^#+/) && line.trim().length > 0) {
+        if (cleanContent) {
+          doc.fontSize(9).fillColor("#fbbf24").font("Helvetica-Bold");
+          doc.text("●", 48, yPosition);
+          doc.fontSize(10).fillColor("#374151").font("Helvetica");
+          const wrappedHeight = doc.heightOfString(cleanContent, { width: 500 });
+          doc.text(cleanContent, 62, yPosition, { width: 500 });
+          yPosition += wrappedHeight + 6;
+        }
+      }
+      // Format key-value pairs (lines with colons)
+      else if (line.includes(":") && !line.match(/^#+/)) {
         const parts = line.split(":").map(p => p.trim());
-        if (parts.length === 2) {
+        if (parts.length >= 2) {
           const cleanLabel = parts[0].replace(/^\s*[-•▪*]\s+/, "").replace(/\*\*/g, "");
-          const cleanValue = parts[1].replace(/\*\*/g, "");
+          const cleanValue = parts.slice(1).join(":").replace(/\*\*/g, "");
           doc.fontSize(9).font("Helvetica-Bold").fillColor("#0f2d6e");
           doc.text(cleanLabel + ":", 55, yPosition);
           doc.fontSize(9).font("Helvetica").fillColor("#1e40af");
-          doc.text(cleanValue, 320, yPosition);
-          yPosition += 14;
+          const wrappedHeight = doc.heightOfString(cleanValue, { width: 380 });
+          doc.text(cleanValue, 320, yPosition, { width: 380 });
+          yPosition += Math.max(14, wrappedHeight + 4);
         }
-      } else if (line.trim().length > 0 && !line.match(/^###/)) {
+      }
+      // Display all other non-empty lines as regular content
+      else if (trimmedLine.length > 0) {
         const cleanLine = line.replace(/\*\*/g, "").trim();
         doc.fontSize(10).fillColor("#4b5563").font("Helvetica");
         const wrappedHeight = doc.heightOfString(cleanLine, { width: 520 });
         doc.text(cleanLine, 48, yPosition, { width: 520 });
         yPosition += wrappedHeight + 5;
-      } else if (yPosition > 200) {
-        yPosition += 3;
       }
     }
 
