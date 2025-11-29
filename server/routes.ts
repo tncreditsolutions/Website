@@ -9,31 +9,26 @@ import path from "path";
 import PDFDocument from "pdfkit";
 import bcrypt from "bcrypt";
 
-let pdfParsePromise: Promise<any> | null = null;
-
-async function loadPdfParse() {
-  if (pdfParsePromise) return pdfParsePromise;
-  
-  pdfParsePromise = (async () => {
-    try {
-      const module = await import('pdf-parse');
-      // In bundled ESM, pdf-parse exports PDFParse as a class, not default
-      const pdfParseModule = module.PDFParse || module.default || module;
-      
-      if (!pdfParseModule || (typeof pdfParseModule !== 'function' && !pdfParseModule.prototype)) {
-        console.error("[AI] pdf-parse loaded but is not callable, module keys:", Object.keys(module).join(','));
-        return null;
-      }
-      
-      console.log("[AI] ✅ pdf-parse loaded successfully as:", pdfParseModule.name || 'PDFParse');
-      return pdfParseModule;
-    } catch (e: any) {
-      console.error("[AI] Failed to load pdf-parse:", e?.message);
-      return null;
+// Extract text from PDF using pdfjs-dist
+async function extractPdfText(pdfBuffer: Buffer): Promise<string> {
+  try {
+    const pdfjsLib = await import('pdfjs-dist');
+    const pdf = await pdfjsLib.getDocument(pdfBuffer).promise;
+    
+    let text = "";
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const textContent = await page.getTextContent();
+      const pageText = textContent.items.map((item: any) => item.str).join(" ");
+      text += pageText + " ";
     }
-  })();
-  
-  return pdfParsePromise;
+    
+    console.log("[AI] PDF text extracted successfully with pdfjs-dist, length:", text.trim().length);
+    return text.trim();
+  } catch (e: any) {
+    console.error("[AI] pdfjs-dist extraction error:", e?.message);
+    return "";
+  }
 }
 
 // Using gpt-4o (most recent stable model)
@@ -874,52 +869,37 @@ This is the start of the conversation. Ask open-ended questions to understand th
         } else if (isPdf) {
           // For PDFs, extract text from database content and send to OpenAI for analysis
           try {
-            const pdfParse = await loadPdfParse();
+            console.log("[AI] Starting PDF text extraction with pdfjs-dist...");
+            // Read PDF from database (base64 encoded)
+            const pdfBuffer = Buffer.from(base64Data, "base64");
+            console.log("[AI] PDF buffer size:", pdfBuffer.length, "bytes");
             
-            if (!pdfParse) {
-              console.error("[AI] pdf-parse not available - cannot process PDF");
+            const pdfText = await extractPdfText(pdfBuffer);
+            
+            if (!pdfText.trim()) {
+              console.log("[AI] PDF has no extractable text");
               analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
             } else {
-              console.log("[AI] Starting PDF text extraction with pdf-parse...");
-              // Read PDF from database (base64 encoded)
-              const pdfBuffer = Buffer.from(base64Data, "base64");
-              console.log("[AI] PDF buffer size:", pdfBuffer.length, "bytes");
+              // Send extracted text to OpenAI for analysis
+              console.log("[AI] Sending PDF text to OpenAI for analysis...");
+              const response = await openai.chat.completions.create({
+                model: "gpt-4o",
+                messages: [
+                  {
+                    role: "user",
+                    content: `IMPORTANT: Analyze this credit report document and provide ONLY a professional financial analysis. Do NOT include any conversational preamble, acknowledgments, or agent responses. Format ONLY with: sections marked with #### headers, bullet points starting with -, and key-value pairs with colons. Start immediately with the analysis content.\n\nDocument text:\n${pdfText}`,
+                  },
+                ],
+                max_tokens: 1500,
+              });
               
-              try {
-                const pdfData = await pdfParse(pdfBuffer);
-                const pdfText = pdfData.text || "";
-                
-                console.log("[AI] PDF text extracted successfully, length:", pdfText.length);
-                
-                if (!pdfText.trim()) {
-                  console.log("[AI] PDF has no extractable text");
-                  analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
-                } else {
-                  // Send extracted text to OpenAI for analysis
-                  console.log("[AI] Sending PDF text to OpenAI for analysis...");
-                  const response = await openai.chat.completions.create({
-                    model: "gpt-4o",
-                    messages: [
-                      {
-                        role: "user",
-                        content: `IMPORTANT: Analyze this credit report document and provide ONLY a professional financial analysis. Do NOT include any conversational preamble, acknowledgments, or agent responses. Format ONLY with: sections marked with #### headers, bullet points starting with -, and key-value pairs with colons. Start immediately with the analysis content.\n\nDocument text:\n${pdfText}`,
-                      },
-                    ],
-                    max_tokens: 1500,
-                  });
-                  
-                  let rawAnalysis = response.choices[0].message.content || "";
-                  console.log("[AI] Raw OpenAI response length:", rawAnalysis.length);
-                  
-                  // Clean analysis text
-                  rawAnalysis = cleanAnalysisText(rawAnalysis);
-                  analysisText = rawAnalysis || "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
-                  console.log("[AI] PDF analysis complete, length:", analysisText.length);
-                }
-              } catch (parseError: any) {
-                console.error("[AI] pdf-parse execution error:", parseError?.message || String(parseError));
-                analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
-              }
+              let rawAnalysis = response.choices[0].message.content || "";
+              console.log("[AI] Raw OpenAI response length:", rawAnalysis.length);
+              
+              // Clean analysis text
+              rawAnalysis = cleanAnalysisText(rawAnalysis);
+              analysisText = rawAnalysis || "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
+              console.log("[AI] PDF analysis complete, length:", analysisText.length);
             }
           } catch (pdfError: any) {
             console.error("[AI] PDF processing error:", pdfError?.message || String(pdfError));

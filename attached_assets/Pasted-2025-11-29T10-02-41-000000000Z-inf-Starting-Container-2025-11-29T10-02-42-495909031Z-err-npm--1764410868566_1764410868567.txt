@@ -1,0 +1,188 @@
+2025-11-29T10:02:41.000000000Z [inf]  Starting Container
+2025-11-29T10:02:42.495909031Z [err]  npm warn config production Use `--omit=dev` instead.
+2025-11-29T10:02:42.495914541Z [inf]  
+2025-11-29T10:02:42.495919891Z [inf]  > rest-express@1.0.0 build
+2025-11-29T10:02:42.495925779Z [inf]  > vite build && esbuild server/index-prod.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/index.js
+2025-11-29T10:02:42.495931209Z [inf]  
+2025-11-29T10:02:43.189219202Z [inf]  [36mvite v5.4.20 [32mbuilding for production...[36m[39m
+2025-11-29T10:02:43.501528157Z [inf]  transforming...
+2025-11-29T10:02:45.829882315Z [err]  
+2025-11-29T10:02:45.829891027Z [err]  A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+2025-11-29T10:02:49.508369383Z [inf]  [32m✓[39m 1742 modules transformed.
+2025-11-29T10:02:50.029502846Z [inf]  rendering chunks...
+2025-11-29T10:02:50.048551682Z [inf]  computing gzip size...
+2025-11-29T10:02:50.078629079Z [inf]  [2m../dist/public/[22m[32mindex.html                                        [39m[1m[2m    2.37 kB[22m[1m[22m[2m │ gzip:   0.95 kB[22m
+2025-11-29T10:02:50.078643391Z [inf]  [2m../dist/public/[22m[2massets/[22m[32mready_for_better_future_hero-C6oVMAMg.png  [39m[1m[2m  945.56 kB[22m[1m[22m
+2025-11-29T10:02:50.078648269Z [inf]  [2m../dist/public/[22m[2massets/[22m[32mclient_testimonial_photo_2-B8UX-XkM.png    [39m[1m[2m1,312.17 kB[22m[1m[22m
+2025-11-29T10:02:50.078653539Z [inf]  [2m../dist/public/[22m[2massets/[22m[32mclient_testimonial_photo_1-C49icyGe.png    [39m[1m[2m1,313.43 kB[22m[1m[22m
+2025-11-29T10:02:50.078657780Z [inf]  [2m../dist/public/[22m[2massets/[22m[32mclient_testimonial_photo_3-BHvJgOFH.png    [39m[1m[2m1,457.77 kB[22m[1m[22m
+2025-11-29T10:02:50.078667287Z [inf]  [2m../dist/public/[22m[2massets/[22m[32mpdf.worker-zxMdjS_u.mjs                    [39m[1m[2m1,916.05 kB[22m[1m[22m
+2025-11-29T10:02:50.078671147Z [inf]  [2m../dist/public/[22m[2massets/[22m[35mindex-B2cAoITb.css                         [39m[1m[2m   96.33 kB[22m[1m[22m[2m │ gzip:  14.74 kB[22m
+2025-11-29T10:02:50.078675525Z [inf]  [2m../dist/public/[22m[2massets/[22m[36mindex-CPa9H5E2.js                          [39m[1m[33m  874.31 kB[39m[22m[2m │ gzip: 261.31 kB[22m
+2025-11-29T10:02:50.078680009Z [err]  [33m
+2025-11-29T10:02:50.078684880Z [err]  (!) Some chunks are larger than 500 kB after minification. Consider:
+2025-11-29T10:02:50.078690180Z [err]  - Using dynamic import() to code-split the application
+2025-11-29T10:02:50.078694706Z [err]  - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2025-11-29T10:02:50.078699004Z [err]  - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+2025-11-29T10:02:50.078703431Z [inf]  [32m✓ built in 6.79s[39m
+2025-11-29T10:02:50.912482231Z [err]  
+2025-11-29T10:02:50.912494079Z [err]    dist/index.js  72.3kb
+2025-11-29T10:02:50.912501887Z [err]  
+2025-11-29T10:02:50.912508329Z [err]  ⚡ Done in 20ms
+2025-11-29T10:02:51.073666747Z [err]  npm warn config production Use `--omit=dev` instead.
+2025-11-29T10:02:51.339575239Z [inf]  
+2025-11-29T10:02:51.339581200Z [inf]  > rest-express@1.0.0 start
+2025-11-29T10:02:51.339588862Z [inf]  > NODE_ENV=production node dist/index.js
+2025-11-29T10:02:51.339596755Z [inf]  
+2025-11-29T10:02:54.110236807Z [inf]  [DbStorage] ✅ Database connected successfully
+2025-11-29T10:02:54.110243229Z [inf]  [Migration] Checking if database tables exist...
+2025-11-29T10:02:54.110247595Z [inf]  [AI] OpenAI initialized: true API key available: true
+2025-11-29T10:02:54.511929869Z [inf]  [Migration] ✅ users table ready
+2025-11-29T10:02:54.511936592Z [inf]  [Migration] ✅ contact_submissions table ready
+2025-11-29T10:02:54.511943784Z [inf]  [Migration] ✅ chat_messages table ready
+2025-11-29T10:02:54.511951489Z [inf]  [Migration] ✅ newsletter_subscriptions table ready
+2025-11-29T10:02:54.511959744Z [inf]  [Migration] ✅ documents table ready
+2025-11-29T10:02:54.511971198Z [inf]  [Migration] Ensuring file_content column exists on documents table...
+2025-11-29T10:02:54.522535019Z [inf]  [Migration] ✅ file_content column ensured on documents table
+2025-11-29T10:02:54.533772458Z [inf]  [Migration] ✅ chat_messages email index ready
+2025-11-29T10:02:54.533779359Z [inf]  [Migration] ✅ documents email index ready
+2025-11-29T10:02:54.543373005Z [inf]  [Migration] ✅ users username index ready
+2025-11-29T10:02:54.543380723Z [inf]  [Migration] ✅ All database tables and indices created successfully
+2025-11-29T10:02:54.543385628Z [inf]  [DbStorage] ✅ Database schema verified - User credentials will PERSIST
+2025-11-29T10:02:54.578877013Z [inf]  [Auth] ✅ Admin user already exists in database. ID: be4efa52-d502-4745-8a85-df401416e2ad
+2025-11-29T10:02:54.642033700Z [inf]  10:02:54 AM [express] serving on port 8080
+2025-11-29T10:05:35.036935607Z [inf]  10:05:32 AM [express] GET /api/chat 200 in 23ms :: [{"id":"e1f3a807-51e0-4316-aa6c-2ec33c2d69a0","nam…
+2025-11-29T10:05:35.036939878Z [inf]  10:05:34 AM [express] GET /api/chat 304 in 8ms :: [{"id":"e1f3a807-51e0-4316-aa6c-2ec33c2d69a0","name…
+2025-11-29T10:05:37.330814889Z [inf]  10:05:37 AM [express] GET /api/chat 304 in 8ms :: [{"id":"e1f3a807-51e0-4316-aa6c-2ec33c2d69a0","name…
+2025-11-29T10:05:39.464821860Z [inf]  10:05:39 AM [express] GET /api/chat 304 in 7ms :: [{"id":"e1f3a807-51e0-4316-aa6c-2ec33c2d69a0","name…
+2025-11-29T10:05:41.526695746Z [inf]  10:05:41 AM [express] GET /api/chat 304 in 7ms :: [{"id":"e1f3a807-51e0-4316-aa6c-2ec33c2d69a0","name…
+2025-11-29T10:05:43.603464728Z [inf]  10:05:43 AM [express] GET /api/chat 304 in 7ms :: [{"id":"e1f3a807-51e0-4316-aa6c-2ec33c2d69a0","name…
+2025-11-29T10:05:45.669731779Z [inf]  10:05:45 AM [express] GET /api/chat 304 in 7ms :: [{"id":"e1f3a807-51e0-4316-aa6c-2ec33c2d69a0","name…
+2025-11-29T10:05:47.848517572Z [inf]  10:05:47 AM [express] GET /api/chat 304 in 7ms :: [{"id":"e1f3a807-51e0-4316-aa6c-2ec33c2d69a0","name…
+2025-11-29T10:05:49.821909727Z [inf]  10:05:49 AM [express] GET /api/chat 304 in 8ms :: [{"id":"e1f3a807-51e0-4316-aa6c-2ec33c2d69a0","name…
+2025-11-29T10:05:50.372197644Z [inf]  10:05:50 AM [express] DELETE /api/chat 200 in 44ms :: {"success":true}
+2025-11-29T10:05:50.446264146Z [inf]  [Chat POST] CRITICAL: Received request body: { sender: 'ai', email: 'support@tncreditsolutions.com', name: 'Riley' }
+2025-11-29T10:05:50.446276266Z [inf]  [Chat POST] Database ready, proceeding with validation
+2025-11-29T10:05:50.446284361Z [inf]  [Chat POST] Validation successful: { sender: 'ai', email: 'support@tncreditsolutions.com' }
+2025-11-29T10:05:50.451280418Z [inf]  [Chat POST] Message saved successfully: {
+2025-11-29T10:05:50.451286870Z [inf]    id: 'e734b5ef-74e7-4d19-b78d-e5dc4ff61dfc',
+2025-11-29T10:05:50.451294829Z [inf]    email: 'support@tncreditsolutions.com',
+2025-11-29T10:05:50.451301536Z [inf]    sender: 'ai',
+2025-11-29T10:05:50.451307742Z [inf]    message: 'Hi Sergey! How can I help you today?'
+2025-11-29T10:05:50.451313661Z [inf]  }
+2025-11-29T10:05:50.451319352Z [inf]  10:05:50 AM [express] POST /api/chat 200 in 11ms :: {"id":"e734b5ef-74e7-4d19-b78d-e5dc4ff61dfc","nam…
+2025-11-29T10:05:50.530880330Z [inf]  10:05:50 AM [express] GET /api/chat 200 in 6ms :: [{"id":"e734b5ef-74e7-4d19-b78d-e5dc4ff61dfc","name…
+2025-11-29T10:05:52.609899307Z [inf]  10:05:52 AM [express] GET /api/chat 304 in 7ms :: [{"id":"e734b5ef-74e7-4d19-b78d-e5dc4ff61dfc","name…
+2025-11-29T10:05:54.747925971Z [inf]  10:05:54 AM [express] GET /api/chat 304 in 8ms :: [{"id":"e734b5ef-74e7-4d19-b78d-e5dc4ff61dfc","name…
+2025-11-29T10:05:56.779416104Z [inf]  10:05:56 AM [express] GET /api/chat 304 in 7ms :: [{"id":"e734b5ef-74e7-4d19-b78d-e5dc4ff61dfc","name…
+2025-11-29T10:05:58.863262878Z [inf]  10:05:58 AM [express] GET /api/chat 304 in 6ms :: [{"id":"e734b5ef-74e7-4d19-b78d-e5dc4ff61dfc","name…
+2025-11-29T10:05:59.702375494Z [inf]  [Chat POST] CRITICAL: Received request body: { sender: undefined, email: 'sergie820@gmail.com', name: 'Sergey' }
+2025-11-29T10:05:59.702384809Z [inf]  [Chat POST] Database ready, proceeding with validation
+2025-11-29T10:05:59.702392949Z [inf]  [Chat POST] Validation successful: { sender: 'visitor', email: 'sergie820@gmail.com' }
+2025-11-29T10:05:59.707206853Z [inf]  [Chat POST] Message saved successfully: {
+2025-11-29T10:05:59.707215465Z [inf]    id: '5653d0ae-eff7-498f-8385-4fa7a4b79d20',
+2025-11-29T10:05:59.707222397Z [inf]    email: 'sergie820@gmail.com',
+2025-11-29T10:05:59.707229730Z [inf]    sender: 'visitor',
+2025-11-29T10:05:59.707236096Z [inf]    message: 'analyze credit report and provide summary'
+2025-11-29T10:05:59.707242399Z [inf]  }
+2025-11-29T10:05:59.707787503Z [inf]  [AI] Visitor message received. OpenAI ready: true Email: sergie820@gmail.com
+2025-11-29T10:05:59.707798516Z [inf]  [AI] Starting AI response generation...
+2025-11-29T10:05:59.707806670Z [inf]  [AI] Detected urgent situation: false
+2025-11-29T10:05:59.712721041Z [inf]  10:05:59 AM [express] POST /api/chat 200 in 11ms :: {"id":"5653d0ae-eff7-498f-8385-4fa7a4b79d20","nam…
+2025-11-29T10:05:59.734425070Z [inf]  [AI] User has uploaded documents: false Count: 0
+2025-11-29T10:05:59.734434619Z [inf]  [AI] Current session only - total messages: 1 current session: 1
+2025-11-29T10:05:59.734442112Z [inf]  [AI] Conversation turns: 1 Previous topics: []
+2025-11-29T10:05:59.734447859Z [inf]  [AI] Using standard prompt, visitor turns: 1 session message count: 1
+2025-11-29T10:05:59.734451635Z [inf]  [AI] Fresh session - using simple greeting prompt
+2025-11-29T10:05:59.808144529Z [inf]  10:05:59 AM [express] GET /api/chat 200 in 6ms :: [{"id":"5653d0ae-eff7-498f-8385-4fa7a4b79d20","name…
+2025-11-29T10:06:01.474951133Z [inf]      "prompt_tokens": 137,
+2025-11-29T10:06:01.474963249Z [inf]      "completion_tokens": 81,
+2025-11-29T10:06:01.474965437Z [inf]        "index": 0,
+2025-11-29T10:06:01.474973930Z [inf]      "total_tokens": 218,
+2025-11-29T10:06:01.474974871Z [inf]        "message": {
+2025-11-29T10:06:01.474981810Z [inf]  [AI] Full response: {
+2025-11-29T10:06:01.474982618Z [inf]          "role": "assistant",
+2025-11-29T10:06:01.474984191Z [inf]      "prompt_tokens_details": {
+2025-11-29T10:06:01.474992535Z [inf]          "content": "I'd be happy to help with that! To get started, could you share what specific concerns or questions you have about your credit report? Are there any particular aspects you're worried about, or is there a goal you're aiming to achieve with your credit? Understanding your situation better will help me provide you with more tailored advice. If you have your credit report handy, I can guide you on what to look for.",
+2025-11-29T10:06:01.474992739Z [inf]    "id": "chatcmpl-ChC804SVAHoxOE1Rj4WBkv4BiPgEH",
+2025-11-29T10:06:01.474994269Z [inf]        "cached_tokens": 0,
+2025-11-29T10:06:01.475002170Z [inf]          "refusal": null,
+2025-11-29T10:06:01.475002570Z [inf]    "object": "chat.completion",
+2025-11-29T10:06:01.475004422Z [inf]        "audio_tokens": 0
+2025-11-29T10:06:01.475008929Z [inf]          "annotations": []
+2025-11-29T10:06:01.475009209Z [inf]    "created": 1764410760,
+2025-11-29T10:06:01.475015253Z [inf]        },
+2025-11-29T10:06:01.475015911Z [inf]    "model": "gpt-4o-2024-08-06",
+2025-11-29T10:06:01.475021625Z [inf]    "choices": [
+2025-11-29T10:06:01.475021805Z [inf]        "logprobs": null,
+2025-11-29T10:06:01.475027644Z [inf]      {
+2025-11-29T10:06:01.475027990Z [inf]        "finish_reason": "stop"
+2025-11-29T10:06:01.475033788Z [inf]      }
+2025-11-29T10:06:01.475039717Z [inf]    ],
+2025-11-29T10:06:01.475045693Z [inf]    "usage": {
+2025-11-29T10:06:01.475399706Z [inf]      },
+2025-11-29T10:06:01.475407835Z [inf]      "completion_tokens_details": {
+2025-11-29T10:06:01.475415542Z [inf]        "reasoning_tokens": 0,
+2025-11-29T10:06:01.475422626Z [inf]        "audio_tokens": 0,
+2025-11-29T10:06:01.475429353Z [inf]        "accepted_prediction_tokens": 0,
+2025-11-29T10:06:01.475436072Z [inf]        "rejected_prediction_tokens": 0
+2025-11-29T10:06:01.475442705Z [inf]      }
+2025-11-29T10:06:01.475449090Z [inf]    },
+2025-11-29T10:06:01.475455859Z [inf]    "service_tier": "default",
+2025-11-29T10:06:01.475462653Z [inf]    "system_fingerprint": "fp_689bad8e9a"
+2025-11-29T10:06:01.475469150Z [inf]  }
+2025-11-29T10:06:01.475476260Z [inf]  [AI] AI response received: I'd be happy to help with that! To get started, co
+2025-11-29T10:06:01.475482886Z [inf]  [AI] AI message saved successfully: 9899d6b9-0543-44c1-8004-acd640daef53 Escalated: false
+2025-11-29T10:06:01.875624741Z [inf]  10:06:01 AM [express] GET /api/chat 200 in 7ms :: [{"id":"9899d6b9-0543-44c1-8004-acd640daef53","name…
+2025-11-29T10:06:03.961479358Z [inf]  10:06:03 AM [express] GET /api/chat 304 in 6ms :: [{"id":"9899d6b9-0543-44c1-8004-acd640daef53","name…
+2025-11-29T10:06:06.049666284Z [inf]  10:06:06 AM [express] GET /api/chat 304 in 7ms :: [{"id":"9899d6b9-0543-44c1-8004-acd640daef53","name…
+2025-11-29T10:06:08.690626814Z [inf]  10:06:08 AM [express] GET /api/chat 304 in 6ms :: [{"id":"9899d6b9-0543-44c1-8004-acd640daef53","name…
+2025-11-29T10:06:09.748150610Z [inf]  [Document Upload] visitorDateForFilename: 11-29-2025 visitorTimezone: America/New_York
+2025-11-29T10:06:09.748156656Z [inf]  [Document Upload] Creating document record, base64Data length: 520936
+2025-11-29T10:06:09.748162811Z [inf]  [DbStorage] createDocument called with fileContent length: 520936
+2025-11-29T10:06:09.748169371Z [inf]  [DbStorage] Inserting document into database...
+2025-11-29T10:06:09.805020283Z [inf]  [DbStorage] Document inserted successfully, id: c6facde8-f9e7-4a27-b552-010f3506aac2
+2025-11-29T10:06:09.805033991Z [inf]  [Document Upload] Document created successfully, id: c6facde8-f9e7-4a27-b552-010f3506aac2
+2025-11-29T10:06:09.805043755Z [inf]  [Document Upload] Starting analysis, fileType: application/pdf
+2025-11-29T10:06:10.585831285Z [inf]  [AI] ✅ pdf-parse loaded successfully as: PDFParse
+2025-11-29T10:06:10.585837656Z [inf]  [AI] Starting PDF text extraction with pdf-parse...
+2025-11-29T10:06:10.585843068Z [inf]  [AI] PDF buffer size: 390702 bytes
+2025-11-29T10:06:10.585848368Z [err]  [AI] pdf-parse execution error: Class constructor PDFParse cannot be invoked without 'new'
+2025-11-29T10:06:10.585853635Z [inf]  [Document Upload] Saving analysis, length: 124 text preview: Your credit report PDF has been received. Our specialists will review it in detail and provide perso
+2025-11-29T10:06:10.585859060Z [inf]  [DbStorage] Document analysis updated in database. ID: c6facde8-f9e7-4a27-b552-010f3506aac2 Analysis length: 124
+2025-11-29T10:06:10.585864828Z [inf]  [Document Upload] ✅ Analysis saved to storage
+2025-11-29T10:06:10.585870234Z [inf]  [Document Upload] Retrieved document - ID: c6facde8-f9e7-4a27-b552-010f3506aac2
+2025-11-29T10:06:10.585876484Z [inf]  [Document Upload] Document aiAnalysis field length: 124
+2025-11-29T10:06:10.585882323Z [inf]  [Document Upload] Document aiAnalysis preview: Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.
+2025-11-29T10:06:10.585888630Z [inf]  [Document Upload] Document aiAnalysis full content:
+2025-11-29T10:06:10.585893770Z [inf]   Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.
+2025-11-29T10:06:10.585898944Z [inf]  [Document Upload] analysisText parameter length: 124
+2025-11-29T10:06:10.585904050Z [inf]  [Document Upload] analysisText parameter preview: Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.
+2025-11-29T10:06:10.585909901Z [inf]  [Document Upload] analysisText full content:
+2025-11-29T10:06:10.585918577Z [inf]   Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.
+2025-11-29T10:06:10.586222868Z [inf]  [Document Upload] About to call generateAndSavePDF with analysisText
+2025-11-29T10:06:10.586231815Z [inf]  [PDF Save] Using visitor date: 11-29-2025
+2025-11-29T10:06:10.586239345Z [inf]  [PDF Save] Saving to: c6facde8-f9e7-4a27-b552-010f3506aac2-11-29-2025.pdf
+2025-11-29T10:06:10.637469951Z [inf]  [PDF Save] Document fields - visitorDateForFilename: 11-29-2025 dateForTitle: 11-29-2025
+2025-11-29T10:06:10.637473775Z [inf]  [PDF Save] Document ID: c6facde8-f9e7-4a27-b552-010f3506aac2 Analysis source: parameter length: 124
+2025-11-29T10:06:10.637477640Z [inf]  [PDF Save] Successfully saved: c6facde8-f9e7-4a27-b552-010f3506aac2-11-29-2025.pdf
+2025-11-29T10:06:10.637481607Z [inf]  [Document Upload] PDF generation complete - file: c6facde8-f9e7-4a27-b552-010f3506aac2-11-29-2025.pdf
+2025-11-29T10:06:10.643478796Z [inf]  [DbStorage] Document PDF path updated in database. ID: c6facde8-f9e7-4a27-b552-010f3506aac2 PDF: c6facde8-f9e7-4a27-b552-010f3506aac2-11-29-2025.pdf
+2025-11-29T10:06:10.643490992Z [inf]  10:06:10 AM [express] POST /api/documents 200 in 896ms :: {"id":"c6facde8-f9e7-4a27-b552-010f3506aac2…
+2025-11-29T10:06:10.724024561Z [inf]  [Chat POST] CRITICAL: Received request body: { sender: 'ai', email: 'sergie820@gmail.com', name: 'Riley' }
+2025-11-29T10:06:10.724032931Z [inf]  [Chat POST] Database ready, proceeding with validation
+2025-11-29T10:06:10.724038483Z [inf]  [Chat POST] Validation successful: { sender: 'ai', email: 'sergie820@gmail.com' }
+2025-11-29T10:06:10.730929490Z [inf]  [Chat POST] Message saved successfully: {
+2025-11-29T10:06:10.730940389Z [inf]    id: '905c3a18-7276-4d1b-8d83-59509ed92a50',
+2025-11-29T10:06:10.730949120Z [inf]    email: 'sergie820@gmail.com',
+2025-11-29T10:06:10.730957802Z [inf]    sender: 'ai',
+2025-11-29T10:06:10.730966010Z [inf]    message: "I've completed my analysis of your Experian.pdf. Y"
+2025-11-29T10:06:10.730973407Z [inf]  }
+2025-11-29T10:06:10.731754083Z [inf]  10:06:10 AM [express] POST /api/chat 200 in 9ms :: {"id":"905c3a18-7276-4d1b-8d83-59509ed92a50","name…
+2025-11-29T10:06:10.743889925Z [inf]  10:06:10 AM [express] GET /api/chat 200 in 5ms :: [{"id":"905c3a18-7276-4d1b-8d83-59509ed92a50","name…
+2025-11-29T10:06:11.643261453Z [inf]  10:06:11 AM [express] GET /api/chat 200 in 7ms :: [{"id":"905c3a18-7276-4d1b-8d83-59509ed92a50","name…
+2025-11-29T10:06:13.714090222Z [inf]  10:06:13 AM [express] GET /api/chat 304 in 6ms :: [{"id":"905c3a18-7276-4d1b-8d83-59509ed92a50","name…
+2025-11-29T10:06:14.255791455Z [inf]  [PDF Endpoint] Using dateOnlyStr from pdfPath: 11-29-2025 pdfPath: c6facde8-f9e7-4a27-b552-010f3506aac2-11-29-2025.pdf
+2025-11-29T10:06:14.255795486Z [inf]  [PDF Endpoint] Setting Content-Disposition with dateOnlyStr: 11-29-2025 final header: attachment; filename*=UTF-8''credit-analysis-11-29-2025.pdf
+2025-11-29T10:06:14.265056841Z [inf]  10:06:14 AM [express] GET /api/documents/c6facde8-f9e7-4a27-b552-010f3506aac2/pdf 200 in 18ms
+2025-11-29T10:06:15.803327655Z [inf]  10:06:15 AM [express] GET /api/chat 304 in 6ms :: [{"id":"905c3a18-7276-4d1b-8d83-59509ed92a50","name…
