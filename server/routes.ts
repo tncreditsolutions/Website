@@ -953,7 +953,7 @@ This is the start of the conversation. Ask open-ended questions to understand th
               if (aiMessage) {
                 const saved = await storage.createChatMessage({
                   name: "Riley",
-                  email: "support@tncreditsolutions.com",
+                  email: message.email,
                   message: aiMessage,
                   sender: "ai",
                   isEscalated: shouldEscalate ? "true" : "false",
