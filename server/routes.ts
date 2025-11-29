@@ -496,10 +496,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/chat", async (req, res) => {
     try {
+      console.log("[Chat POST] CRITICAL: Received request body:", {
+        sender: req.body.sender,
+        email: req.body.email,
+        name: req.body.name,
+      });
+      
+      // Wait for database to be ready BEFORE processing
+      await dbReadyPromise;
+      console.log("[Chat POST] Database ready, proceeding with validation");
+      
       const validatedData = insertChatMessageSchema.parse(req.body);
+      console.log("[Chat POST] Validation successful:", {
+        sender: validatedData.sender,
+        email: validatedData.email,
+      });
+      
       const message = await storage.createChatMessage(validatedData);
       
-      console.log("[Chat POST] Message saved:", {
+      console.log("[Chat POST] Message saved successfully:", {
         id: message.id,
         email: message.email,
         sender: message.sender,
