@@ -414,20 +414,18 @@ export default function ChatWidget() {
 
     const pollInterval = setInterval(async () => {
       try {
-        const allMessagesBlob = await fetch("/api/chat");
-        const allMessages = await allMessagesBlob.json() as ChatMessage[];
+        const response = await fetch("/api/chat");
+        if (!response.ok) return;
+        const allMessages = (await response.json()) as ChatMessage[];
         
-        // Find messages from this email that aren't in sessionMessages
-        const newMessages = allMessages.filter(msg => 
-          msg.email === email && 
-          !sessionMessages.some(sm => sm.id === msg.id)
-        );
-        
-        // Add any new AI/admin messages to session
-        newMessages.forEach(msg => {
-          if (msg.sender === "ai" || msg.sender === "admin") {
-            setSessionMessages(prev => [...prev, msg]);
-          }
+        // Add any AI/admin messages from this email that aren't already in sessionMessages
+        setSessionMessages(prev => {
+          const newMessages = allMessages.filter(msg => 
+            msg.email === email && 
+            msg.sender === "ai" || msg.sender === "admin" &&
+            !prev.some(sm => sm.id === msg.id)
+          );
+          return newMessages.length > 0 ? [...prev, ...newMessages] : prev;
         });
       } catch (error) {
         // Silently fail - don't spam errors if polling fails
@@ -435,7 +433,7 @@ export default function ChatWidget() {
     }, 2000); // Poll every 2 seconds for new responses
     
     return () => clearInterval(pollInterval);
-  }, [email, isNewVisitor, sessionMessages]);
+  }, [email, isNewVisitor]);
 
   const handleDownloadPDF = async () => {
     if (!lastDocumentId) {
