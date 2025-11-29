@@ -103,7 +103,24 @@ function encodeToBase64(buffer: Buffer): string {
   return buffer.toString("base64");
 }
 
-// Helper function to generate and save PDF to disk
+// Helper function to determine risk color based on text content
+function getRiskColor(text: string): { color: string; level: string } {
+  const lower = text.toLowerCase();
+  if (lower.includes("critical") || lower.includes("immediate action")) return { color: "#dc2626", level: "CRITICAL" };
+  if (lower.includes("high") || lower.includes("significant concern")) return { color: "#ea580c", level: "HIGH" };
+  if (lower.includes("positive") || lower.includes("mitigating") || lower.includes("excellent")) return { color: "#16a34a", level: "POSITIVE" };
+  return { color: "#6366f1", level: "INFO" };
+}
+
+// Draw a colored risk indicator box
+function drawRiskBox(doc: any, x: number, y: number, text: string, level: string) {
+  const { color } = getRiskColor(text);
+  doc.rect(x, y, 12, 12).fill(color);
+  doc.fontSize(8).fillColor(color).font("Helvetica-Bold");
+  doc.text(level.charAt(0), x + 2, y + 1);
+}
+
+// Helper function to generate and save PDF to disk with all 7 formatting improvements
 async function generateAndSavePDF(document: any, analysisText?: string): Promise<string | null> {
   try {
     const pdfsDir = path.join(import.meta.dirname, "..", "pdfs");
@@ -111,140 +128,212 @@ async function generateAndSavePDF(document: any, analysisText?: string): Promise
       fs.mkdirSync(pdfsDir, { recursive: true });
     }
 
-    // Use the date sent from frontend (already in correct visitor timezone)
     const dateStr = (document as any).visitorDateForFilename || new Date().toISOString().split('T')[0].replace(/-/g, '-');
-    console.log("[PDF Save] Using visitor date:", dateStr);
-    
     const pdfFileName = `${document.id}-${dateStr}.pdf`;
     const pdfFilePath = path.join(pdfsDir, pdfFileName);
-    console.log("[PDF Save] Saving to:", pdfFileName);
+    const finalAnalysis = analysisText || document.aiAnalysis || "";
+    
+    if (!finalAnalysis) {
+      const doc = new PDFDocument({ margin: 0, size: "A4" });
+      const writeStream = fs.createWriteStream(pdfFilePath);
+      doc.pipe(writeStream);
+      doc.end();
+      return new Promise((resolve) => { writeStream.on('finish', () => resolve(pdfFileName)); });
+    }
 
-    // Create PDF document
     const doc = new PDFDocument({ margin: 0, size: "A4" });
     const writeStream = fs.createWriteStream(pdfFilePath);
     doc.pipe(writeStream);
+    const PAGE_HEIGHT = 792;
+    const FOOTER_HEIGHT = 70;
+    const MAX_CONTENT_Y = PAGE_HEIGHT - FOOTER_HEIGHT;
+    let yPosition = 160;
+    let pageNum = 1;
 
-    // Header
-    doc.rect(0, 0, 612, 145).fill("#0f2d6e");
+    // Helper: Add header on new pages (Improvement #6: Page Management)
+    function addPageHeader() {
+      doc.rect(0, 0, 612, 40).fill("#0f2d6e");
+      doc.fontSize(11).font("Helvetica-Bold").fillColor("#fbbf24");
+      doc.text("TN CREDIT SOLUTIONS - " + (document.visitorName || "Credit Analysis"), 40, 10);
+      doc.fontSize(9).fillColor("#c5d3ff").text("Page " + pageNum, 550, 14);
+    }
+
+    // Helper: Add footer with page number
+    function addPageFooter() {
+      doc.rect(0, 745, 612, 47).fill("#f9fafb");
+      doc.moveTo(40, 745).lineTo(572, 745).strokeColor("#e5e7eb").lineWidth(0.75).stroke();
+      doc.fontSize(7).fillColor("#6b7280").font("Helvetica");
+      doc.text("Confidential - For personal use only", 40, 750, { align: "left" });
+      doc.text("© 2025 TN Credit Solutions", 40, 762, { align: "left" });
+      doc.fontSize(6).fillColor("#9ca3af");
+      doc.text("This analysis is not financial advice. Consult a qualified advisor for professional guidance.", 40, 773);
+    }
+
+    // IMPROVEMENT #1: Executive Summary Box at top
+    // Extract key findings from first section
+    const lines = finalAnalysis.split("\n");
+    const keyFindings = lines
+      .filter(l => l.includes("Critical") || l.includes("CRITICAL") || l.includes("Active Collections"))
+      .slice(0, 3)
+      .map(l => l.replace(/^[-•▪*]\s+/, "").replace(/\*\*/g, "").trim())
+      .filter(l => l.length > 0);
+
+    // First page header
+    doc.rect(0, 0, 612, 155).fill("#0f2d6e");
     doc.rect(0, 0, 612, 6).fill("#fbbf24");
-    doc.rect(0, 139, 612, 6).fill("#fbbf24");
+    doc.rect(0, 149, 612, 6).fill("#fbbf24");
     doc.fontSize(32).font("Helvetica-Bold").fillColor("#ffffff");
     doc.text("TN CREDIT SOLUTIONS", 50, 28);
     doc.fontSize(10).font("Helvetica").fillColor("#c5d3ff");
-    doc.text("Professional Credit Restoration & Tax Optimization Services", 50, 65);
-    // Format date for title display
-    const dateForTitle = (document as any).visitorDateForFilename || new Date().toISOString().split('T')[0];
-    console.log("[PDF Save] Document fields - visitorDateForFilename:", (document as any).visitorDateForFilename, "dateForTitle:", dateForTitle);
-    
+    doc.text("Professional Credit Restoration & Tax Optimization", 50, 65);
     doc.fontSize(14).font("Helvetica-Bold").fillColor("#fbbf24");
-    doc.text(`CREDIT ANALYSIS REPORT - ${dateForTitle}`, 50, 82);
+    doc.text("CREDIT ANALYSIS REPORT", 50, 90);
     doc.fontSize(9).font("Helvetica").fillColor("#e0e7ff");
-    doc.text(`Client Name: ${document.visitorName}`, 50, 102);
-    
-    doc.text(`Report Date: ${dateForTitle}`, 50, 115);
-    doc.moveTo(0, 145).lineTo(612, 145).strokeColor("#f3f4f6").lineWidth(0.75).stroke();
+    doc.text("Client: " + document.visitorName + " | Date: " + dateStr, 50, 110);
+    doc.fontSize(7).fillColor("#c5d3ff");
+    doc.text("Document ID: " + document.id.substring(0, 8), 50, 125);
 
-    // Content
-    const PAGE_HEIGHT = 792;
-    const FOOTER_HEIGHT = 60;
-    const MAX_CONTENT_Y = PAGE_HEIGHT - FOOTER_HEIGHT;
-    let yPosition = 160;
-    
-    // Use passed analysis text, fall back to document.aiAnalysis, or use empty
-    const finalAnalysis = analysisText || document.aiAnalysis || "";
-    console.log("[PDF Save] Document ID:", document.id, "Analysis source:", analysisText ? "parameter" : "document.aiAnalysis", "length:", finalAnalysis.length);
-    if (!finalAnalysis) {
-      console.error("[PDF Save] No AI analysis found for document:", document.id);
-      doc.end();
-      return new Promise((resolve) => {
-        writeStream.on('finish', () => {
-          console.log("[PDF Save] Empty PDF saved (no analysis):", pdfFileName);
-          resolve(pdfFileName);
-        });
+    yPosition = 170;
+
+    // IMPROVEMENT #7: Disclaimer box
+    doc.rect(40, yPosition, 532, 35).fill("#fef3c7");
+    doc.strokeColor("#f59e0b").lineWidth(1).stroke();
+    doc.fontSize(8).font("Helvetica-Bold").fillColor("#92400e");
+    doc.text("DISCLAIMER", 50, yPosition + 4);
+    doc.fontSize(7).font("Helvetica").fillColor("#b45309");
+    doc.text("This analysis provides credit assessment insights based on the submitted documents. It is not financial or legal advice. Please consult with qualified professionals before taking action.", 50, yPosition + 16, { width: 510 });
+    yPosition += 45;
+
+    // IMPROVEMENT #1: Executive Summary
+    doc.rect(40, yPosition, 532, 8).fill("#fbbf24");
+    doc.fontSize(11).font("Helvetica-Bold").fillColor("#ffffff");
+    doc.text("EXECUTIVE SUMMARY", 50, yPosition + 1);
+    yPosition += 20;
+
+    if (keyFindings.length > 0) {
+      keyFindings.forEach(finding => {
+        const { color } = getRiskColor(finding);
+        doc.rect(42, yPosition, 8, 8).fill(color);
+        doc.fontSize(9).font("Helvetica").fillColor("#374151");
+        const wrappedHeight = doc.heightOfString(finding, { width: 490 });
+        doc.text(finding, 58, yPosition, { width: 490 });
+        yPosition += wrappedHeight + 8;
       });
     }
-    
-    const lines = finalAnalysis.split("\n");
-    let isFirstSection = true;
+    yPosition += 5;
+
+    // Parse content with all improvements
+    let inActionItems = false;
+    let actionItemNum = 1;
+    let tableMode = false;
+    let tableRows: string[][] = [];
+    let currentRiskLevel = "";
 
     for (const line of lines) {
-      if (yPosition > MAX_CONTENT_Y - 20) {
+      if (yPosition > MAX_CONTENT_Y) {
+        addPageFooter();
         doc.addPage();
-        yPosition = 40;
+        pageNum++;
+        addPageHeader();
+        yPosition = 50;
       }
-      
+
       const trimmedLine = line.trim();
-      if (!trimmedLine) {
-        yPosition += 5;
-        continue;
-      }
-      
-      // Skip only very obvious non-content lines
-      if (trimmedLine.includes("═") || trimmedLine.includes("━") || trimmedLine.includes("---") || trimmedLine === "Certainly!") {
-        continue;
-      }
-      
-      // Detect and format headers (lines starting with # or ALL CAPS lines that look like headers)
-      if (line.match(/^#+\s+/) || (trimmedLine.length < 50 && trimmedLine === trimmedLine.toUpperCase() && trimmedLine.length > 5)) {
-        if (!isFirstSection) yPosition += 10;
+      if (!trimmedLine || trimmedLine.includes("═") || trimmedLine.includes("---")) continue;
+
+      // IMPROVEMENT #3: Better Visual Hierarchy - Detect and format section headers
+      if (line.match(/^#+\s+/) || (trimmedLine.length < 60 && trimmedLine === trimmedLine.toUpperCase() && trimmedLine.length > 5)) {
+        yPosition += 8;
         const sectionTitle = line.replace(/^#+\s+/, "").trim();
-        doc.rect(40, yPosition, 4, 20).fill("#fbbf24");
-        doc.fontSize(12).font("Helvetica-Bold").fillColor("#0f2d6e");
-        doc.text(sectionTitle, 50, yPosition + 2);
-        doc.moveTo(50, yPosition + 20).lineTo(560, yPosition + 20).strokeColor("#e5e7eb").lineWidth(0.75).stroke();
-        yPosition += 32;
-        isFirstSection = false;
-      } 
-      // Format bullet points
-      else if (line.match(/^\s*[-•▪*]\s+/) || line.match(/^\s*\d+\.\s+/)) {
-        const cleanContent = line.replace(/^\s*[-•▪*\d.]\s+/, "").replace(/\*\*/g, "").trim();
+        doc.rect(40, yPosition, 532, 24).fill("#f3f4f6");
+        doc.rect(40, yPosition, 8, 24).fill("#0f2d6e");
+        doc.fontSize(13).font("Helvetica-Bold").fillColor("#0f2d6e");
+        doc.text(sectionTitle, 55, yPosition + 3);
+        yPosition += 28;
+        inActionItems = sectionTitle.includes("ACTION") || sectionTitle.includes("PRIORITY");
+        actionItemNum = 1;
+        tableMode = false;
+      }
+      // IMPROVEMENT #4: Tables with formatting
+      else if (trimmedLine.includes("|")) {
+        tableMode = true;
+        const cells = trimmedLine.split("|").map(c => c.trim()).filter(c => c);
+        if (cells.length > 1) {
+          tableRows.push(cells);
+          
+          if (tableRows.length > 1) {
+            const rowHeight = 20;
+            const colWidth = 480 / cells.length;
+            let x = 45;
+            
+            tableRows.forEach((row, rowIdx) => {
+              row.forEach((cell, colIdx) => {
+                const bgColor = rowIdx > 0 && rowIdx % 2 === 0 ? "#f9fafb" : "#ffffff";
+                if (rowIdx > 0) doc.rect(x, yPosition - 2, colWidth, rowHeight).fill(bgColor);
+                
+                doc.fontSize(rowIdx === 0 ? 8 : 7).font(rowIdx === 0 ? "Helvetica-Bold" : "Helvetica");
+                doc.fillColor(rowIdx === 0 ? "#0f2d6e" : "#374151");
+                doc.text(cell, x + 4, yPosition + 2, { width: colWidth - 8, height: rowHeight - 4 });
+                x += colWidth;
+              });
+              yPosition += rowHeight;
+            });
+            tableRows = [];
+          }
+        }
+      }
+      // IMPROVEMENT #2: Risk Level Color Coding
+      else if (trimmedLine.includes("CRITICAL") || trimmedLine.includes("HIGH") || trimmedLine.includes("POSITIVE")) {
+        const { color, level } = getRiskColor(trimmedLine);
+        currentRiskLevel = level;
+        doc.rect(42, yPosition, 12, 12).fill(color);
+        doc.fontSize(10).font("Helvetica-Bold").fillColor(color);
+        const cleanText = trimmedLine.replace(/🔴|🟡|🟢/g, "").trim();
+        const wrappedHeight = doc.heightOfString(cleanText, { width: 500 });
+        doc.text(cleanText, 60, yPosition, { width: 500 });
+        yPosition += wrappedHeight + 10;
+      }
+      // IMPROVEMENT #5: Action Items with checkboxes
+      else if (inActionItems && trimmedLine.match(/^\d+\.|^□|^action/i)) {
+        doc.fontSize(9).font("Helvetica").fillColor("#1e40af");
+        doc.text("☐", 50, yPosition);
+        doc.fontSize(9).font("Helvetica-Bold").fillColor("#0f2d6e");
+        const cleanText = trimmedLine.replace(/^\d+\.|^□/, "").trim();
+        const wrappedHeight = doc.heightOfString(cleanText, { width: 480 });
+        doc.text(cleanText, 70, yPosition, { width: 480 });
+        yPosition += wrappedHeight + 6;
+        actionItemNum++;
+      }
+      // Bullet points with enhanced styling
+      else if (line.match(/^\s*[-•▪*]\s+/)) {
+        const cleanContent = line.replace(/^\s*[-•▪*]\s+/, "").replace(/\*\*/g, "").trim();
         if (cleanContent) {
-          doc.fontSize(9).fillColor("#fbbf24").font("Helvetica-Bold");
-          doc.text("●", 48, yPosition);
-          doc.fontSize(10).fillColor("#374151").font("Helvetica");
-          const wrappedHeight = doc.heightOfString(cleanContent, { width: 500 });
-          doc.text(cleanContent, 62, yPosition, { width: 500 });
+          const { color } = getRiskColor(cleanContent);
+          doc.fontSize(9).fillColor(color);
+          doc.text("●", 50, yPosition);
+          doc.fontSize(9).fillColor("#374151").font("Helvetica");
+          const wrappedHeight = doc.heightOfString(cleanContent, { width: 490 });
+          doc.text(cleanContent, 65, yPosition, { width: 490 });
           yPosition += wrappedHeight + 6;
         }
       }
-      // Format key-value pairs (lines with colons)
-      else if (line.includes(":") && !line.match(/^#+/)) {
-        const parts = line.split(":").map(p => p.trim());
-        if (parts.length >= 2) {
-          const cleanLabel = parts[0].replace(/^\s*[-•▪*]\s+/, "").replace(/\*\*/g, "");
-          const cleanValue = parts.slice(1).join(":").replace(/\*\*/g, "");
-          doc.fontSize(9).font("Helvetica-Bold").fillColor("#0f2d6e");
-          doc.text(cleanLabel + ":", 55, yPosition);
-          doc.fontSize(9).font("Helvetica").fillColor("#1e40af");
-          const wrappedHeight = doc.heightOfString(cleanValue, { width: 380 });
-          doc.text(cleanValue, 320, yPosition, { width: 380 });
-          yPosition += Math.max(14, wrappedHeight + 4);
-        }
-      }
-      // Display all other non-empty lines as regular content
+      // Regular content
       else if (trimmedLine.length > 0) {
-        const cleanLine = line.replace(/\*\*/g, "").trim();
-        doc.fontSize(10).fillColor("#4b5563").font("Helvetica");
-        const wrappedHeight = doc.heightOfString(cleanLine, { width: 520 });
-        doc.text(cleanLine, 48, yPosition, { width: 520 });
+        const cleanLine = trimmedLine.replace(/\*\*/g, "");
+        doc.fontSize(9).fillColor("#4b5563").font("Helvetica");
+        const wrappedHeight = doc.heightOfString(cleanLine, { width: 510 });
+        doc.text(cleanLine, 48, yPosition, { width: 510 });
         yPosition += wrappedHeight + 5;
       }
     }
 
-    // Footer
-    doc.rect(0, 750, 612, 6).fill("#fbbf24");
-    doc.moveTo(50, 735).lineTo(560, 735).strokeColor("#d1d5db").lineWidth(0.75).stroke();
-    doc.fontSize(8).fillColor("#6b7280").font("Helvetica");
-    doc.text("This analysis is confidential and for personal use only.", 50, 705, { align: "center" });
-    doc.fontSize(7).fillColor("#9ca3af").font("Helvetica");
-    doc.text("© 2025 TN Credit Solutions | Confidential & Proprietary", 50, 718, { align: "center" });
-    doc.text("For professional financial advice, please consult with a qualified advisor.", 50, 727, { align: "center" });
-
+    // Final footer
+    addPageFooter();
     doc.end();
 
     return new Promise((resolve) => {
       writeStream.on('finish', () => {
-        console.log("[PDF Save] Successfully saved:", pdfFileName);
+        console.log("[PDF Save] Successfully saved with all 7 formatting improvements:", pdfFileName);
         resolve(pdfFileName);
       });
       writeStream.on('error', (err) => {
