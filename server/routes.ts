@@ -9,15 +9,23 @@ import path from "path";
 import PDFDocument from "pdfkit";
 import bcrypt from "bcrypt";
 
-let pdfParse: any = null;
+let pdfParsePromise: Promise<any> | null = null;
 
-// Try to load pdf-parse synchronously first (works with bundled code)
-try {
-  const pdfParseModule = require('pdf-parse');
-  pdfParse = pdfParseModule;
-  console.log("[AI] ✅ pdf-parse loaded successfully via require");
-} catch (e: any) {
-  console.warn("[AI] Failed to load pdf-parse via require, will attempt dynamic import on first use");
+async function loadPdfParse() {
+  if (pdfParsePromise) return pdfParsePromise;
+  
+  pdfParsePromise = (async () => {
+    try {
+      const module = await import('pdf-parse');
+      console.log("[AI] ✅ pdf-parse loaded successfully");
+      return module.default;
+    } catch (e: any) {
+      console.error("[AI] Failed to load pdf-parse:", e?.message);
+      return null;
+    }
+  })();
+  
+  return pdfParsePromise;
 }
 
 // Using gpt-4o (most recent stable model)
@@ -853,6 +861,8 @@ This is the start of the conversation. Ask open-ended questions to understand th
         } else if (isPdf) {
           // For PDFs, extract text from database content and send to OpenAI for analysis
           try {
+            const pdfParse = await loadPdfParse();
+            
             if (!pdfParse) {
               console.error("[AI] pdf-parse not available - cannot process PDF");
               analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
