@@ -71,6 +71,33 @@ export async function ensureTablesExist(db: NeonHttpDatabase) {
     `);
     console.log("[Migration] ✅ documents table ready");
 
+    // Add fileContent column if it doesn't exist (for Railway compatibility)
+    try {
+      const columnExists = await db.execute(sql`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'documents' AND column_name = 'file_content'
+      `);
+      
+      if (!columnExists || columnExists.length === 0) {
+        console.log("[Migration] Adding file_content column to documents table...");
+        await db.execute(sql`
+          ALTER TABLE "documents"
+          ADD COLUMN IF NOT EXISTS "file_content" text
+        `);
+        console.log("[Migration] ✅ file_content column added to documents table");
+      } else {
+        console.log("[Migration] ✅ file_content column already exists");
+      }
+    } catch (error: any) {
+      if (error.message && error.message.includes("already exists")) {
+        console.log("[Migration] ✅ file_content column already exists");
+      } else {
+        console.error("[Migration] Error checking/adding file_content column:", error);
+        throw error;
+      }
+    }
+
     // Create indices if they don't exist
     await db.execute(sql`
       CREATE INDEX IF NOT EXISTS "idx_chat_messages_email" ON "chat_messages"("email");
