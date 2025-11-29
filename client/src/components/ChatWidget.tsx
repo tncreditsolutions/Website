@@ -24,6 +24,7 @@ export default function ChatWidget() {
   const [lastDocumentId, setLastDocumentId] = useState<string | null>(null);
   const [visitorDateForFilename, setVisitorDateForFilename] = useState<string>("");
   const [sessionMessages, setSessionMessages] = useState<ChatMessage[]>([]); // CRITICAL: Only current session messages
+  const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null); // Track when session started
   const escalationMessageIdRef = useRef<string | null>(null);
   const dismissedEscalationIdRef = useRef<string | null>(null);
   const escalationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -63,8 +64,13 @@ export default function ChatWidget() {
     staleTime: 1000,
   });
 
+  // Filter messages to only show current session (created after session started)
+  const filteredMessages = sessionStartTime
+    ? dbMessages.filter((msg: any) => new Date(msg.createdAt) >= sessionStartTime)
+    : [];
+
   // Merge database messages with session messages (db takes priority for AI responses)
-  const messages = dbMessages.length > 0 ? dbMessages : sessionMessages;
+  const messages = filteredMessages.length > 0 ? filteredMessages : sessionMessages;
 
   const sendMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -322,6 +328,10 @@ export default function ChatWidget() {
     // Clear session messages for fresh start (previous session, if any)
     setSessionMessages([]);
     
+    // Mark session start time (so we only show messages from this session)
+    const now = new Date();
+    setSessionStartTime(now);
+    
     // Send greeting message from AI agent
     try {
       console.log("[Chat Form] Sending greeting message from Riley");
@@ -342,7 +352,7 @@ export default function ChatWidget() {
         message: `Hi ${trimmedName}! How can I help you today?`,
         sender: "ai",
         isEscalated: "false",
-        createdAt: new Date(),
+        createdAt: now,
       }]);
       
       setIsNewVisitor(false);
