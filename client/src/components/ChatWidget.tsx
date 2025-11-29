@@ -255,7 +255,10 @@ export default function ChatWidget() {
 
   const handleInitialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("[Chat Form] Submit handler called", { name, email });
+    
     if (!name.trim() || !email.trim()) {
+      console.log("[Chat Form] Validation failed: missing fields");
       toast({
         title: "Missing information",
         description: "Please fill in your name and email",
@@ -270,6 +273,7 @@ export default function ChatWidget() {
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(trimmedEmail)) {
+      console.log("[Chat Form] Validation failed: invalid email format");
       toast({
         title: "Invalid email",
         description: "Please enter a valid email address (e.g., name@example.com)",
@@ -278,34 +282,45 @@ export default function ChatWidget() {
       return;
     }
     
+    console.log("[Chat Form] Validation passed, saving to localStorage");
     localStorage.setItem(VISITOR_INFO_KEY, JSON.stringify({ name: trimmedName, email: trimmedEmail }));
     
-    // CRITICAL: Clear any previous chat history AND documents for this email from the backend
-    // This ensures fresh sessions don't inherit old conversation context
+    // Skip DELETE for now - just send greeting to get chat working
+    // Try to clear previous data but don't block on it
     try {
-      console.log("[Chat] Clearing previous messages and documents for fresh session");
-      // The DELETE /api/chat endpoint clears both messages AND documents for this email
+      console.log("[Chat Form] Attempting to clear previous messages");
       await apiRequest("DELETE", "/api/chat", { email: trimmedEmail });
+      console.log("[Chat Form] Successfully cleared previous messages");
     } catch (error) {
-      console.error("[Chat] Error clearing previous data (this is OK on first visit):", error);
-      // Don't fail - this is expected if user is new
+      console.log("[Chat Form] Delete failed (OK for new users):", error);
+      // Continue anyway - new users won't have previous data
     }
     
     // Send greeting message from AI agent
     try {
-      await apiRequest("POST", "/api/chat", {
+      console.log("[Chat Form] Sending greeting message from Riley");
+      const greetingResponse = await apiRequest("POST", "/api/chat", {
         name: "Riley",
         email: "support@tncreditsolutions.com",
         message: `Hi ${trimmedName}! How can I help you today?`,
         sender: "ai",
         isEscalated: "false",
       });
+      console.log("[Chat Form] Greeting sent successfully:", greetingResponse.status);
+      setIsNewVisitor(false);
       queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
-    } catch (error) {
-      console.error("Failed to send greeting:", error);
+    } catch (error: any) {
+      console.error("[Chat Form] CRITICAL: Failed to send greeting:", {
+        error: error?.message || String(error),
+        status: error?.status,
+      });
+      toast({
+        title: "Error",
+        description: "Failed to start chat. Please refresh and try again.",
+        variant: "destructive",
+      });
+      // Don't set isNewVisitor to false on error
     }
-    
-    setIsNewVisitor(false);
   };
 
   const handleSend = (e: React.FormEvent) => {
