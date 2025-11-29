@@ -462,13 +462,19 @@ export default function Admin() {
               <div className="space-y-4">
                 {Array.from(
                   chatMessages?.reduce((acc, msg) => {
-                    // Filter out admin system messages to get unique visitor emails
-                    if (msg.email !== "support@tncreditsolutions.com" || msg.sender === "visitor") {
-                      const email = msg.email;
-                      if (!acc.has(email)) {
-                        acc.set(email, []);
+                    // Include both visitor messages and Riley AI responses
+                    if (msg.sender === "visitor" || msg.sender === "ai") {
+                      // Group by visitor email (not Riley's support email)
+                      const email = msg.sender === "visitor" ? msg.email : 
+                        chatMessages.find((m: ChatMessage) => m.sender === "visitor" && 
+                          new Date(m.createdAt).getTime() <= new Date(msg.createdAt).getTime())?.email || msg.email;
+                      
+                      if (email && email !== "support@tncreditsolutions.com") {
+                        if (!acc.has(email)) {
+                          acc.set(email, []);
+                        }
+                        acc.get(email)?.push(msg);
                       }
-                      acc.get(email)?.push(msg);
                     }
                     return acc;
                   }, new Map<string, ChatMessage[]>()) || new Map()
