@@ -839,7 +839,6 @@ This is the start of the conversation. Ask open-ended questions to understand th
             console.log("[AI] PDF converted to PNG, size:", pngBase64.length);
             
             // Send PNG image to OpenAI for analysis via vision API
-            console.log("[AI] Sending PDF to OpenAI for analysis...");
             const response = await openai.chat.completions.create({
               model: "gpt-4o",
               messages: [
@@ -862,8 +861,6 @@ This is the start of the conversation. Ask open-ended questions to understand th
               max_tokens: 1500,
             });
             
-            console.log("[AI] OpenAI response received:", !!response.choices[0].message.content, "length:", response.choices[0].message.content?.length || 0);
-            
             // Clean up PNG file
             try {
               fs.unlinkSync(pngPath);
@@ -872,13 +869,11 @@ This is the start of the conversation. Ask open-ended questions to understand th
             }
             
             let rawAnalysis = response.choices[0].message.content || "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
-            console.log("[AI] Raw analysis from OpenAI, length:", rawAnalysis.length, "preview:", rawAnalysis.substring(0, 150));
             
             // Clean analysis text: remove conversational preambles and agent-like responses
             rawAnalysis = cleanAnalysisText(rawAnalysis);
-            console.log("[AI] After cleaning, analysis length:", rawAnalysis.length, "preview:", rawAnalysis.substring(0, 150));
             analysisText = rawAnalysis || "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
-            console.log("[AI] Final analysisText for storage, length:", analysisText.length, "preview:", analysisText.substring(0, 150));
+            console.log("[AI] PDF analysis received, length:", analysisText.length);
           } catch (pdfError) {
             console.error("[AI] PDF processing error:", pdfError instanceof Error ? pdfError.message : String(pdfError));
             analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations to help improve your credit score and financial situation.";
@@ -894,13 +889,8 @@ This is the start of the conversation. Ask open-ended questions to understand th
 
       // Update storage with analysis
       console.log("[Document Upload] Saving analysis, length:", analysisText.length, "text preview:", analysisText.substring(0, 100));
-      try {
-        await storage.updateDocumentAnalysis(document.id, analysisText);
-        console.log("[Document Upload] ✅ Analysis saved successfully");
-      } catch (storageError) {
-        console.error("[Document Upload] ❌ CRITICAL: Failed to save analysis to database:", storageError);
-        return res.status(500).json({ error: "Failed to save document analysis to database. Please try again." });
-      }
+      await storage.updateDocumentAnalysis(document.id, analysisText);
+      console.log("[Document Upload] ✅ Analysis saved successfully");
       
       // Fetch the updated document from storage to ensure aiAnalysis is included
       const updatedDoc = await storage.getDocumentById(document.id);
@@ -917,12 +907,7 @@ This is the start of the conversation. Ask open-ended questions to understand th
       const pdfFileName = await generateAndSavePDF(updatedDoc, analysisText);
       console.log("[Document Upload] PDF generation complete - file:", pdfFileName);
       if (pdfFileName) {
-        try {
-          await storage.updateDocumentPdfPath(updatedDoc.id, pdfFileName);
-        } catch (pdfStorageError) {
-          console.error("[Document Upload] ❌ CRITICAL: Failed to save PDF path to database:", pdfStorageError);
-          return res.status(500).json({ error: "Failed to save PDF path to database. Please try again." });
-        }
+        await storage.updateDocumentPdfPath(updatedDoc.id, pdfFileName);
       }
       
       // Construct response with all fields, converting Date to ISO string

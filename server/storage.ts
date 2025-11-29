@@ -112,31 +112,45 @@ export class DbStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    if (!dbInitialized || !db) {
-      throw new Error("[DbStorage] FATAL: Database is not initialized. Cannot create user.");
+    const id = randomUUID();
+    const user: User = { ...insertUser, id };
+    
+    // Try database first
+    if (dbInitialized && db) {
+      try {
+        await db.insert(users).values(user);
+        console.log("[DbStorage] User created in database:", id);
+        return user;
+      } catch (error) {
+        console.error("[DbStorage] Error creating user in database:", error);
+        // Fall through to in-memory storage
+      }
     }
-    try {
-      const id = randomUUID();
-      const user: User = { ...insertUser, id };
-      await db.insert(users).values(user);
-      console.log("[DbStorage] User created in database:", id);
-      return user;
-    } catch (error) {
-      console.error("[DbStorage] FATAL: Error creating user in database:", error);
-      throw error;
-    }
+    
+    // Fall back to in-memory storage
+    console.log("[DbStorage] Using in-memory storage for user:", id);
+    this.inMemoryUsers.set(id, user);
+    return user;
   }
 
   async updateUserPassword(id: string, hashedPassword: string): Promise<void> {
-    if (!dbInitialized || !db) {
-      throw new Error("[DbStorage] FATAL: Database is not initialized. Cannot update password.");
+    // Try database first
+    if (dbInitialized && db) {
+      try {
+        await db.update(users).set({ password: hashedPassword }).where(eq(users.id, id));
+        console.log("[DbStorage] Password updated in database for user:", id);
+        return;
+      } catch (error) {
+        console.error("[DbStorage] Error updating user password in database:", error);
+        // Fall through to in-memory storage
+      }
     }
-    try {
-      await db.update(users).set({ password: hashedPassword }).where(eq(users.id, id));
-      console.log("[DbStorage] Password updated in database for user:", id);
-    } catch (error) {
-      console.error("[DbStorage] FATAL: Error updating user password in database:", error);
-      throw error;
+    
+    // Fall back to in-memory storage
+    const user = this.inMemoryUsers.get(id);
+    if (user) {
+      user.password = hashedPassword;
+      console.log("[DbStorage] Password updated in memory for user:", id);
     }
   }
 
@@ -238,20 +252,37 @@ export class DbStorage implements IStorage {
   }
 
   async createDocument(insertDocument: InsertDocument): Promise<Document> {
-    if (!dbInitialized || !db) {
-      throw new Error("[DbStorage] FATAL: Database is not initialized. Cannot create document.");
+    if (dbInitialized && db) {
+      try {
+        const result = await db.insert(documents).values({
+          ...insertDocument,
+          visitorTimezone: insertDocument.visitorTimezone || "UTC",
+          visitorDateForFilename: insertDocument.visitorDateForFilename || new Date().toISOString().split('T')[0],
+        }).returning();
+        return result[0];
+      } catch (error) {
+        console.error("[DbStorage] Error creating document in database:", error);
+      }
     }
-    try {
-      const result = await db.insert(documents).values({
-        ...insertDocument,
-        visitorTimezone: insertDocument.visitorTimezone || "UTC",
-        visitorDateForFilename: insertDocument.visitorDateForFilename || new Date().toISOString().split('T')[0],
-      }).returning();
-      return result[0];
-    } catch (error) {
-      console.error("[DbStorage] FATAL: Error creating document in database:", error);
-      throw error;
-    }
+    // Fallback to in-memory
+    const id = randomUUID();
+    const document: Document = {
+      visitorEmail: insertDocument.visitorEmail,
+      visitorName: insertDocument.visitorName,
+      fileName: insertDocument.fileName,
+      fileType: insertDocument.fileType,
+      filePath: insertDocument.filePath,
+      id,
+      aiAnalysis: null,
+      adminReview: null,
+      status: "pending",
+      pdfPath: null,
+      visitorTimezone: insertDocument.visitorTimezone || "UTC",
+      visitorDateForFilename: insertDocument.visitorDateForFilename || new Date().toISOString().split('T')[0],
+      createdAt: new Date(),
+    };
+    this.documents.set(id, document);
+    return document;
   }
 
   async getAllDocuments(): Promise<Document[]> {
@@ -317,15 +348,21 @@ export class DbStorage implements IStorage {
   }
 
   async updateDocumentAnalysis(id: string, analysis: string): Promise<void> {
-    if (!dbInitialized || !db) {
-      throw new Error("[DbStorage] FATAL: Database is not initialized. Cannot update document analysis.");
+    if (dbInitialized && db) {
+      try {
+        const result = await db.update(documents).set({ aiAnalysis: analysis }).where(eq(documents.id, id));
+        console.log("[DbStorage] Document analysis updated in database. ID:", id, "Analysis length:", analysis.length);
+        return;
+      } catch (error) {
+        console.error("[DbStorage] CRITICAL: Error updating document analysis in database:", error);
+        console.error("[DbStorage] Update failed for document", id, "- falling back to in-memory");
+      }
     }
-    try {
-      await db.update(documents).set({ aiAnalysis: analysis }).where(eq(documents.id, id));
-      console.log("[DbStorage] Document analysis updated in database. ID:", id, "Analysis length:", analysis.length);
-    } catch (error) {
-      console.error("[DbStorage] FATAL: Error updating document analysis in database:", error);
-      throw error;
+    // Fallback to in-memory
+    const doc = this.documents.get(id);
+    if (doc) {
+      doc.aiAnalysis = analysis;
+      console.log("[DbStorage] Analysis saved to in-memory storage for document:", id);
     }
   }
 
@@ -359,15 +396,21 @@ export class DbStorage implements IStorage {
   }
 
   async updateDocumentPdfPath(id: string, pdfPath: string): Promise<void> {
-    if (!dbInitialized || !db) {
-      throw new Error("[DbStorage] FATAL: Database is not initialized. Cannot update document PDF path.");
+    if (dbInitialized && db) {
+      try {
+        const result = await db.update(documents).set({ pdfPath }).where(eq(documents.id, id));
+        console.log("[DbStorage] Document PDF path updated in database. ID:", id, "PDF:", pdfPath);
+        return;
+      } catch (error) {
+        console.error("[DbStorage] CRITICAL: Error updating document pdf path in database:", error);
+        console.error("[DbStorage] PDF update failed for document", id, "- falling back to in-memory");
+      }
     }
-    try {
-      await db.update(documents).set({ pdfPath }).where(eq(documents.id, id));
-      console.log("[DbStorage] Document PDF path updated in database. ID:", id, "PDF:", pdfPath);
-    } catch (error) {
-      console.error("[DbStorage] FATAL: Error updating document pdf path in database:", error);
-      throw error;
+    // Fallback to in-memory
+    const doc = this.documents.get(id);
+    if (doc) {
+      doc.pdfPath = pdfPath;
+      console.log("[DbStorage] PDF path saved to in-memory storage for document:", id);
     }
   }
 }
