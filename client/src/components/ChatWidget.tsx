@@ -295,7 +295,7 @@ export default function ChatWidget() {
     try {
       await apiRequest("POST", "/api/chat", {
         name: "Riley",
-        email: "support@tncreditsolutions.com",
+        email: trimmedEmail,
         message: `Hi ${trimmedName}! How can I help you today?`,
         sender: "ai",
         isEscalated: "false",
