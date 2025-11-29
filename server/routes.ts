@@ -30,7 +30,7 @@ async function analyzePdfWithClaude(pdfBuffer: Buffer, fileName: string): Promis
     
     const response = await claude.messages.create({
       model: "claude-opus-4-1-20250805",
-      max_tokens: 3000,
+      max_tokens: 2000,
       messages: [
         {
           role: "user",
