@@ -850,67 +850,46 @@ This is the start of the conversation. Ask open-ended questions to understand th
           rawAnalysis = cleanAnalysisText(rawAnalysis);
           analysisText = rawAnalysis || "No analysis available";
         } else if (isPdf) {
-          // For PDFs, convert first page to PNG image and send to OpenAI for analysis
+          // For PDFs, extract text and send to OpenAI for analysis
           try {
             const filePath = path.join(import.meta.dirname, "..", "uploads", fileId);
             console.log("[AI] PDF file path:", filePath);
             
-            // Convert PDF to PNG using ImageMagick with higher quality settings
-            const { exec } = require("child_process");
-            const pngPath = filePath + "-page0.png";
-            
-            await new Promise<void>((resolve, reject) => {
-              // Use higher DPI (300) and quality settings for better readability
-              exec(`convert -density 300 -quality 95 "${filePath}[0]" "${pngPath}"`, (error: any) => {
-                if (error) {
-                  console.log("[AI] ImageMagick convert not available, trying alternative method");
-                  reject(error);
-                } else {
-                  resolve();
-                }
-              });
-            });
-            
-            const pngBuffer = fs.readFileSync(pngPath);
-            const pngBase64 = encodeToBase64(pngBuffer);
-            console.log("[AI] PDF converted to PNG, size:", pngBase64.length);
-            
-            // Send PNG image to OpenAI for analysis via vision API
-            const response = await openai.chat.completions.create({
-              model: "gpt-4o",
-              messages: [
-                {
-                  role: "user",
-                  content: [
-                    {
-                      type: "image_url",
-                      image_url: {
-                        url: `data:image/png;base64,${pngBase64}`,
-                      },
-                    },
-                    {
-                      type: "text",
-                      text: "IMPORTANT: Provide ONLY the professional financial analysis of this document. Do NOT include any conversational preamble, acknowledgments, or agent responses. Format ONLY with: sections marked with #### headers, bullet points starting with -, and key-value pairs with colons. Start immediately with the analysis content.",
-                    },
-                  ],
-                },
-              ],
-              max_tokens: 1500,
-            });
-            
-            // Clean up PNG file
-            try {
-              fs.unlinkSync(pngPath);
-            } catch (e) {
-              console.log("[AI] Could not delete temporary PNG");
+            // Extract text from PDF using pdf-parse
+            if (!pdfParse) {
+              const pdfParseModule = await import('pdf-parse/lib/pdf-parse.js');
+              pdfParse = pdfParseModule.default;
             }
             
-            let rawAnalysis = response.choices[0].message.content || "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
+            const pdfBuffer = fs.readFileSync(filePath);
+            const pdfData = await pdfParse(pdfBuffer);
+            const pdfText = pdfData.text || "";
             
-            // Clean analysis text: remove conversational preambles and agent-like responses
-            rawAnalysis = cleanAnalysisText(rawAnalysis);
-            analysisText = rawAnalysis || "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
-            console.log("[AI] PDF analysis received, length:", analysisText.length);
+            console.log("[AI] PDF text extracted, length:", pdfText.length);
+            
+            if (!pdfText.trim()) {
+              console.log("[AI] PDF has no extractable text");
+              analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
+            } else {
+              // Send extracted text to OpenAI for analysis
+              const response = await openai.chat.completions.create({
+                model: "gpt-4o",
+                messages: [
+                  {
+                    role: "user",
+                    content: `IMPORTANT: Analyze this credit report document and provide ONLY a professional financial analysis. Do NOT include any conversational preamble, acknowledgments, or agent responses. Format ONLY with: sections marked with #### headers, bullet points starting with -, and key-value pairs with colons. Start immediately with the analysis content.\n\nDocument text:\n${pdfText}`,
+                  },
+                ],
+                max_tokens: 1500,
+              });
+              
+              let rawAnalysis = response.choices[0].message.content || "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
+              
+              // Clean analysis text: remove conversational preambles and agent-like responses
+              rawAnalysis = cleanAnalysisText(rawAnalysis);
+              analysisText = rawAnalysis || "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
+              console.log("[AI] PDF analysis received, length:", analysisText.length);
+            }
           } catch (pdfError) {
             console.error("[AI] PDF processing error:", pdfError instanceof Error ? pdfError.message : String(pdfError));
             analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations to help improve your credit score and financial situation.";
