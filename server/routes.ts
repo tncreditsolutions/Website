@@ -13,6 +13,11 @@ import bcrypt from "bcrypt";
 // Analyze PDF using Claude API with native PDF support
 async function analyzePdfWithClaude(pdfBuffer: Buffer, fileName: string): Promise<string> {
   try {
+    if (!claude) {
+      console.error("[AI] Claude API not initialized - ANTHROPIC_API_KEY missing");
+      return "";
+    }
+
     console.log("[AI] Starting PDF analysis via Claude API");
     console.log("[AI] PDF file:", fileName, "size:", pdfBuffer.length, "bytes");
     
@@ -21,17 +26,18 @@ async function analyzePdfWithClaude(pdfBuffer: Buffer, fileName: string): Promis
     console.log("[AI] PDF encoded to base64, length:", pdfBase64.length, "chars");
     
     // Send to Claude with native PDF support
-    console.log("[AI] Sending PDF to Claude for analysis...");
+    console.log("[AI] Sending PDF to Claude for analysis with claude-opus-4-1...");
+    
     const response = await claude.messages.create({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 2000,
+      model: "claude-opus-4-1-20250805",
+      max_tokens: 3000,
       messages: [
         {
           role: "user",
           content: [
             {
               type: "text",
-              text: "Please analyze this credit report PDF and provide a professional financial analysis. Include: 1) Key Findings (main credit issues and financial status), 2) Credit Score Analysis (if visible), 3) Account Summary (accounts, balances, payment history), 4) Recommendations for improvement. Format with #### headers, bullet points with -, and key details. Start immediately with analysis, no preamble.",
+              text: "Analyze this credit report PDF as a financial professional. Provide detailed analysis including: 1) Key Financial Findings - identify the most critical credit issues, 2) Credit Score Assessment - estimate score based on visible information, 3) Account Breakdown - list all accounts with balances and status, 4) Risk Factors - highlight major concerns, 5) Action Items - specific recommendations to improve credit profile. Use clear formatting with headers and bullet points.",
             },
             {
               type: "document",
@@ -40,25 +46,46 @@ async function analyzePdfWithClaude(pdfBuffer: Buffer, fileName: string): Promis
                 media_type: "application/pdf",
                 data: pdfBase64,
               },
-            },
+            } as any,
           ],
         },
       ],
     });
     
-    const analysis = response.content[0].type === "text" ? response.content[0].text : "";
-    console.log("[AI] PDF analysis complete, length:", analysis.length);
+    console.log("[AI] Claude response status:", response.stop_reason);
+    console.log("[AI] Response content array length:", response.content.length);
     
-    if (analysis.trim().length > 50) {
-      console.log("[AI] PDF analysis successful, returning cleaned text");
+    if (!response.content || response.content.length === 0) {
+      console.error("[AI] Claude returned empty content array");
+      return "";
+    }
+    
+    console.log("[AI] First content block type:", response.content[0].type);
+    
+    const textContent = response.content.find(c => c.type === "text");
+    if (!textContent || textContent.type !== "text") {
+      console.error("[AI] Claude did not return text content");
+      return "";
+    }
+    
+    const analysis = textContent.text;
+    console.log("[AI] Received analysis length:", analysis.length);
+    console.log("[AI] First 300 chars:", analysis.substring(0, 300));
+    
+    if (analysis.trim().length > 100) {
+      console.log("[AI] ✅ PDF analysis successful");
       return cleanAnalysisText(analysis);
     }
     
-    console.log("[AI] PDF analysis returned insufficient content");
+    console.error("[AI] ❌ Insufficient analysis length:", analysis.length);
     return "";
   } catch (e: any) {
     console.error("[AI] PDF analysis error:", e?.message);
-    console.error("[AI] Full error:", JSON.stringify(e, null, 2));
+    console.error("[AI] Error type:", e?.type || "unknown");
+    console.error("[AI] Error status:", e?.status || "unknown");
+    if (e?.error) {
+      console.error("[AI] API error details:", JSON.stringify(e.error, null, 2));
+    }
     return "";
   }
 }
@@ -905,22 +932,22 @@ This is the start of the conversation. Ask open-ended questions to understand th
         } else if (isPdf) {
           // For PDFs, use Claude API which has native PDF support
           try {
-            console.log("[AI] Starting PDF analysis via Claude API...");
+            console.log("[AI] 🚀 Starting PDF analysis via Claude...");
             // Read PDF from database (base64 encoded)
             const pdfBuffer = Buffer.from(base64Data, "base64");
             console.log("[AI] PDF buffer size:", pdfBuffer.length, "bytes");
             
             const pdfAnalysis = await analyzePdfWithClaude(pdfBuffer, fileName);
             
-            if (!pdfAnalysis.trim()) {
-              console.log("[AI] PDF analysis returned empty result");
+            if (!pdfAnalysis || !pdfAnalysis.trim()) {
+              console.log("[AI] ⚠️ PDF analysis returned empty - using fallback message");
               analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
             } else {
               analysisText = pdfAnalysis;
-              console.log("[AI] PDF analysis complete, length:", analysisText.length);
+              console.log("[AI] ✅ PDF analysis complete, length:", analysisText.length);
             }
           } catch (pdfError: any) {
-            console.error("[AI] PDF processing error:", pdfError?.message || String(pdfError));
+            console.error("[AI] ❌ PDF processing error:", pdfError?.message || String(pdfError));
             analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
           }
         } else {
