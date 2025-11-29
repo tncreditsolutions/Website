@@ -4,47 +4,50 @@ import { createRequire } from "module";
 import { storage, dbReadyPromise } from "./storage";
 import { insertContactSubmissionSchema, insertChatMessageSchema, insertNewsletterSubscriptionSchema, insertDocumentSchema } from "@shared/schema";
 import OpenAI from "openai";
+import Anthropic from "@anthropic-ai/sdk";
 import fs from "fs";
 import path from "path";
 import PDFDocument from "pdfkit";
 import bcrypt from "bcrypt";
 
-// Analyze PDF using OpenAI Vision API with base64 encoding
-async function analyzePdfWithOpenAI(pdfBuffer: Buffer, fileName: string): Promise<string> {
+// Analyze PDF using Claude API with native PDF support
+async function analyzePdfWithClaude(pdfBuffer: Buffer, fileName: string): Promise<string> {
   try {
-    console.log("[AI] Starting PDF analysis via OpenAI Vision API");
+    console.log("[AI] Starting PDF analysis via Claude API");
     console.log("[AI] PDF file:", fileName, "size:", pdfBuffer.length, "bytes");
     
     // Convert PDF buffer to base64
     const pdfBase64 = pdfBuffer.toString('base64');
     console.log("[AI] PDF encoded to base64, length:", pdfBase64.length, "chars");
     
-    // Send to OpenAI gpt-4o vision API with pdf_url type
-    console.log("[AI] Sending PDF to OpenAI gpt-4o vision API...");
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+    // Send to Claude with native PDF support
+    console.log("[AI] Sending PDF to Claude for analysis...");
+    const response = await claude.messages.create({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 2000,
       messages: [
         {
           role: "user",
           content: [
             {
               type: "text",
-              text: "Please analyze this credit report PDF and provide a professional financial analysis. Include: 1) Key Findings (main credit issues), 2) Credit Score Analysis, 3) Account Summary, 4) Recommendations for improvement. Format with #### headers, bullet points with -, and key details. Start immediately with analysis, no preamble.",
+              text: "Please analyze this credit report PDF and provide a professional financial analysis. Include: 1) Key Findings (main credit issues and financial status), 2) Credit Score Analysis (if visible), 3) Account Summary (accounts, balances, payment history), 4) Recommendations for improvement. Format with #### headers, bullet points with -, and key details. Start immediately with analysis, no preamble.",
             },
             {
-              type: "image_url",
-              image_url: {
-                url: `data:application/pdf;base64,${pdfBase64}`,
+              type: "document",
+              source: {
+                type: "base64",
+                media_type: "application/pdf",
+                data: pdfBase64,
               },
             },
           ],
         },
       ],
-      max_tokens: 2000,
     });
     
-    const analysis = response.choices[0].message.content || "";
-    console.log("[AI] PDF vision analysis complete, length:", analysis.length);
+    const analysis = response.content[0].type === "text" ? response.content[0].text : "";
+    console.log("[AI] PDF analysis complete, length:", analysis.length);
     
     if (analysis.trim().length > 50) {
       console.log("[AI] PDF analysis successful, returning cleaned text");
@@ -60,7 +63,11 @@ async function analyzePdfWithOpenAI(pdfBuffer: Buffer, fileName: string): Promis
   }
 }
 
-// Using gpt-4o (most recent stable model)
+// Initialize Claude API
+const claude = process.env.ANTHROPIC_API_KEY ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }) : null;
+console.log("[AI] Claude initialized:", !!claude, "API key available:", !!process.env.ANTHROPIC_API_KEY);
+
+// Using gpt-4o (most recent stable model) - kept for chat analysis if needed
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
 console.log("[AI] OpenAI initialized:", !!openai, "API key available:", !!process.env.OPENAI_API_KEY);
 
@@ -896,14 +903,14 @@ This is the start of the conversation. Ask open-ended questions to understand th
           rawAnalysis = cleanAnalysisText(rawAnalysis);
           analysisText = rawAnalysis || "No analysis available";
         } else if (isPdf) {
-          // For PDFs, use OpenAI Files API for professional document analysis
+          // For PDFs, use Claude API which has native PDF support
           try {
-            console.log("[AI] Starting PDF analysis via OpenAI Files API...");
+            console.log("[AI] Starting PDF analysis via Claude API...");
             // Read PDF from database (base64 encoded)
             const pdfBuffer = Buffer.from(base64Data, "base64");
             console.log("[AI] PDF buffer size:", pdfBuffer.length, "bytes");
             
-            const pdfAnalysis = await analyzePdfWithOpenAI(pdfBuffer, fileName);
+            const pdfAnalysis = await analyzePdfWithClaude(pdfBuffer, fileName);
             
             if (!pdfAnalysis.trim()) {
               console.log("[AI] PDF analysis returned empty result");
