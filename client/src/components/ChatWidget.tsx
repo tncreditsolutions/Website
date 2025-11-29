@@ -309,10 +309,13 @@ export default function ChatWidget() {
         sender: "ai",
         isEscalated: "false",
       });
-      console.log("[Chat] Greeting sent successfully");
+      console.log("[Chat] Greeting sent, waiting for database...");
       
-      // Invalidate cache so next refetch gets fresh data from server
-      queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
+      // Wait briefly for database to process, then immediately fetch
+      await new Promise(resolve => setTimeout(resolve, 200));
+      await queryClient.refetchQueries({ queryKey: ["/api/chat"] });
+      console.log("[Chat] Greeting fetched and displayed");
+      
       setIsNewVisitor(false);
     } catch (error: any) {
       console.error("[Chat] Failed to send greeting:", error);
