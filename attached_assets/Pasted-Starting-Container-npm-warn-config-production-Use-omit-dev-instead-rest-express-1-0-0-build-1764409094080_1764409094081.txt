@@ -1,0 +1,176 @@
+Starting Container
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 build
+> vite build && esbuild server/index-prod.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/index.js
+vite v5.4.20 building for production...
+transforming...
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+✓ 1742 modules transformed.
+rendering chunks...
+✓ built in 4.65s
+  dist/index.js  71.9kb
+⚡ Done in 10ms
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+computing gzip size...
+../dist/public/index.html                                            2.37 kB │ gzip:   0.95 kB
+../dist/public/assets/ready_for_better_future_hero-C6oVMAMg.png    945.56 kB
+../dist/public/assets/client_testimonial_photo_2-B8UX-XkM.png    1,312.17 kB
+../dist/public/assets/client_testimonial_photo_1-C49icyGe.png    1,313.43 kB
+../dist/public/assets/client_testimonial_photo_3-BHvJgOFH.png    1,457.77 kB
+../dist/public/assets/pdf.worker-zxMdjS_u.mjs                    1,916.05 kB
+../dist/public/assets/index-B2cAoITb.css                            96.33 kB │ gzip:  14.74 kB
+../dist/public/assets/index-CPa9H5E2.js                            874.31 kB │ gzip: 261.31 kB
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[DbStorage] ✅ Database connected successfully
+[Migration] Checking if database tables exist...
+[AI] OpenAI initialized: true API key available: true
+[Migration] ✅ users table ready
+[Migration] ✅ contact_submissions table ready
+[Migration] ✅ chat_messages table ready
+[Migration] ✅ newsletter_subscriptions table ready
+[Migration] ✅ documents table ready
+[Migration] Ensuring file_content column exists on documents table...
+[Migration] ✅ file_content column ensured on documents table
+[Migration] ✅ chat_messages email index ready
+[Migration] ✅ documents email index ready
+[Migration] ✅ users username index ready
+[Migration] ✅ All database tables and indices created successfully
+[DbStorage] ✅ Database schema verified - User credentials will PERSIST
+[Auth] ✅ Admin user already exists in database. ID: be4efa52-d502-4745-8a85-df401416e2ad
+9:31:23 AM [express] serving on port 8080
+9:32:35 AM [express] GET /api/chat 304 in 26ms :: [{"id":"fb98a0b7-40ce-4dfc-a971-654d6f67890b","nam…
+9:32:42 AM [express] GET /api/chat 200 in 26ms :: [{"id":"fb98a0b7-40ce-4dfc-a971-654d6f67890b","nam…
+9:32:44 AM [express] GET /api/chat 304 in 10ms :: [{"id":"fb98a0b7-40ce-4dfc-a971-654d6f67890b","nam…
+9:32:46 AM [express] GET /api/chat 304 in 7ms :: [{"id":"fb98a0b7-40ce-4dfc-a971-654d6f67890b","name…
+9:32:48 AM [express] GET /api/chat 304 in 7ms :: [{"id":"fb98a0b7-40ce-4dfc-a971-654d6f67890b","name…
+9:32:50 AM [express] GET /api/chat 304 in 6ms :: [{"id":"fb98a0b7-40ce-4dfc-a971-654d6f67890b","name…
+9:32:52 AM [express] GET /api/chat 304 in 6ms :: [{"id":"fb98a0b7-40ce-4dfc-a971-654d6f67890b","name…
+9:32:54 AM [express] GET /api/chat 304 in 6ms :: [{"id":"fb98a0b7-40ce-4dfc-a971-654d6f67890b","name…
+9:32:56 AM [express] DELETE /api/chat 200 in 33ms :: {"success":true}
+[Chat POST] CRITICAL: Received request body: { sender: 'ai', email: 'support@tncreditsolutions.com', name: 'Riley' }
+[Chat POST] Database ready, proceeding with validation
+[Chat POST] Validation successful: { sender: 'ai', email: 'support@tncreditsolutions.com' }
+[Chat POST] Message saved successfully: {
+  id: '81cbfc9c-9c68-4744-8cde-955a8e6db9dd',
+  email: 'support@tncreditsolutions.com',
+  sender: 'ai',
+  message: 'Hi Sergey! How can I help you today?'
+}
+9:32:56 AM [express] POST /api/chat 200 in 22ms :: {"id":"81cbfc9c-9c68-4744-8cde-955a8e6db9dd","nam…
+9:32:56 AM [express] GET /api/chat 200 in 6ms :: [{"id":"81cbfc9c-9c68-4744-8cde-955a8e6db9dd","name…
+9:32:58 AM [express] GET /api/chat 304 in 6ms :: [{"id":"81cbfc9c-9c68-4744-8cde-955a8e6db9dd","name…
+9:33:00 AM [express] GET /api/chat 304 in 6ms :: [{"id":"81cbfc9c-9c68-4744-8cde-955a8e6db9dd","name…
+9:33:02 AM [express] GET /api/chat 304 in 7ms :: [{"id":"81cbfc9c-9c68-4744-8cde-955a8e6db9dd","name…
+[Chat POST] CRITICAL: Received request body: { sender: undefined, email: 'sergie820@gmail.com', name: 'Sergey' }
+[Chat POST] Database ready, proceeding with validation
+[Chat POST] Validation successful: { sender: 'visitor', email: 'sergie820@gmail.com' }
+[Chat POST] Message saved successfully: {
+  id: 'f9f83c14-0d86-4925-a6a3-9fdcd38fab7c',
+  email: 'sergie820@gmail.com',
+  sender: 'visitor',
+  message: 'analyze credit report and provide summary'
+}
+[AI] Visitor message received. OpenAI ready: true Email: sergie820@gmail.com
+[AI] Starting AI response generation...
+[AI] Detected urgent situation: false
+9:33:03 AM [express] POST /api/chat 200 in 11ms :: {"id":"f9f83c14-0d86-4925-a6a3-9fdcd38fab7c","nam…
+9:33:03 AM [express] GET /api/chat 200 in 6ms :: [{"id":"f9f83c14-0d86-4925-a6a3-9fdcd38fab7c","name…
+[AI] User has uploaded documents: false Count: 0
+[AI] Current session only - total messages: 1 current session: 1
+[AI] Conversation turns: 1 Previous topics: []
+[AI] Using standard prompt, visitor turns: 1 session message count: 1
+[AI] Fresh session - using simple greeting prompt
+9:33:05 AM [express] GET /api/chat 304 in 6ms :: [{"id":"f9f83c14-0d86-4925-a6a3-9fdcd38fab7c","name…
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "I'd be happy to help with that! Could you share a bit more about your current credit concerns or goals? Understanding what brought you to TN Credit Solutions today can ensure that we tailor our advice to your needs. If you have specific issues you're facing, like high debt, late payments, or errors on your credit report, please let me know. Additionally, if you already have a credit report available, we can start by reviewing its key components.",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 137,
+    "completion_tokens": 89,
+    "total_tokens": 226,
+    "prompt_tokens_details": {
+[AI] Full response: {
+      "cached_tokens": 0,
+  "id": "chatcmpl-ChBc87TXusV7jTZkh6XChmTkPdQCH",
+  "object": "chat.completion",
+  "created": 1764408784,
+  "model": "gpt-4o-2024-08-06",
+  "choices": [
+    {
+  "service_tier": "default",
+  "system_fingerprint": "fp_689bad8e9a"
+      "audio_tokens": 0,
+      "audio_tokens": 0
+}
+    },
+[AI] AI response received: I'd be happy to help with that! Could you share a 
+      "accepted_prediction_tokens": 0,
+    "completion_tokens_details": {
+[AI] AI message saved successfully: cebbabac-acbb-4b87-a8c3-3e618cf458ab Escalated: false
+      "rejected_prediction_tokens": 0
+      "reasoning_tokens": 0,
+    }
+  },
+9:33:07 AM [express] GET /api/chat 200 in 6ms :: [{"id":"cebbabac-acbb-4b87-a8c3-3e618cf458ab","name…
+9:33:09 AM [express] GET /api/chat 304 in 5ms :: [{"id":"cebbabac-acbb-4b87-a8c3-3e618cf458ab","name…
+9:33:11 AM [express] GET /api/chat 304 in 6ms :: [{"id":"cebbabac-acbb-4b87-a8c3-3e618cf458ab","name…
+[Document Upload] visitorDateForFilename: 11-29-2025 visitorTimezone: America/New_York
+[Document Upload] Creating document record, base64Data length: 520936
+[DbStorage] createDocument called with fileContent length: 520936
+[DbStorage] Inserting document into database...
+[DbStorage] Document inserted successfully, id: 6dbafe42-b9ca-43b6-a39c-e7536206bb45
+[Document Upload] Document created successfully, id: 6dbafe42-b9ca-43b6-a39c-e7536206bb45
+[Document Upload] Starting analysis, fileType: application/pdf
+[AI] ✅ pdf-parse loaded successfully
+[AI] pdf-parse not available - cannot process PDF
+[Document Upload] Saving analysis, length: 124 text preview: Your credit report PDF has been received. Our specialists will review it in detail and provide perso
+[DbStorage] Document analysis updated in database. ID: 6dbafe42-b9ca-43b6-a39c-e7536206bb45 Analysis length: 124
+[Document Upload] ✅ Analysis saved to storage
+[Document Upload] Retrieved document - ID: 6dbafe42-b9ca-43b6-a39c-e7536206bb45
+[Document Upload] Document aiAnalysis field length: 124
+[Document Upload] Document aiAnalysis preview: Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.
+[Document Upload] Document aiAnalysis full content:
+ Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.
+[Document Upload] analysisText parameter length: 124
+[Document Upload] analysisText parameter preview: Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.
+[Document Upload] analysisText full content:
+ Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.
+[Document Upload] About to call generateAndSavePDF with analysisText
+[PDF Save] Using visitor date: 11-29-2025
+[PDF Save] Saving to: 6dbafe42-b9ca-43b6-a39c-e7536206bb45-11-29-2025.pdf
+[PDF Save] Document fields - visitorDateForFilename: 11-29-2025 dateForTitle: 11-29-2025
+[PDF Save] Document ID: 6dbafe42-b9ca-43b6-a39c-e7536206bb45 Analysis source: parameter length: 124
+[PDF Save] Successfully saved: 6dbafe42-b9ca-43b6-a39c-e7536206bb45-11-29-2025.pdf
+[Document Upload] PDF generation complete - file: 6dbafe42-b9ca-43b6-a39c-e7536206bb45-11-29-2025.pdf
+[DbStorage] Document PDF path updated in database. ID: 6dbafe42-b9ca-43b6-a39c-e7536206bb45 PDF: 6dbafe42-b9ca-43b6-a39c-e7536206bb45-11-29-2025.pdf
+9:33:13 AM [express] POST /api/documents 200 in 228ms :: {"id":"6dbafe42-b9ca-43b6-a39c-e7536206bb45…
+[Chat POST] CRITICAL: Received request body: { sender: 'ai', email: 'sergie820@gmail.com', name: 'Riley' }
+[Chat POST] Database ready, proceeding with validation
+[Chat POST] Validation successful: { sender: 'ai', email: 'sergie820@gmail.com' }
+[Chat POST] Message saved successfully: {
+  id: 'b96bf982-34b5-436d-8b19-7e76a1fe8eec',
+  email: 'sergie820@gmail.com',
+  sender: 'ai',
+  message: "I've completed my analysis of your Experian.pdf. Y"
+}
+9:33:13 AM [express] POST /api/chat 200 in 8ms :: {"id":"b96bf982-34b5-436d-8b19-7e76a1fe8eec","name…
+9:33:14 AM [express] GET /api/chat 200 in 6ms :: [{"id":"b96bf982-34b5-436d-8b19-7e76a1fe8eec","name…
+9:33:14 AM [express] GET /api/chat 304 in 6ms :: [{"id":"b96bf982-34b5-436d-8b19-7e76a1fe8eec","name…
+9:33:16 AM [express] GET /api/chat 304 in 5ms :: [{"id":"b96bf982-34b5-436d-8b19-7e76a1fe8eec","name…
+[PDF Endpoint] Using dateOnlyStr from pdfPath: 11-29-2025 pdfPath: 6dbafe42-b9ca-43b6-a39c-e7536206bb45-11-29-2025.pdf
+[PDF Endpoint] Setting Content-Disposition with dateOnlyStr: 11-29-2025 final header: attachment; filename*=UTF-8''credit-analysis-11-29-2025.pdf
+9:33:17 AM [express] GET /api/documents/6dbafe42-b9ca-43b6-a39c-e7536206bb45/pdf 200 in 22ms
+9:33:18 AM [express] GET /api/chat 304 in 6ms :: [{"id":"b96bf982-34b5-436d-8b19-7e76a1fe8eec","name…

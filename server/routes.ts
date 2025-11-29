@@ -17,8 +17,16 @@ async function loadPdfParse() {
   pdfParsePromise = (async () => {
     try {
       const module = await import('pdf-parse');
-      console.log("[AI] ✅ pdf-parse loaded successfully");
-      return module.default;
+      // In bundled ESM, try default export first, then fall back to module itself or named exports
+      const pdfParseModule = module.default || module.pdfParse || module;
+      
+      if (!pdfParseModule || typeof pdfParseModule !== 'function') {
+        console.error("[AI] pdf-parse loaded but is not callable, module keys:", Object.keys(module).join(','));
+        return null;
+      }
+      
+      console.log("[AI] ✅ pdf-parse loaded successfully and is callable");
+      return pdfParseModule;
     } catch (e: any) {
       console.error("[AI] Failed to load pdf-parse:", e?.message);
       return null;
