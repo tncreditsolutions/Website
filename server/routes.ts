@@ -9,29 +9,18 @@ import path from "path";
 import PDFDocument from "pdfkit";
 import bcrypt from "bcrypt";
 
-// Analyze PDF using OpenAI Files API for professional document handling
+// Analyze PDF using OpenAI Vision API with base64 encoding
 async function analyzePdfWithOpenAI(pdfBuffer: Buffer, fileName: string): Promise<string> {
-  let fileId: string | null = null;
   try {
-    console.log("[AI] Starting PDF analysis via OpenAI Files API");
+    console.log("[AI] Starting PDF analysis via OpenAI Vision API");
+    console.log("[AI] PDF file:", fileName, "size:", pdfBuffer.length, "bytes");
     
-    // Upload PDF to OpenAI Files API
-    console.log("[AI] Uploading PDF to OpenAI Files API...");
+    // Convert PDF buffer to base64
+    const pdfBase64 = pdfBuffer.toString('base64');
+    console.log("[AI] PDF encoded to base64, length:", pdfBase64.length, "chars");
     
-    // Create a Blob-like object from the buffer
-    const file = new (await import('fetch')).File([pdfBuffer], fileName, { type: 'application/pdf' });
-    
-    const uploadResponse = await (openai as any).beta.files.create({
-      file: file,
-      purpose: 'assistants'
-    });
-    
-    fileId = uploadResponse.id;
-    console.log("[AI] File uploaded successfully, fileId:", fileId);
-    
-    // Use the file for analysis via vision/document processing
-    // For now, we'll use the chat API with file context
-    console.log("[AI] Analyzing PDF with OpenAI...");
+    // Send to OpenAI gpt-4o vision API with pdf_url type
+    console.log("[AI] Sending PDF to OpenAI gpt-4o vision API...");
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
@@ -40,15 +29,14 @@ async function analyzePdfWithOpenAI(pdfBuffer: Buffer, fileName: string): Promis
           content: [
             {
               type: "text",
-              text: "Please analyze this credit report PDF and provide a professional financial analysis. Include key findings, credit score insights, account information, and recommendations. Format with #### headers, bullet points with -, and key-value pairs with colons. Start immediately with the analysis, no preamble.",
+              text: "Please analyze this credit report PDF and provide a professional financial analysis. Include: 1) Key Findings (main credit issues), 2) Credit Score Analysis, 3) Account Summary, 4) Recommendations for improvement. Format with #### headers, bullet points with -, and key details. Start immediately with analysis, no preamble.",
             },
             {
-              type: "document",
-              document: {
-                type: "file",
-                file_id: fileId,
+              type: "image_url",
+              image_url: {
+                url: `data:application/pdf;base64,${pdfBase64}`,
               },
-            } as any,
+            },
           ],
         },
       ],
@@ -56,33 +44,18 @@ async function analyzePdfWithOpenAI(pdfBuffer: Buffer, fileName: string): Promis
     });
     
     const analysis = response.choices[0].message.content || "";
-    console.log("[AI] PDF analysis complete, length:", analysis.length);
-    
-    // Clean up: delete the file from OpenAI
-    try {
-      await (openai as any).beta.files.delete(fileId);
-      console.log("[AI] Temporary file deleted from OpenAI");
-    } catch (deleteError) {
-      console.log("[AI] Note: Could not delete temporary file from OpenAI");
-    }
+    console.log("[AI] PDF vision analysis complete, length:", analysis.length);
     
     if (analysis.trim().length > 50) {
+      console.log("[AI] PDF analysis successful, returning cleaned text");
       return cleanAnalysisText(analysis);
     }
     
+    console.log("[AI] PDF analysis returned insufficient content");
     return "";
   } catch (e: any) {
     console.error("[AI] PDF analysis error:", e?.message);
-    
-    // Attempt cleanup if upload succeeded but analysis failed
-    if (fileId) {
-      try {
-        await (openai as any).beta.files.delete(fileId);
-      } catch (deleteError) {
-        console.log("[AI] Could not delete temporary file on error");
-      }
-    }
-    
+    console.error("[AI] Full error:", JSON.stringify(e, null, 2));
     return "";
   }
 }
