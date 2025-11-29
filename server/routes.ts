@@ -12,36 +12,51 @@ import bcrypt from "bcrypt";
 // Convert PDF pages to images and analyze with OpenAI vision API
 async function analyzePdfWithVision(pdfBuffer: Buffer): Promise<string> {
   try {
-    const pdfjsLib = await import('pdfjs-dist');
-    const { createCanvas } = await import('canvas');
-    const pdf = await pdfjsLib.getDocument(pdfBuffer).promise;
+    console.log("[AI] Starting PDF vision analysis, buffer size:", pdfBuffer.length);
     
-    console.log("[AI] PDF loaded, analyzing", pdf.numPages, "pages with vision API...");
+    const pdfjsLib = await import('pdfjs-dist');
+    console.log("[AI] pdfjs-dist imported successfully");
+    
+    const { createCanvas } = await import('canvas');
+    console.log("[AI] canvas imported successfully");
+    
+    const pdf = await pdfjsLib.getDocument(pdfBuffer).promise;
+    console.log("[AI] PDF loaded successfully, pages:", pdf.numPages);
     
     let combinedAnalysis = "";
     
     // Process first 3 pages max (to avoid token limits)
     const pagesToProcess = Math.min(3, pdf.numPages);
+    console.log("[AI] Processing", pagesToProcess, "pages");
     
     for (let i = 1; i <= pagesToProcess; i++) {
       try {
+        console.log("[AI] Getting page", i);
         const page = await pdf.getPage(i);
+        
         const viewport = page.getViewport({ scale: 2 });
+        console.log("[AI] Page", i, "viewport size:", viewport.width, 'x', viewport.height);
         
         // Create canvas and render PDF page
-        const canvas = createCanvas(viewport.width, viewport.height);
+        const canvas = createCanvas(Math.ceil(viewport.width), Math.ceil(viewport.height));
         const context = canvas.getContext('2d');
+        console.log("[AI] Canvas created for page", i);
         
-        await page.render({
+        const renderTask = page.render({
           canvasContext: context,
           viewport: viewport,
-        }).promise;
+        });
+        
+        await renderTask.promise;
+        console.log("[AI] Page", i, "rendered to canvas");
         
         // Convert canvas to base64 PNG
-        const imageBase64 = canvas.toDataURL('image/png').split(',')[1];
-        console.log("[AI] Page", i, "rendered, size:", imageBase64.length, "bytes");
+        const imageBuffer = canvas.toBuffer('image/png');
+        const imageBase64 = imageBuffer.toString('base64');
+        console.log("[AI] Page", i, "converted to base64, size:", imageBase64.length, "bytes");
         
         // Send to OpenAI vision API
+        console.log("[AI] Sending page", i, "to OpenAI vision API...");
         const response = await openai.chat.completions.create({
           model: "gpt-4o",
           messages: [
@@ -68,9 +83,12 @@ async function analyzePdfWithVision(pdfBuffer: Buffer): Promise<string> {
         if (pageAnalysis) {
           combinedAnalysis += pageAnalysis + "\n\n";
           console.log("[AI] Page", i, "analysis complete, content length:", pageAnalysis.length);
+        } else {
+          console.log("[AI] Page", i, "analysis was empty");
         }
       } catch (pageError: any) {
         console.error("[AI] Error analyzing page", i, ":", pageError?.message);
+        console.error("[AI] Full page error:", pageError);
       }
     }
     
@@ -78,6 +96,7 @@ async function analyzePdfWithVision(pdfBuffer: Buffer): Promise<string> {
     return combinedAnalysis.trim();
   } catch (e: any) {
     console.error("[AI] PDF vision analysis error:", e?.message);
+    console.error("[AI] Full vision analysis error:", e);
     return "";
   }
 }
