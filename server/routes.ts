@@ -926,7 +926,7 @@ This is the start of the conversation. Ask open-ended questions to understand th
       // Update storage with analysis
       console.log("[Document Upload] Saving analysis, length:", analysisText.length, "text preview:", analysisText.substring(0, 100));
       await storage.updateDocumentAnalysis(document.id, analysisText);
-      console.log("[Document Upload] ✅ Analysis saved successfully");
+      console.log("[Document Upload] ✅ Analysis saved to storage");
       
       // Fetch the updated document from storage to ensure aiAnalysis is included
       const updatedDoc = await storage.getDocumentById(document.id);
@@ -936,10 +936,21 @@ This is the start of the conversation. Ask open-ended questions to understand th
         return res.status(500).json({ error: "Failed to retrieve updated document" });
       }
       
-      console.log("[Document Upload] ✅ Updated doc aiAnalysis length:", updatedDoc.aiAnalysis?.length || 0, "preview:", updatedDoc.aiAnalysis?.substring(0, 100) || "NO ANALYSIS");
-      console.log("[Document Upload] About to generate PDF - analysisText length:", analysisText.length, "analysisText preview:", analysisText.substring(0, 150));
+      console.log("[Document Upload] Retrieved document - ID:", updatedDoc.id);
+      console.log("[Document Upload] Document aiAnalysis field length:", updatedDoc.aiAnalysis?.length || 0);
+      if (updatedDoc.aiAnalysis) {
+        console.log("[Document Upload] Document aiAnalysis preview:", updatedDoc.aiAnalysis.substring(0, 150));
+        console.log("[Document Upload] Document aiAnalysis full content:\n", updatedDoc.aiAnalysis);
+      } else {
+        console.log("[Document Upload] ❌ WARNING: Document aiAnalysis is NULL or EMPTY in database!");
+      }
+      
+      console.log("[Document Upload] analysisText parameter length:", analysisText.length);
+      console.log("[Document Upload] analysisText parameter preview:", analysisText.substring(0, 150));
+      console.log("[Document Upload] analysisText full content:\n", analysisText);
       
       // Generate and save PDF for admin resending - pass analysisText directly to ensure it's included
+      console.log("[Document Upload] About to call generateAndSavePDF with analysisText");
       const pdfFileName = await generateAndSavePDF(updatedDoc, analysisText);
       console.log("[Document Upload] PDF generation complete - file:", pdfFileName);
       if (pdfFileName) {
