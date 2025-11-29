@@ -9,18 +9,25 @@ import path from "path";
 import PDFDocument from "pdfkit";
 import bcrypt from "bcrypt";
 
-const require = createRequire(import.meta.url);
 let pdfParse: any = null;
 
-// Load pdf-parse at startup - handle both ESM and CommonJS bundling
-try {
-  const pdfParseModule = require('pdf-parse');
-  // Handle both direct function and default export
-  pdfParse = typeof pdfParseModule === 'function' ? pdfParseModule : pdfParseModule.default;
-  console.log("[AI] ✅ pdf-parse loaded successfully, type:", typeof pdfParse);
-} catch (e) {
-  console.error("[AI] Failed to load pdf-parse:", e);
-}
+// Load pdf-parse at startup using dynamic import for better bundling compatibility
+(async () => {
+  try {
+    const pdfParseModule = await import('pdf-parse/lib/pdf.js');
+    pdfParse = pdfParseModule.default;
+    console.log("[AI] ✅ pdf-parse loaded successfully from pdf.js");
+  } catch (e) {
+    console.warn("[AI] Failed to load pdf-parse from pdf.js, trying default export:", e);
+    try {
+      const pdfParseModule = await import('pdf-parse');
+      pdfParse = pdfParseModule.default;
+      console.log("[AI] ✅ pdf-parse loaded successfully from default export");
+    } catch (e2) {
+      console.error("[AI] Failed to load pdf-parse:", e2);
+    }
+  }
+})();
 
 // Using gpt-4o (most recent stable model)
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
@@ -855,8 +862,20 @@ This is the start of the conversation. Ask open-ended questions to understand th
         } else if (isPdf) {
           // For PDFs, extract text from database content and send to OpenAI for analysis
           try {
+            // Try to load pdf-parse if not already loaded
             if (!pdfParse) {
-              console.error("[AI] pdf-parse not loaded - falling back to generic message");
+              try {
+                console.log("[AI] Attempting to load pdf-parse dynamically...");
+                const module = await import('pdf-parse');
+                pdfParse = module.default;
+                console.log("[AI] pdf-parse loaded dynamically");
+              } catch (importError) {
+                console.error("[AI] Failed to load pdf-parse dynamically:", importError);
+              }
+            }
+            
+            if (!pdfParse) {
+              console.error("[AI] pdf-parse still not available - falling back to generic message");
               analysisText = "Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations.";
             } else {
               // Read PDF from database (base64 encoded)
