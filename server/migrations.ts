@@ -73,29 +73,15 @@ export async function ensureTablesExist(db: NeonHttpDatabase) {
 
     // Add fileContent column if it doesn't exist (for Railway compatibility)
     try {
-      const columnExists = await db.execute(sql`
-        SELECT column_name 
-        FROM information_schema.columns 
-        WHERE table_name = 'documents' AND column_name = 'file_content'
+      console.log("[Migration] Ensuring file_content column exists on documents table...");
+      await db.execute(sql`
+        ALTER TABLE "documents"
+        ADD COLUMN IF NOT EXISTS "file_content" text
       `);
-      
-      if (!columnExists || columnExists.length === 0) {
-        console.log("[Migration] Adding file_content column to documents table...");
-        await db.execute(sql`
-          ALTER TABLE "documents"
-          ADD COLUMN IF NOT EXISTS "file_content" text
-        `);
-        console.log("[Migration] ✅ file_content column added to documents table");
-      } else {
-        console.log("[Migration] ✅ file_content column already exists");
-      }
+      console.log("[Migration] ✅ file_content column ensured on documents table");
     } catch (error: any) {
-      if (error.message && error.message.includes("already exists")) {
-        console.log("[Migration] ✅ file_content column already exists");
-      } else {
-        console.error("[Migration] Error checking/adding file_content column:", error);
-        throw error;
-      }
+      console.error("[Migration] Error ensuring file_content column:", error?.message || String(error));
+      throw error;
     }
 
     // Create indices if they don't exist
