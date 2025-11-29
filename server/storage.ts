@@ -2,6 +2,7 @@ import { type User, type InsertUser, type ContactSubmission, type InsertContactS
 import { randomUUID } from "crypto";
 import { drizzle } from "drizzle-orm/neon-http";
 import { eq, or } from "drizzle-orm";
+import { ensureTablesExist } from "./migrations";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -30,19 +31,37 @@ export interface IStorage {
 let db: any = null;
 let dbInitialized = false;
 
-if (process.env.DATABASE_URL) {
-  try {
-    db = drizzle(process.env.DATABASE_URL);
-    dbInitialized = true;
-    console.log("[DbStorage] ✅ Database connected successfully - User credentials will PERSIST");
-  } catch (error) {
-    console.error("[DbStorage] ❌ Failed to initialize database:", error);
-    console.error("[DbStorage] ⚠️  CRITICAL: Without database, password changes will be LOST on restart!");
+async function initializeDatabase() {
+  if (process.env.DATABASE_URL) {
+    try {
+      db = drizzle(process.env.DATABASE_URL);
+      console.log("[DbStorage] ✅ Database connected successfully");
+      
+      // Ensure all tables exist - critical for Railway deployments with fresh databases
+      try {
+        await ensureTablesExist(db);
+        console.log("[DbStorage] ✅ Database schema verified - User credentials will PERSIST");
+        dbInitialized = true;
+      } catch (migrationError) {
+        console.error("[DbStorage] ❌ Failed to ensure database tables exist:", migrationError);
+        console.error("[DbStorage] ⚠️  CRITICAL: Falling back to in-memory storage");
+        db = null;
+        dbInitialized = false;
+      }
+    } catch (error) {
+      console.error("[DbStorage] ❌ Failed to initialize database:", error);
+      console.error("[DbStorage] ⚠️  CRITICAL: Without database, password changes will be LOST on restart!");
+    }
+  } else {
+    console.error("[DbStorage] ❌ CRITICAL: DATABASE_URL environment variable is not set!");
+    console.error("[DbStorage] ⚠️  WARNING: Using in-memory storage only - Admin passwords will RESET on every restart!");
   }
-} else {
-  console.error("[DbStorage] ❌ CRITICAL: DATABASE_URL environment variable is not set!");
-  console.error("[DbStorage] ⚠️  WARNING: Using in-memory storage only - Admin passwords will RESET on every restart!");
 }
+
+// Initialize on startup
+initializeDatabase().catch(err => {
+  console.error("[DbStorage] Failed to initialize database on startup:", err);
+});
 
 export class DbStorage implements IStorage {
   private contactSubmissions: Map<string, ContactSubmission>;
