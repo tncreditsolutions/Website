@@ -288,7 +288,22 @@ export class DbStorage implements IStorage {
   async getAllDocuments(): Promise<Document[]> {
     if (dbInitialized && db) {
       try {
-        const result = await db.select().from(documents);
+        // Dynamically select columns to handle schema differences between environments
+        const result = await db.select({
+          id: documents.id,
+          visitorEmail: documents.visitorEmail,
+          visitorName: documents.visitorName,
+          fileName: documents.fileName,
+          fileType: documents.fileType,
+          filePath: documents.filePath,
+          aiAnalysis: documents.aiAnalysis,
+          adminReview: documents.adminReview,
+          status: documents.status,
+          pdfPath: documents.pdfPath,
+          visitorTimezone: documents.visitorTimezone,
+          visitorDateForFilename: documents.visitorDateForFilename,
+          createdAt: documents.createdAt,
+        }).from(documents);
         return result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       } catch (error) {
         console.error("[DbStorage] Error fetching documents from database:", error);
@@ -303,7 +318,21 @@ export class DbStorage implements IStorage {
   async getDocumentsByEmail(email: string): Promise<Document[]> {
     if (dbInitialized && db) {
       try {
-        const result = await db.select().from(documents).where(eq(documents.visitorEmail, email));
+        const result = await db.select({
+          id: documents.id,
+          visitorEmail: documents.visitorEmail,
+          visitorName: documents.visitorName,
+          fileName: documents.fileName,
+          fileType: documents.fileType,
+          filePath: documents.filePath,
+          aiAnalysis: documents.aiAnalysis,
+          adminReview: documents.adminReview,
+          status: documents.status,
+          pdfPath: documents.pdfPath,
+          visitorTimezone: documents.visitorTimezone,
+          visitorDateForFilename: documents.visitorDateForFilename,
+          createdAt: documents.createdAt,
+        }).from(documents).where(eq(documents.visitorEmail, email));
         return result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       } catch (error) {
         console.error("[DbStorage] Error fetching documents by email from database:", error);
@@ -337,7 +366,21 @@ export class DbStorage implements IStorage {
   async getDocumentById(id: string): Promise<Document | undefined> {
     if (dbInitialized && db) {
       try {
-        const result = await db.select().from(documents).where(eq(documents.id, id)).limit(1);
+        const result = await db.select({
+          id: documents.id,
+          visitorEmail: documents.visitorEmail,
+          visitorName: documents.visitorName,
+          fileName: documents.fileName,
+          fileType: documents.fileType,
+          filePath: documents.filePath,
+          aiAnalysis: documents.aiAnalysis,
+          adminReview: documents.adminReview,
+          status: documents.status,
+          pdfPath: documents.pdfPath,
+          visitorTimezone: documents.visitorTimezone,
+          visitorDateForFilename: documents.visitorDateForFilename,
+          createdAt: documents.createdAt,
+        }).from(documents).where(eq(documents.id, id)).limit(1);
         return result[0];
       } catch (error) {
         console.error("[DbStorage] Error fetching document by id from database:", error);

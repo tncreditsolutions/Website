@@ -1,0 +1,115 @@
+  internalQuery: undefined,
+  constraint: undefined,
+  file: 'parse_target.c',
+  line: '1065',
+  routine: 'checkInsertTargets',
+  sourceError: undefined
+}
+[AI] PDF buffer from database, size: 390702
+[AI] PDF processing error: pdfParse is not a function
+[AI] Full error: TypeError: pdfParse is not a function
+    at file:///app/dist/index.js:1205:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[Document Upload] Saving analysis, length: 182 text preview: Your credit report PDF has been received. Our specialists will review it in detail and provide perso
+[DbStorage] Document analysis updated in database. ID: 63c0c317-1595-4bb1-a834-c872349b1a94 Analysis length: 182
+[Document Upload] ✅ Analysis saved to storage
+    at async file:///app/dist/index.js:1248:26 {
+  severity: 'ERROR',
+[Document Upload] Retrieved document - ID: 63c0c317-1595-4bb1-a834-c872349b1a94
+[Document Upload] Document aiAnalysis field length: 0
+  code: '42703',
+  detail: undefined,
+[Document Upload] ❌ WARNING: Document aiAnalysis is NULL or EMPTY in database!
+[Document Upload] analysisText parameter length: 182
+[Document Upload] analysisText parameter preview: Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations to help improve your credi
+[Document Upload] analysisText full content:
+ Your credit report PDF has been received. Our specialists will review it in detail and provide personalized recommendations to help improve your credit score and financial situation.
+[Document Upload] About to call generateAndSavePDF with analysisText
+[DbStorage] Error fetching document by id from database: NeonDbError: column "file_content" does not exist
+    at execute (file:///app/node_modules/@neondatabase/serverless/index.mjs:1556:55)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonHttpPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-http/session.js:40:20)
+    at async DbStorage.getDocumentById (file:///app/dist/index.js:458:24)
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn',
+  sourceError: undefined
+}
+[PDF Save] Using visitor date: 11-29-2025
+  hint: undefined,
+[PDF Save] Saving to: 63c0c317-1595-4bb1-a834-c872349b1a94-11-29-2025.pdf
+  position: '86',
+[PDF Save] Document fields - visitorDateForFilename: 11-29-2025 dateForTitle: 11-29-2025
+[PDF Save] Document ID: 63c0c317-1595-4bb1-a834-c872349b1a94 Analysis source: parameter length: 182
+[PDF Save] Successfully saved: 63c0c317-1595-4bb1-a834-c872349b1a94-11-29-2025.pdf
+[Document Upload] PDF generation complete - file: 63c0c317-1595-4bb1-a834-c872349b1a94-11-29-2025.pdf
+[DbStorage] Document PDF path updated in database. ID: 63c0c317-1595-4bb1-a834-c872349b1a94 PDF: 63c0c317-1595-4bb1-a834-c872349b1a94-11-29-2025.pdf
+8:05:45 AM [express] POST /api/documents 200 in 104ms :: {"id":"63c0c317-1595-4bb1-a834-c872349b1a94…
+8:05:46 AM [express] GET /api/chat 304 in 6ms :: [{"id":"6c0932ef-8387-4b50-a4d6-b5e9df18cab3","name…
+8:05:49 AM [express] GET /api/chat 304 in 6ms :: [{"id":"6c0932ef-8387-4b50-a4d6-b5e9df18cab3","name…
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+    at execute (file:///app/node_modules/@neondatabase/serverless/index.mjs:1556:55)
+  routine: 'errorMissingColumn',
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+  sourceError: undefined
+    at async NeonHttpPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-http/session.js:40:20)
+    at async DbStorage.getDocumentById (file:///app/dist/index.js:458:24)
+}
+    at async file:///app/dist/index.js:1401:24 {
+8:05:49 AM [express] GET /api/documents/63c0c317-1595-4bb1-a834-c872349b1a94/pdf 400 in 9ms :: {"err…
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '86',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+[DbStorage] Error fetching document by id from database: NeonDbError: column "file_content" does not exist
+8:05:51 AM [express] GET /api/chat 304 in 11ms :: [{"id":"6c0932ef-8387-4b50-a4d6-b5e9df18cab3","nam…
+8:05:53 AM [express] GET /api/chat 304 in 6ms :: [{"id":"6c0932ef-8387-4b50-a4d6-b5e9df18cab3","name…
+8:05:55 AM [express] GET /api/chat 304 in 6ms :: [{"id":"6c0932ef-8387-4b50-a4d6-b5e9df18cab3","name…
+8:05:57 AM [express] GET /api/chat 304 in 7ms :: [{"id":"6c0932ef-8387-4b50-a4d6-b5e9df18cab3","name…
+[DbStorage] Error fetching document by id from database: NeonDbError: column "file_content" does not exist
+    at execute (file:///app/node_modules/@neondatabase/serverless/index.mjs:1556:55)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonHttpPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-http/session.js:40:20)
+    at async DbStorage.getDocumentById (file:///app/dist/index.js:458:24)
+  table: undefined,
+    at async file:///app/dist/index.js:1401:24 {
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  column: undefined,
+  hint: undefined,
+  dataType: undefined,
+  position: '86',
+  constraint: undefined,
+  internalPosition: undefined,
+  file: 'parse_relation.c',
+  internalQuery: undefined,
+  line: '3716',
+  where: undefined,
+  routine: 'errorMissingColumn',
+  schema: undefined,
+  sourceError: undefined
+}
+8:05:59 AM [express] GET /api/documents/63c0c317-1595-4bb1-a834-c872349b1a94/pdf 400 in 6ms :: {"err…
+8:05:59 AM [express] GET /api/chat 304 in 10ms :: [{"id":"6c0932ef-8387-4b50-a4d6-b5e9df18cab3","nam…
+8:06:01 AM [express] GET /api/chat 304 in 6ms :: [{"id":"6c0932ef-8387-4b50-a4d6-b5e9df18cab3","name…
+8:06:03 AM [express] GET /api/chat 304 in 6ms :: [{"id":"6c0932ef-8387-4b50-a4d6-b5e9df18cab3","name…
+8:06:05 AM [express] GET /api/chat 304 in 5ms :: [{"id":"6c0932ef-8387-4b50-a4d6-b5e9df18cab3","name…

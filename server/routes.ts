@@ -12,10 +12,12 @@ import bcrypt from "bcrypt";
 const require = createRequire(import.meta.url);
 let pdfParse: any = null;
 
-// Load pdf-parse at startup
+// Load pdf-parse at startup - handle both ESM and CommonJS bundling
 try {
-  pdfParse = require('pdf-parse');
-  console.log("[AI] ✅ pdf-parse loaded successfully");
+  const pdfParseModule = require('pdf-parse');
+  // Handle both direct function and default export
+  pdfParse = typeof pdfParseModule === 'function' ? pdfParseModule : pdfParseModule.default;
+  console.log("[AI] ✅ pdf-parse loaded successfully, type:", typeof pdfParse);
 } catch (e) {
   console.error("[AI] Failed to load pdf-parse:", e);
 }
