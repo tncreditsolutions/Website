@@ -308,8 +308,25 @@ export default function ChatWidget() {
       });
       console.log("[Chat] Greeting sent successfully");
       
-      // Let the normal 2-second refetch pick up the greeting from the server
-      await queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
+      // Immediately add greeting to cache for instant display
+      const currentMessages = queryClient.getQueryData<any[]>(["/api/chat"]) || [];
+      const greetingMessage = {
+        id: `greeting-${Date.now()}`,
+        name: "Riley",
+        email: trimmedEmail,
+        message: `Hi ${trimmedName}! How can I help you today?`,
+        sender: "ai",
+        isEscalated: "false",
+        createdAt: new Date().toISOString(),
+      };
+      console.log("[Chat] Adding greeting to cache:", greetingMessage);
+      queryClient.setQueryData(["/api/chat"], [...currentMessages, greetingMessage]);
+      
+      // Refetch after a short delay to ensure server data is fresh
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ["/api/chat"] });
+      }, 500);
+      
       setIsNewVisitor(false);
     } catch (error: any) {
       console.error("[Chat] Failed to send greeting:", error);
